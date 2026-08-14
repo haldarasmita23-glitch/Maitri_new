@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Register your business on Maitri and get discovered by hundreds of residents in Peenya and Nagasandra, Bengaluru. Free to list.">
+  <title>List Your Business — Maitri</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/pages/auth.css">
+
+  <style>
+    /* ── Vendor Register — multi-step extras ───────────────── */
+    .vendor-step { display: block; }
+    .vendor-step.hidden { display: none !important; }
+
+    /* Step progress indicator */
+    .auth-steps {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin-bottom: var(--space-8);
+    }
+
+    .auth-step-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-full);
+      background: var(--color-border);
+      color: var(--color-text-muted);
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-bold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition-base), color var(--transition-base);
+      flex-shrink: 0;
+      border: 2px solid var(--color-border);
+    }
+
+    .auth-step-dot.active {
+      background: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary);
+      box-shadow: var(--shadow-green);
+    }
+
+    .auth-step-dot.done {
+      background: var(--color-success);
+      color: white;
+      border-color: var(--color-success);
+    }
+
+    .auth-step-line {
+      flex: 1;
+      height: 2px;
+      background: var(--color-border);
+      min-width: var(--space-8);
+      transition: background var(--transition-base);
+    }
+
+    .auth-step-line.done {
+      background: var(--color-success);
+    }
+
+    /* Step label below dots */
+    .auth-steps-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: var(--space-6);
+      padding: 0 var(--space-1);
+    }
+
+    .auth-steps-labels span {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+      text-align: center;
+      width: 80px;
+    }
+
+    /* Form nav buttons */
+    .vendor-step-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: var(--space-6);
+      gap: var(--space-4);
+    }
+
+    .vendor-step-nav.first { justify-content: flex-end; }
+
+    /* Select category grid */
+    .category-select-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-3);
+      margin-top: var(--space-2);
+    }
+
+    .category-select-option {
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      transition: border-color var(--transition-base), background var(--transition-base);
+      background: var(--color-bg);
+    }
+
+    .category-select-option:hover {
+      border-color: var(--color-primary);
+      background: var(--color-primary-50);
+    }
+
+    .category-select-option.selected {
+      border-color: var(--color-primary);
+      background: var(--color-primary-50);
+    }
+
+    .category-select-option input[type="radio"] {
+      accent-color: var(--color-primary);
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .category-select-option__icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .category-select-option__text {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-text-primary);
+    }
+
+    /* Time fields row */
+    .time-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+    }
+
+    /* Success state */
+    .vendor-success {
+      text-align: center;
+      padding: var(--space-10) 0;
+      display: none;
+    }
+
+    .vendor-success__icon {
+      font-size: 4rem;
+      margin-bottom: var(--space-6);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── Navbar ───────────────────────────────────────────── -->
+  <nav class="navbar" id="main-navbar" role="navigation" aria-label="Main navigation">
+    <div class="container">
+      <div class="navbar__inner">
+        <a href="../index.html" class="navbar__logo" aria-label="Maitri Home">
+          <div class="navbar__logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 22 22" fill="none"><path d="M11 6l1.5 3.5H16l-2.75 2 1 3.5L11 13l-3.25 2 1-3.5L6 9.5h3.5L11 6z" fill="white"/></svg>
+          </div>
+          <span class="navbar__logo-text">Maitr<span>i</span></span>
+        </a>
+        <div class="navbar__auth" style="margin-left: auto;">
+          <span style="font-size: var(--font-size-sm); color: var(--color-text-muted);">Already a member?</span>
+          <a href="login.html" class="btn btn--outline btn--sm">Log In</a>
+        </div>
+        <button class="navbar__hamburger" id="navbar-hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navbar-mobile">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="navbar__mobile" id="navbar-mobile">
+    <a href="../index.html" class="navbar__mobile-link">🏠 Home</a>
+    <a href="vendors.html" class="navbar__mobile-link">🏪 Browse Vendors</a>
+    <a href="about.html" class="navbar__mobile-link">ℹ️ About</a>
+    <div class="navbar__mobile-divider"></div>
+    <a href="login.html" class="btn btn--outline btn--full">Log In</a>
+  </div>
+
+  <!-- ─── Auth Layout ──────────────────────────────────────── -->
+  <main class="auth-page" id="main-content">
+
+    <!-- Left branding panel -->
+    <div class="auth-panel" aria-hidden="true">
+      <div class="auth-panel__logo">
+        <div class="auth-panel__logo-mark">🌿</div>
+        <span class="auth-panel__logo-text">Maitr<span>i</span></span>
+      </div>
+      <h2 class="auth-panel__title">Grow Your<br>Local Business</h2>
+      <p class="auth-panel__subtitle">
+        Join Maitri and get discovered by hundreds of residents in Peenya and Nagasandra. 100% free to list. Always.
+      </p>
+      <div class="auth-panel__features">
+        <div class="auth-panel__feature">
+          <div class="auth-panel__feature-icon">🆓</div>
+          <div class="auth-panel__feature-text">
+            <strong>Free Listing</strong>
+            No subscription, no commission, no hidden charges
+          </div>
+        </div>
+        <div class="auth-panel__feature">
+          <div class="auth-panel__feature-icon">👥</div>
+          <div class="auth-panel__feature-text">
+            <strong>Reach Local Customers</strong>
+            Get discovered by residents who need your services
+          </div>
+        </div>
+        <div class="auth-panel__feature">
+          <div class="auth-panel__feature-icon">⭐</div>
+          <div class="auth-panel__feature-text">
+            <strong>Build Your Reputation</strong>
+            Collect genuine reviews from your satisfied customers
+          </div>
+        </div>
+        <div class="auth-panel__feature">
+          <div class="auth-panel__feature-icon">✅</div>
+          <div class="auth-panel__feature-text">
+            <strong>Verified Badge</strong>
+            Get a verified checkmark once our team reviews your listing
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right form panel -->
+    <div class="auth-form-panel">
+      <div class="auth-form-container">
+
+        <!-- Mobile logo -->
+        <div class="auth-mobile-logo">
+          <div class="auth-mobile-logo__mark" aria-hidden="true">🌿</div>
+          <span class="auth-mobile-logo__text">Maitr<span>i</span></span>
+        </div>
+
+        <div class="auth-form-header">
+          <h1>List Your Business</h1>
+          <p>Fill in your details and we'll get you live in 24–48 hours</p>
+        </div>
+
+        <!-- Phase 2 info banner -->
+        <div class="alert alert--info mb-4" role="note">
+          <span class="alert__icon">ℹ️</span>
+          <div class="alert__text">
+            <strong>Phase 2 — Static UI</strong><br>
+            Vendor registration will be connected to the backend in Phase 3. Your details are not saved yet.
+          </div>
+        </div>
+
+        <!-- ── Step Progress ──────────────────────────────── -->
+        <div class="auth-steps" role="progressbar" aria-label="Registration progress" aria-valuenow="1" aria-valuemin="1" aria-valuemax="3">
+          <div class="auth-step-dot active" id="step-dot-1" aria-label="Step 1: Business Info">1</div>
+          <div class="auth-step-line" id="step-line-1"></div>
+          <div class="auth-step-dot" id="step-dot-2" aria-label="Step 2: Location &amp; Hours">2</div>
+          <div class="auth-step-line" id="step-line-2"></div>
+          <div class="auth-step-dot" id="step-dot-3" aria-label="Step 3: Contact">3</div>
+        </div>
+        <div class="auth-steps-labels" aria-hidden="true">
+          <span>Business Info</span>
+          <span>Location &amp; Hours</span>
+          <span>Contact</span>
+        </div>
+
+        <!-- ── Multi-Step Form ─────────────────────────────── -->
+        <div class="auth-form-card">
+          <form id="vendor-register-form" novalidate aria-label="Vendor registration form">
+
+            <!-- ── STEP 1: Business Info ─────────────────── -->
+            <div class="vendor-step" id="vendor-step-1">
+              <h3 style="font-size: var(--font-size-lg); color: var(--color-primary-dark); margin-bottom: var(--space-5);">
+                Step 1 — Business Information
+              </h3>
+
+              <!-- Shop Name -->
+              <div class="form-group">
+                <label class="form-label" for="vr-shop-name">
+                  Shop / Business Name <span class="required" aria-label="required">*</span>
+                </label>
+                <div class="input-icon-wrapper">
+                  <span class="input-icon" aria-hidden="true">🏪</span>
+                  <input type="text" id="vr-shop-name" name="shopName" class="form-control"
+                         placeholder="e.g. Shree Sagar Tiffin Centre" required aria-required="true"
+                         autocomplete="organization">
+                </div>
+              </div>
+
+              <!-- Category -->
+              <div class="form-group">
+                <label class="form-label">
+                  Business Category <span class="required" aria-label="required">*</span>
+                </label>
+                <div class="category-select-grid" role="radiogroup" aria-label="Select business category">
+
+                  <label class="category-select-option" id="cat-opt-food">
+                    <input type="radio" name="category" value="street-food" required>
+                    <span class="category-select-option__icon">🍛</span>
+                    <span class="category-select-option__text">Street Food</span>
+                  </label>
+
+                  <label class="category-select-option" id="cat-opt-tailor">
+                    <input type="radio" name="category" value="tailors">
+                    <span class="category-select-option__icon">🧵</span>
+                    <span class="category-select-option__text">Tailors</span>
+                  </label>
+
+                  <label class="category-select-option" id="cat-opt-print">
+                    <input type="radio" name="category" value="printing">
+                    <span class="category-select-option__icon">🖨️</span>
+                    <span class="category-select-option__text">Printing &amp; Xerox</span>
+                  </label>
+
+                  <label class="category-select-option" id="cat-opt-repair">
+                    <input type="radio" name="category" value="repair">
+                    <span class="category-select-option__icon">📱</span>
+                    <span class="category-select-option__text">Mobile/Laptop Repair</span>
+                  </label>
+
+                </div>
+                <input type="hidden" id="vr-category" name="categoryHidden" required aria-required="true">
+              </div>
+
+              <!-- Description -->
+              <div class="form-group">
+                <label class="form-label" for="vr-description">
+                  Business Description <span class="required" aria-label="required">*</span>
+                </label>
+                <textarea id="vr-description" name="description" class="form-control" rows="3"
+                          placeholder="Tell customers what you offer, your specialities, and what makes your shop unique…"
+                          minlength="20" required aria-required="true"></textarea>
+                <span class="form-hint">Minimum 20 characters. Be specific — good descriptions attract more customers.</span>
+              </div>
+
+              <div class="vendor-step-nav first">
+                <button type="button" class="btn btn--primary" data-next-step>
+                  Next: Location &amp; Hours →
+                </button>
+              </div>
+            </div><!-- end step 1 -->
+
+
+            <!-- ── STEP 2: Location & Hours ──────────────── -->
+            <div class="vendor-step hidden" id="vendor-step-2">
+              <h3 style="font-size: var(--font-size-lg); color: var(--color-primary-dark); margin-bottom: var(--space-5);">
+                Step 2 — Location &amp; Hours
+              </h3>
+
+              <!-- Area -->
+              <div class="form-group">
+                <label class="form-label" for="vr-area">
+                  Area / Neighbourhood <span class="required" aria-label="required">*</span>
+                </label>
+                <div class="input-icon-wrapper">
+                  <span class="input-icon" aria-hidden="true">📍</span>
+                  <select id="vr-area" name="area" class="form-control" required aria-required="true">
+                    <option value="" disabled selected>Select your area</option>
+                    <option value="Peenya">Peenya</option>
+                    <option value="Peenya 1st Stage">Peenya 1st Stage</option>
+                    <option value="Peenya 2nd Stage">Peenya 2nd Stage</option>
+                    <option value="Peenya Industrial Area">Peenya Industrial Area</option>
+                    <option value="Nagasandra">Nagasandra</option>
+                    <option value="Nagasandra Main Road">Nagasandra Main Road</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Full Address -->
+              <div class="form-group">
+                <label class="form-label" for="vr-address">
+                  Full Address <span class="required" aria-label="required">*</span>
+                </label>
+                <div class="input-icon-wrapper">
+                  <span class="input-icon" aria-hidden="true">🗺️</span>
+                  <input type="text" id="vr-address" name="address" class="form-control"
+                         placeholder="e.g. Near Gate 2, Peenya Industrial Area, Bengaluru"
+                         required aria-required="true">
+                </div>
+                <span class="form-hint">Include nearby landmarks so customers can find you easily.</span>
+              </div>
+
+              <!-- Opening & Closing Times -->
+              <div class="form-group">
+                <label class="form-label">
+                  Opening Hours <span class="required" aria-label="required">*</span>
+                </label>
+                <div class="time-row">
+                  <div>
+                    <label class="form-label" for="vr-open-time" style="font-size: var(--font-size-xs); color: var(--color-text-muted);">Opens at</label>
+                    <input type="time" id="vr-open-time" name="openingTime" class="form-control"
+                           required aria-required="true" aria-label="Opening time">
+                  </div>
+                  <div>
+                    <label class="form-label" for="vr-close-time" style="font-size: var(--font-size-xs); color: var(--color-text-muted);">Closes at</label>
+                    <input type="time" id="vr-close-time" name="closingTime" class="form-control"
+                           required aria-required="true" aria-label="Closing time">
+                  </div>
+                </div>
+              </div>
+
+              <div class="vendor-step-nav">
+                <button type="button" class="btn btn--outline" data-prev-step>← Back</button>
+                <button type="button" class="btn btn--primary" data-next-step>Next: Contact →</button>
+              </div>
+            </div><!-- end step 2 -->
+
+
+            <!-- ── STEP 3: Contact ────────────────────────── -->
+            <div class="vendor-step hidden" id="vendor-step-3">
+              <h3 style="font-size: var(--font-size-lg); color: var(--color-primary-dark); margin-bottom: var(--space-5);">
+                Step 3 — Contact Details
+              </h3>
+
+              <!-- Owner Name -->
+              <div class="form-group">
+                <label class="form-label" for="vr-owner-name">
+                  Owner / Manager Name <span class="required" aria-label="required">*</span>
+                </label>
+                <div class="input-icon-wrapper">
+                  <span class="input-icon" aria-hidden="true">👤</span>
+                  <input type="text" id="vr-owner-name" name="ownerName" class="form-control"
+                         placeholder="e.g. Ramesh Kumar" required aria-required="true"
+                         autocomplete="name">
+                </div>
+              </div>
+
+              <!-- Phone -->
+              <div class="form-group">
+                <label class="form-label" for="vr-phone">
+                  Business Phone Number <span class="required" aria-label="required">*</span>
+                </label>
+                <div class="input-icon-wrapper">
+                  <span class="input-icon" aria-hidden="true">📞</span>
+                  <input type="tel" id="vr-phone" name="phone" class="form-control"
+                         placeholder="10-digit mobile number" required aria-required="true"
+                         pattern="[6-9][0-9]{9}" autocomplete="tel">
+                </div>
+                <span class="form-hint">This number will be shown to customers on your listing.</span>
+              </div>
+
+              <!-- Email -->
+              <div class="form-group">
+                <label class="form-label" for="vr-email">
+                  Email Address <span class="required" aria-label="required">*</span>
+                </label>
+                <div class="input-icon-wrapper">
+                  <span class="input-icon" aria-hidden="true">✉️</span>
+                  <input type="email" id="vr-email" name="email" class="form-control"
+                         placeholder="you@example.com" required aria-required="true"
+                         autocomplete="email">
+                </div>
+                <span class="form-hint">We'll use this to notify you when your listing is approved.</span>
+              </div>
+
+              <!-- Terms -->
+              <div class="form-group">
+                <label class="form-check">
+                  <input type="checkbox" id="vr-agree" name="agree" required aria-required="true">
+                  <span class="form-check__label">
+                    I confirm the above details are accurate and I agree to the
+                    <a href="#">Terms of Service</a> and <a href="#">Vendor Policy</a>
+                  </span>
+                </label>
+              </div>
+
+              <div class="vendor-step-nav">
+                <button type="button" class="btn btn--outline" data-prev-step>← Back</button>
+                <button type="submit" class="btn btn--primary btn--lg">
+                  🚀 Submit for Review
+                </button>
+              </div>
+            </div><!-- end step 3 -->
+
+          </form>
+
+          <!-- ── Success State (shown after submit) ──────── -->
+          <div class="vendor-success" id="vendor-success">
+            <div class="vendor-success__icon">🎉</div>
+            <h2 style="color: var(--color-primary-dark); margin-bottom: var(--space-4);">Application Received!</h2>
+            <p style="font-size: var(--font-size-lg); color: var(--color-text-secondary); margin-bottom: var(--space-6);">
+              Thank you for listing your business on Maitri. Our team will review your details and get you live within <strong>24–48 hours</strong>.
+            </p>
+            <div class="alert alert--info" role="note" style="text-align: left;">
+              <span class="alert__icon">ℹ️</span>
+              <div class="alert__text">
+                <strong>Phase 2 — Static UI</strong><br>
+                In the live version, you'll receive a confirmation email and be able to manage your listing from your vendor dashboard.
+              </div>
+            </div>
+            <div class="flex gap-4 mt-8" style="justify-content: center; flex-wrap: wrap;">
+              <a href="vendors.html" class="btn btn--primary btn--lg">Browse Vendors</a>
+              <a href="../index.html" class="btn btn--outline btn--lg">Go to Home</a>
+            </div>
+          </div>
+
+        </div><!-- end auth-form-card -->
+
+        <div class="auth-switch">
+          Already have an account? <a href="login.html">Log in</a>
+        </div>
+        <div class="auth-switch mt-4">
+          Looking for a service? <a href="vendors.html">Browse vendors →</a>
+        </div>
+
+      </div>
+    </div><!-- end auth-form-panel -->
+
+  </main>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/mock-data.js"></script>
+<script src="../js/components.js"></script>
+<script src="../js/auth.js"></script>
+<script>
+  // ── Category radio card visual selection ────────────────
+  document.querySelectorAll('.category-select-option input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      document.querySelectorAll('.category-select-option').forEach(opt => opt.classList.remove('selected'));
+      radio.closest('.category-select-option').classList.add('selected');
+      // Also populate the hidden required field used by validateStep()
+      document.getElementById('vr-category').value = radio.value;
+    });
+  });
+
+  // ── Override submit to show success panel ───────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('vendor-register-form');
+    const success = document.getElementById('vendor-success');
+    if (!form || !success) return;
+
+    // Wrap the original submit so after auth.js fires,
+    // we also toggle the success panel on completion
+    form.addEventListener('submit', () => {
+      // auth.js will show the toast; we show success UI after a short delay
+      setTimeout(() => {
+        form.style.display = 'none';
+        success.style.display = 'block';
+      }, 1400); // matches auth.js delay(1200) + buffer
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="About Maitri — the hyperlocal community platform connecting residents and students in Peenya and Nagasandra, Bengaluru with trusted local businesses.">
+  <meta name="keywords" content="About Maitri, Peenya, Nagasandra, community platform, local business directory">
+  <title>About — Maitri</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/layout.css">
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- ─── Navbar ─────────────────────────────────────────────── -->
+  <nav class="navbar" id="main-navbar" role="navigation" aria-label="Main navigation">
+    <div class="container">
+      <div class="navbar__inner">
+        <a href="../index.html" class="navbar__logo" aria-label="Maitri Home">
+          <div class="navbar__logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M11 2C6.03 2 2 6.03 2 11s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9z" fill="rgba(255,255,255,0.2)"/>
+              <path d="M11 6l1.5 3.5H16l-2.75 2 1 3.5L11 13l-3.25 2 1-3.5L6 9.5h3.5L11 6z" fill="white"/>
+            </svg>
+          </div>
+          <span class="navbar__logo-text">Maitr<span>i</span></span>
+        </a>
+
+        <nav class="navbar__nav" aria-label="Site links">
+          <a href="../index.html" class="navbar__link">Home</a>
+          <a href="vendors.html" class="navbar__link">Browse Vendors</a>
+          <a href="about.html" class="navbar__link active">About</a>
+        </nav>
+
+        <div class="navbar__auth">
+          <a href="login.html" class="btn btn--ghost btn--sm">Log In</a>
+          <a href="register.html" class="btn btn--primary btn--sm">Sign Up</a>
+        </div>
+
+        <button class="navbar__hamburger"
+                id="navbar-hamburger"
+                aria-label="Open menu"
+                aria-expanded="false"
+                aria-controls="navbar-mobile">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="navbar__mobile" id="navbar-mobile" role="navigation" aria-label="Mobile navigation">
+    <a href="../index.html" class="navbar__mobile-link">🏠 Home</a>
+    <a href="vendors.html" class="navbar__mobile-link">🏪 Browse Vendors</a>
+    <a href="about.html" class="navbar__mobile-link active">ℹ️ About</a>
+    <div class="navbar__mobile-divider"></div>
+    <div class="navbar__mobile-auth">
+      <a href="login.html" class="btn btn--outline btn--full">Log In</a>
+      <a href="register.html" class="btn btn--primary btn--full">Sign Up Free</a>
+    </div>
+  </div>
+
+  <!-- ─── Page Hero ──────────────────────────────────────────── -->
+  <header class="page-hero">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">Home</a>
+        <span class="breadcrumb__sep" aria-hidden="true">›</span>
+        <span class="breadcrumb__current">About</span>
+      </nav>
+      <h1>About Maitri</h1>
+      <p>Built for Peenya and Nagasandra — a community platform with a local heart.</p>
+    </div>
+  </header>
+
+  <!-- ─── Main Content ───────────────────────────────────────── -->
+  <main class="page-main" id="main-content">
+
+    <!-- ── Mission Section ─────────────────────────────────── -->
+    <section class="section" aria-labelledby="mission-heading">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-label">Our Story</span>
+          <h2 id="mission-heading">Why We Built Maitri</h2>
+          <p class="section-subtitle">
+            Maitri (Sanskrit: मैत्री — friendship, goodwill) was born from a simple observation:<br>
+            the best local shops are often the hardest to find.
+          </p>
+        </div>
+
+        <div style="
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: var(--space-10);
+          align-items: center;
+          margin-top: var(--space-10);
+        " class="about-mission-grid">
+
+          <!-- Text -->
+          <div>
+            <p style="font-size: var(--font-size-lg); color: var(--color-text-secondary); line-height: var(--line-height-relaxed);">
+              Peenya is one of India's largest industrial areas. Nagasandra is a fast-growing
+              residential neighbourhood. Together, they are home to thousands of factory workers,
+              students, and families — all of whom rely on the same small cluster of local
+              businesses every single day.
+            </p>
+            <p style="font-size: var(--font-size-lg); color: var(--color-text-secondary); line-height: var(--line-height-relaxed);">
+              Yet discovering a reliable dosa stall near Peenya Gate 2, a blouse tailor in
+              Nagasandra, or a trustworthy phone repair shop used to mean asking a neighbour or
+              hunting through WhatsApp groups. <strong>Maitri changes that.</strong>
+            </p>
+            <div class="flex gap-4 mt-8" style="flex-wrap: wrap;">
+              <a href="vendors.html" class="btn btn--primary btn--lg">Browse Local Vendors</a>
+              <a href="vendor-register.html" class="btn btn--outline btn--lg">List Your Business</a>
+            </div>
+          </div>
+
+          <!-- Stats card -->
+          <div style="
+            background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
+            border-radius: var(--radius-2xl);
+            padding: var(--space-10);
+            color: white;
+            text-align: center;
+          " aria-label="Platform statistics">
+            <div style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: var(--space-8);
+            ">
+              <div>
+                <div style="font-size: var(--font-size-5xl); font-weight: var(--font-weight-extrabold); line-height: 1;">12+</div>
+                <div style="font-size: var(--font-size-sm); opacity: 0.8; margin-top: var(--space-2);">Local Vendors</div>
+              </div>
+              <div>
+                <div style="font-size: var(--font-size-5xl); font-weight: var(--font-weight-extrabold); line-height: 1;">4</div>
+                <div style="font-size: var(--font-size-sm); opacity: 0.8; margin-top: var(--space-2);">Categories</div>
+              </div>
+              <div>
+                <div style="font-size: var(--font-size-5xl); font-weight: var(--font-weight-extrabold); line-height: 1;">500+</div>
+                <div style="font-size: var(--font-size-sm); opacity: 0.8; margin-top: var(--space-2);">Happy Users</div>
+              </div>
+              <div>
+                <div style="font-size: var(--font-size-5xl); font-weight: var(--font-weight-extrabold); line-height: 1;">2</div>
+                <div style="font-size: var(--font-size-sm); opacity: 0.8; margin-top: var(--space-2);">Neighbourhoods</div>
+              </div>
+            </div>
+            <div style="margin-top: var(--space-8); padding-top: var(--space-6); border-top: 1px solid rgba(255,255,255,0.2); font-size: var(--font-size-sm); opacity: 0.7;">
+              📍 Peenya & Nagasandra, Bengaluru
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Values Section ──────────────────────────────────── -->
+    <section class="section" style="background: var(--color-primary-50);" aria-labelledby="values-heading">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-label">What We Stand For</span>
+          <h2 id="values-heading">Our Values</h2>
+        </div>
+
+        <div style="
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: var(--space-6);
+        " class="values-grid">
+
+          <div class="card card--hover" style="text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: var(--space-4);" aria-hidden="true">🤝</div>
+            <h3 style="font-size: var(--font-size-xl); color: var(--color-primary-dark); margin-bottom: var(--space-3);">Community First</h3>
+            <p style="color: var(--color-text-secondary); margin: 0;">
+              Every decision we make is guided by what's best for the Peenya and Nagasandra community — residents, students, and small business owners alike.
+            </p>
+          </div>
+
+          <div class="card card--hover" style="text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: var(--space-4);" aria-hidden="true">🌿</div>
+            <h3 style="font-size: var(--font-size-xl); color: var(--color-primary-dark); margin-bottom: var(--space-3);">Trust & Transparency</h3>
+            <p style="color: var(--color-text-secondary); margin: 0;">
+              Vendors are verified. Reviews are genuine. We do not accept paid placements or fake ratings. What you see is what the community actually thinks.
+            </p>
+          </div>
+
+          <div class="card card--hover" style="text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: var(--space-4);" aria-hidden="true">🆓</div>
+            <h3 style="font-size: var(--font-size-xl); color: var(--color-primary-dark); margin-bottom: var(--space-3);">Free Forever</h3>
+            <p style="color: var(--color-text-secondary); margin: 0;">
+              Maitri is free for residents to use and free for small businesses to list. Supporting the local economy should never come with a paywall.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ── How It Works ───────────────────────────────────── -->
+    <section class="section how-it-works" aria-labelledby="how-about-heading">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-label">Simple & Free</span>
+          <h2 id="how-about-heading">How Maitri Works</h2>
+          <p class="section-subtitle">Three easy steps to find — or be found by — the local community.</p>
+        </div>
+
+        <div class="how-steps">
+          <div class="how-step animate-on-scroll">
+            <div class="how-step__number" aria-hidden="true">1</div>
+            <span class="how-step__icon" aria-hidden="true">🔍</span>
+            <h3 class="how-step__title">Search or Browse</h3>
+            <p class="how-step__desc">
+              Residents search by service type, vendor name, or location in Peenya or Nagasandra. Filter by category. Sort by rating. Find in seconds.
+            </p>
+          </div>
+          <div class="how-step animate-on-scroll">
+            <div class="how-step__number" aria-hidden="true">2</div>
+            <span class="how-step__icon" aria-hidden="true">⭐</span>
+            <h3 class="how-step__title">Read Genuine Reviews</h3>
+            <p class="how-step__desc">
+              Real reviews from real neighbours. Check ratings and read experiences before you visit. No fake reviews, no paid promotions.
+            </p>
+          </div>
+          <div class="how-step animate-on-scroll">
+            <div class="how-step__number" aria-hidden="true">3</div>
+            <span class="how-step__icon" aria-hidden="true">🏪</span>
+            <h3 class="how-step__title">Visit & Support Local</h3>
+            <p class="how-step__desc">
+              Get directions, phone numbers, and opening hours. Visit your local vendor and support the people and businesses that make Peenya thrive.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Categories Section ─────────────────────────────── -->
+    <section class="section" style="background: var(--color-bg);" aria-labelledby="cats-about-heading">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-label">What We Cover</span>
+          <h2 id="cats-about-heading">Four Categories to Start</h2>
+          <p class="section-subtitle">We launched with the four categories most requested by residents in our community survey.</p>
+        </div>
+
+        <div style="
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: var(--space-6);
+        " class="about-cat-grid">
+
+          <a href="vendors.html?category=street-food" class="card card--hover animate-on-scroll" style="text-align:center; text-decoration:none;">
+            <div style="font-size: 2.5rem; margin-bottom: var(--space-3);" aria-hidden="true">🍛</div>
+            <h3 style="font-size: var(--font-size-lg); color: var(--color-primary-dark); margin-bottom: var(--space-2);">Street Food</h3>
+            <p style="font-size: var(--font-size-sm); color: var(--color-text-muted); margin: 0;">
+              Tiffin centres, dosa stalls, juice corners, and evening snacks
+            </p>
+          </a>
+
+          <a href="vendors.html?category=tailors" class="card card--hover animate-on-scroll" style="text-align:center; text-decoration:none;">
+            <div style="font-size: 2.5rem; margin-bottom: var(--space-3);" aria-hidden="true">🧵</div>
+            <h3 style="font-size: var(--font-size-lg); color: var(--color-primary-dark); margin-bottom: var(--space-2);">Tailors</h3>
+            <p style="font-size: var(--font-size-sm); color: var(--color-text-muted); margin: 0;">
+              Blouses, alterations, custom stitching, and embroidery
+            </p>
+          </a>
+
+          <a href="vendors.html?category=printing" class="card card--hover animate-on-scroll" style="text-align:center; text-decoration:none;">
+            <div style="font-size: 2.5rem; margin-bottom: var(--space-3);" aria-hidden="true">🖨️</div>
+            <h3 style="font-size: var(--font-size-lg); color: var(--color-primary-dark); margin-bottom: var(--space-2);">Printing & Xerox</h3>
+            <p style="font-size: var(--font-size-sm); color: var(--color-text-muted); margin: 0;">
+              Document printing, lamination, visiting cards, and binding
+            </p>
+          </a>
+
+          <a href="vendors.html?category=repair" class="card card--hover animate-on-scroll" style="text-align:center; text-decoration:none;">
+            <div style="font-size: 2.5rem; margin-bottom: var(--space-3);" aria-hidden="true">📱</div>
+            <h3 style="font-size: var(--font-size-lg); color: var(--color-primary-dark); margin-bottom: var(--space-2);">Mobile/Laptop Repair</h3>
+            <p style="font-size: var(--font-size-sm); color: var(--color-text-muted); margin: 0;">
+              Screen replacement, battery, data recovery, and servicing
+            </p>
+          </a>
+
+        </div>
+
+        <div class="text-center mt-8">
+          <p style="color: var(--color-text-muted); font-size: var(--font-size-sm);">
+            More categories — grocery, beauty, electronics, and more — are planned for future phases.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── FAQ ────────────────────────────────────────────── -->
+    <section class="section" style="background: var(--color-primary-50);" aria-labelledby="faq-heading">
+      <div class="container container--narrow">
+        <div class="section-header">
+          <span class="section-label">Questions & Answers</span>
+          <h2 id="faq-heading">Frequently Asked Questions</h2>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: var(--space-4);" id="faq-list">
+
+          <div class="card">
+            <h3 style="font-size: var(--font-size-lg); color: var(--color-primary-dark); margin-bottom: var(--space-3);">
+              Is Maitri free to use?
+            </h3>
+            <p style="margin: 0; color: var(--color-text-secondary);">
+              Yes — completely free. Residents can browse, search, and review vendors without paying anything. Vendors can list their business at no charge.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3 style="font-size: var(--font-size-lg); color: var(--color-primary-dark); margin-bottom: var(--space-3);">
+              How do I list my business?
+            </h3>
+            <p style="margin: 0; color: var(--color-text-secondary);">
+              Click "List Your Business" anywhere on the site and fill in your details. Your listing will be reviewed by our team and approved within 24–48 hours.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3 style="font-size: var(--font-size-lg); color: var(--color-primary-dark); margin-bottom: var(--space-3);">
+              Are the vendors verified?
+            </h3>
+            <p style="margin: 0; color: var(--color-text-secondary);">
+              We manually review each vendor submission and verify the phone number and location before approval. Verified vendors receive a ✅ badge on their listing.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3 style="font-size: var(--font-size-lg); color: var(--color-primary-dark); margin-bottom: var(--space-3);">
+              Which areas does Maitri cover?
+            </h3>
+            <p style="margin: 0; color: var(--color-text-secondary);">
+              Currently Peenya (1st, 2nd Stage, Industrial Area) and Nagasandra. We plan to expand to Jalahalli, Yeshwanthpur, and surrounding areas in future phases.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3 style="font-size: var(--font-size-lg); color: var(--color-primary-dark); margin-bottom: var(--space-3);">
+              Can I report a wrong listing or a bad experience?
+            </h3>
+            <p style="margin: 0; color: var(--color-text-secondary);">
+              Yes. A complaints and reporting system is being built and will be available in a later phase. For now, please write an honest review to inform other users.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CTA Banner ─────────────────────────────────────── -->
+    <section class="cta-banner" aria-labelledby="about-cta-heading">
+      <div class="container">
+        <h2 id="about-cta-heading">Ready to Join Your Local Community?</h2>
+        <p>Whether you're a resident looking for local services, or a business owner wanting to be discovered — Maitri is for you.</p>
+        <div class="cta-banner__actions">
+          <a href="vendor-register.html" class="btn btn--accent btn--xl">List Your Business Free</a>
+          <a href="vendors.html" class="btn btn--outline-white btn--xl">Browse Vendors</a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ─── Footer ──────────────────────────────────────────── -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer__grid">
+
+        <div class="footer__brand">
+          <a href="../index.html" class="navbar__logo" aria-label="Maitri Home">
+            <div class="navbar__logo-mark" aria-hidden="true">
+              <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 6l1.5 3.5H16l-2.75 2 1 3.5L11 13l-3.25 2 1-3.5L6 9.5h3.5L11 6z" fill="white"/>
+              </svg>
+            </div>
+            <span class="navbar__logo-text">Maitr<span>i</span></span>
+          </a>
+          <p class="footer__tagline">
+            Connecting residents and students in Peenya &amp; Nagasandra with trusted local businesses.
+          </p>
+          <div class="footer__backend-status" id="footer-backend-status" aria-live="polite">
+            <span class="status-dot status-dot--amber js-health-dot" aria-hidden="true"></span>
+            <span class="js-health-text">Checking backend…</span>
+          </div>
+        </div>
+
+        <div class="footer__col">
+          <h4>Browse</h4>
+          <ul class="footer__links" role="list">
+            <li><a href="vendors.html?category=street-food" class="footer__link">🍛 Street Food</a></li>
+            <li><a href="vendors.html?category=tailors" class="footer__link">🧵 Tailors</a></li>
+            <li><a href="vendors.html?category=printing" class="footer__link">🖨️ Printing &amp; Xerox</a></li>
+            <li><a href="vendors.html?category=repair" class="footer__link">📱 Mobile/Laptop Repair</a></li>
+          </ul>
+        </div>
+
+        <div class="footer__col">
+          <h4>Community</h4>
+          <ul class="footer__links" role="list">
+            <li><a href="about.html" class="footer__link">About Maitri</a></li>
+            <li><a href="vendor-register.html" class="footer__link">List Your Business</a></li>
+            <li><a href="register.html" class="footer__link">Create Account</a></li>
+          </ul>
+        </div>
+
+        <div class="footer__col">
+          <h4>Account</h4>
+          <ul class="footer__links" role="list">
+            <li><a href="login.html" class="footer__link">Log In</a></li>
+            <li><a href="register.html" class="footer__link">Sign Up</a></li>
+            <li><a href="vendor-register.html" class="footer__link">Vendor Registration</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer__bottom">
+        <span class="footer__copyright">
+          © 2026 Maitri. All rights reserved. Made with ❤️ for Peenya &amp; Nagasandra.
+        </span>
+        <div class="footer__bottom-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</div><!-- end .page-wrapper -->
+
+<!-- Scripts -->
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/mock-data.js"></script>
+<script src="../js/components.js"></script>
+
+</body>
+</html>

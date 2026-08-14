@@ -1,0 +1,96 @@
+/* ─────────────────────────────────────────────────────────────────
+   Maitri — Vendors Browse Page Styles
+   ───────────────────────────────────────────────────────────────── */
+
+/* ── Browse Layout ────────────────────────────────────────────── */
+.browse-section {
+  padding: var(--space-10) 0 var(--space-20);
+}
+
+.browse-header {
+  margin-bottom: var(--space-8);
+}
+
+.browse-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-dark);
+  margin-bottom: var(--space-2);
+}
+
+.browse-subtitle {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin-bottom: 0;
+}
+
+/* ── Controls Bar ─────────────────────────────────────────────── */
+.browse-controls {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.browse-controls .search-box {
+  flex: 1;
+  min-width: 240px;
+  max-width: 420px;
+}
+
+.browse-controls__filters {
+  flex: 1;
+  min-width: 0;
+}
+
+.browse-controls__right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.sort-select {
+  padding: 0.5rem var(--space-4) 0.5rem var(--space-3);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  background: var(--color-bg-card);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  outline: none;
+}
+
+.sort-select:focus { border-color: var(--color-primary); }
+
+.results-count {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  align-self: center;
+}
+
+/* ── No Results ───────────────────────────────────────────────── */
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: var(--space-20) var(--space-6);
+}
+
+.no-results__emoji {
+  font-size: 3.5rem;
+  margin-bottom: var(--space-4);
+  display: block;
+}
+
+.no-results h3 {
+  font-size: var(--font-size-xl);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-2);
+}
+
+.no-results p {
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-5);
+}

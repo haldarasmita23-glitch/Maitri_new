@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+        Spring Boot Parent POM
+        This imports all of Spring Boot's managed dependency versions.
+        We do NOT need to specify versions for most Spring libraries
+        because the parent manages them automatically.
+    -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.5</version>
+        <relativePath/>
+    </parent>
+
+    <!-- ─── Project Identity ───────────────────────────────── -->
+    <groupId>com.maitri</groupId>
+    <artifactId>maitri-backend</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>Maitri Backend</name>
+    <description>
+        Hyperlocal community platform backend for Peenya and Nagasandra, Bengaluru.
+        Connects residents with trusted local businesses via REST APIs.
+    </description>
+
+    <!-- ─── Global Properties ──────────────────────────────── -->
+    <properties>
+        <!-- Java version — must be 17 or higher for Spring Boot 3.x -->
+        <java.version>17</java.version>
+
+        <!-- JJWT version — 0.12.x is required for Jakarta EE (Spring Boot 3.x) -->
+        <jjwt.version>0.12.3</jjwt.version>
+    </properties>
+
+    <!-- ─── Dependencies ───────────────────────────────────── -->
+    <dependencies>
+
+        <!--
+            spring-boot-starter-web
+            PURPOSE: Provides everything needed to build REST APIs.
+            INCLUDES: Spring MVC, embedded Tomcat server, Jackson (JSON).
+            WITHOUT THIS: There would be no HTTP server, no @RestController.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!--
+            spring-boot-starter-data-mongodb
+            PURPOSE: Connects Spring Boot to MongoDB.
+            INCLUDES: Spring Data MongoDB, MongoDB Java Driver.
+            WITHOUT THIS: The backend cannot talk to the database.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+
+        <!--
+            spring-boot-starter-security
+            PURPOSE: Adds authentication and authorization infrastructure.
+            INCLUDES: Spring Security filters, password encoding, role checks.
+            WITHOUT THIS: Anyone could access any endpoint with no protection.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!--
+            spring-boot-starter-validation
+            PURPOSE: Validates incoming request data (e.g. @NotBlank, @Email).
+            INCLUDES: Jakarta Bean Validation, Hibernate Validator.
+            WITHOUT THIS: We would have to validate every field manually.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!--
+            JJWT — JSON Web Token library (3 parts required together)
+
+            jjwt-api     : The public API we write code against (interfaces).
+            jjwt-impl    : The actual implementation (runtime only — Spring will load it).
+            jjwt-jackson : Uses Jackson to read/write JWT JSON (runtime only).
+
+            PURPOSE: Create, sign, and validate JWT tokens for authentication.
+            We use JWTs so users don't need server-side sessions.
+        -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!--
+            Lombok
+            PURPOSE: Automatically generates repetitive Java code at compile time.
+            EXAMPLES: @Data generates getters/setters. @Builder adds a builder pattern.
+            WITHOUT THIS: Every model class would need 50+ lines of boilerplate.
+            NOTE: Lombok is a compile-time-only tool; it is excluded from the final JAR.
+        -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!--
+            Spring Boot DevTools
+            PURPOSE: Enables automatic application restart when code changes during development.
+            SCOPE: runtime + optional = only active during development, not in production JAR.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <!--
+            spring-boot-starter-test
+            PURPOSE: Testing framework for unit and integration tests.
+            INCLUDES: JUnit 5, Mockito, AssertJ, Spring Test.
+            SCOPE: test = only included when running tests, not in the final JAR.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!--
+            spring-security-test
+            PURPOSE: Testing utilities for Spring Security (mock users, roles, etc.).
+        -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <!-- ─── Build Configuration ────────────────────────────── -->
+    <build>
+        <plugins>
+            <!--
+                Spring Boot Maven Plugin
+                PURPOSE: Packages the application as a self-contained executable JAR.
+                The JAR includes the embedded Tomcat server, so you just run:
+                    java -jar maitri-backend-1.0.0.jar
+                No separate web server installation needed.
+            -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- Exclude Lombok from final JAR — it's only needed at compile time -->
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

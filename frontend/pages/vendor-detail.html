@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="View vendor details, ratings, reviews, and contact information on Maitri.">
+  <title>Vendor Detail — Maitri</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/pages/vendor-detail.css">
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- Navbar -->
+  <nav class="navbar" id="main-navbar" role="navigation" aria-label="Main navigation">
+    <div class="container">
+      <div class="navbar__inner">
+        <a href="../index.html" class="navbar__logo" aria-label="Maitri Home">
+          <div class="navbar__logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 22 22" fill="none"><path d="M11 6l1.5 3.5H16l-2.75 2 1 3.5L11 13l-3.25 2 1-3.5L6 9.5h3.5L11 6z" fill="white"/></svg>
+          </div>
+          <span class="navbar__logo-text">Maitr<span>i</span></span>
+        </a>
+        <nav class="navbar__nav" aria-label="Site links">
+          <a href="../index.html" class="navbar__link">Home</a>
+          <a href="vendors.html" class="navbar__link">Browse Vendors</a>
+          <a href="about.html" class="navbar__link">About</a>
+        </nav>
+        <div class="navbar__auth">
+          <a href="login.html" class="btn btn--ghost btn--sm">Log In</a>
+          <a href="register.html" class="btn btn--primary btn--sm">Sign Up</a>
+        </div>
+        <button class="navbar__hamburger" id="navbar-hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navbar-mobile">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="navbar__mobile" id="navbar-mobile" role="navigation" aria-label="Mobile navigation">
+    <a href="../index.html" class="navbar__mobile-link">🏠 Home</a>
+    <a href="vendors.html" class="navbar__mobile-link">🏪 Browse Vendors</a>
+    <a href="about.html" class="navbar__mobile-link">ℹ️ About</a>
+    <div class="navbar__mobile-divider"></div>
+    <div class="navbar__mobile-auth">
+      <a href="login.html" class="btn btn--outline btn--full">Log In</a>
+      <a href="register.html" class="btn btn--primary btn--full">Sign Up Free</a>
+    </div>
+  </div>
+
+  <main class="page-main" id="vendor-detail-main">
+
+    <!-- Gallery -->
+    <div class="vendor-gallery" id="vendor-gallery" role="img" aria-label="Vendor photos">
+      <!-- Rendered by vendor-detail.js -->
+    </div>
+
+    <section class="vendor-detail-section">
+      <div class="container">
+
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="../index.html">Home</a>
+          <span class="breadcrumb__sep" aria-hidden="true">›</span>
+          <a href="vendors.html">Browse Vendors</a>
+          <span class="breadcrumb__sep" aria-hidden="true">›</span>
+          <span class="breadcrumb__current" id="vendor-breadcrumb-name">Vendor</span>
+        </nav>
+
+        <div class="detail-layout">
+
+          <!-- ── Main Column ─────────────────────────────────── -->
+          <div>
+
+            <!-- Header -->
+            <div class="vendor-detail-header">
+              <div class="vendor-detail-header__top">
+                <div>
+                  <h1 class="vendor-detail-name" id="vendor-name">Loading…</h1>
+                  <div class="vendor-detail-meta">
+                    <div id="vendor-category-badge"></div>
+                    <div id="vendor-rating"></div>
+                  </div>
+                </div>
+                <div class="vendor-detail-actions">
+                  <button id="fav-btn" class="btn btn--outline">
+                    🤍 Save
+                  </button>
+                </div>
+              </div>
+
+              <!-- Tags -->
+              <div class="flex flex-wrap gap-2 mt-4" id="vendor-tags"></div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="detail-tabs" role="tablist" aria-label="Vendor information tabs">
+              <button class="detail-tab active" data-tab="tab-about" role="tab" aria-selected="true" aria-controls="tab-about" id="tab-btn-about">
+                📋 About
+              </button>
+              <button class="detail-tab" data-tab="tab-reviews" role="tab" aria-selected="false" aria-controls="tab-reviews" id="tab-btn-reviews">
+                ⭐ Reviews
+              </button>
+            </div>
+
+            <!-- About Tab -->
+            <div id="tab-about" class="tab-panel active" role="tabpanel" aria-labelledby="tab-btn-about">
+              <p class="vendor-description" id="vendor-description">Loading…</p>
+
+              <div class="vendor-info-grid">
+                <!-- Location & Hours -->
+                <div class="vendor-info-card">
+                  <div class="vendor-info-card__title">Location &amp; Hours</div>
+                  <div class="vendor-info-card__body">
+                    <div class="info-item">
+                      <div class="info-item__icon" aria-hidden="true">📍</div>
+                      <div class="info-item__content">
+                        <div class="info-item__label">Address</div>
+                        <div class="info-item__value" id="vendor-address">—</div>
+                      </div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-item__icon" aria-hidden="true">🕐</div>
+                      <div class="info-item__content">
+                        <div class="info-item__label">Opening Hours</div>
+                        <div class="info-item__value" id="vendor-hours">—</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Contact -->
+                <div class="vendor-info-card">
+                  <div class="vendor-info-card__title">Contact</div>
+                  <div class="vendor-info-card__body">
+                    <div class="info-item">
+                      <div class="info-item__icon" aria-hidden="true">📞</div>
+                      <div class="info-item__content">
+                        <div class="info-item__label">Phone</div>
+                        <div class="info-item__value" id="vendor-phone">—</div>
+                      </div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-item__icon" aria-hidden="true">👤</div>
+                      <div class="info-item__content">
+                        <div class="info-item__label">Owner / Manager</div>
+                        <div class="info-item__value" id="vendor-owner">—</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reviews Tab -->
+            <div id="tab-reviews" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-reviews">
+
+              <!-- Rating Summary -->
+              <div class="reviews-summary">
+                <div class="reviews-summary__score">
+                  <span class="reviews-summary__big" id="reviews-big-score">—</span>
+                  <div id="reviews-summary-stars"></div>
+                  <span class="reviews-summary__label" id="reviews-summary-count">— reviews</span>
+                </div>
+                <div class="reviews-summary__bars" id="rating-bars">
+                  <!-- Rendered by JS -->
+                </div>
+              </div>
+
+              <!-- Write a Review -->
+              <div class="write-review">
+                <h4>Write a Review</h4>
+                <div class="alert alert--info mb-4" role="note">
+                  <span class="alert__icon">ℹ️</span>
+                  <div class="alert__text">
+                    You can submit reviews without an account in Phase 2. Full account-based reviews arrive in Phase 3.
+                  </div>
+                </div>
+                <form id="review-form" novalidate aria-label="Submit a review">
+                  <div class="form-group">
+                    <label class="form-label">Your Rating <span class="required" aria-label="required">*</span></label>
+                    <div class="rating-input" role="group" aria-label="Select star rating">
+                      <button type="button" class="rating-input__star" data-value="1" aria-label="1 star">★</button>
+                      <button type="button" class="rating-input__star" data-value="2" aria-label="2 stars">★</button>
+                      <button type="button" class="rating-input__star" data-value="3" aria-label="3 stars">★</button>
+                      <button type="button" class="rating-input__star" data-value="4" aria-label="4 stars">★</button>
+                      <button type="button" class="rating-input__star" data-value="5" aria-label="5 stars">★</button>
+                    </div>
+                    <input type="hidden" id="rating-value" name="rating">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="review-text">Your Review <span class="required" aria-label="required">*</span></label>
+                    <textarea id="review-text" name="review" class="form-control" rows="3"
+                              placeholder="Share your experience with this vendor…" minlength="10" required></textarea>
+                  </div>
+                  <button type="submit" class="btn btn--primary">Submit Review</button>
+                </form>
+              </div>
+
+              <!-- Review List -->
+              <div id="reviews-list" class="reviews-list" aria-label="Customer reviews">
+                <div class="spinner" aria-label="Loading reviews"></div>
+              </div>
+
+            </div>
+
+          </div><!-- end main col -->
+
+          <!-- ── Sidebar ──────────────────────────────────────── -->
+          <aside>
+            <div class="sidebar-card">
+              <h2 class="modal__title" id="sidebar-vendor-name" style="font-size: 1.1rem; margin-bottom: var(--space-4);">—</h2>
+
+              <!-- Open/Closed status -->
+              <div class="sidebar-status" aria-live="polite">
+                <span class="sidebar-status__label">Status</span>
+                <span id="vendor-status" class="flex gap-2 items-center"></span>
+              </div>
+
+              <!-- Contact CTA -->
+              <a href="tel:" id="sidebar-phone-link" class="btn btn--primary sidebar-contact-btn" onclick="handlePhoneClick(event)">
+                📞 Call Vendor
+              </a>
+              <button id="fav-btn-sidebar" class="btn btn--outline sidebar-contact-btn" style="display:none"></button>
+
+              <!-- Quick Info -->
+              <div class="mt-4">
+                <div class="info-item">
+                  <div class="info-item__icon" aria-hidden="true">📍</div>
+                  <div class="info-item__content">
+                    <div class="info-item__label">Location</div>
+                    <div class="info-item__value" id="sidebar-address" style="font-size: var(--font-size-sm);">—</div>
+                  </div>
+                </div>
+                <div class="info-item">
+                  <div class="info-item__icon" aria-hidden="true">🕐</div>
+                  <div class="info-item__content">
+                    <div class="info-item__label">Hours</div>
+                    <div class="info-item__value" id="sidebar-hours" style="font-size: var(--font-size-sm);">—</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="alert alert--warning mt-4" role="note" style="font-size: var(--font-size-xs);">
+                <span class="alert__icon">⚠️</span>
+                <div class="alert__text">Chat &amp; messaging will be available in a later phase.</div>
+              </div>
+            </div>
+          </aside>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer__bottom" style="border-top: none; padding-top: 0;">
+        <span class="footer__copyright">© 2026 Maitri. Made with ❤️ for Peenya &amp; Nagasandra.</span>
+        <div class="footer__backend-status" aria-live="polite">
+          <span class="status-dot status-dot--amber js-health-dot" aria-hidden="true"></span>
+          <span class="js-health-text">Checking backend…</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/mock-data.js"></script>
+<script src="../js/components.js"></script>
+<script src="../js/vendor-detail.js"></script>
+
+<script>
+function handlePhoneClick(e) {
+  const v = getVendorById(new URLSearchParams(location.search).get('id'));
+  if (v) e.currentTarget.href = 'tel:' + v.phone.replace(/\s/g, '');
+}
+
+// Sync sidebar address/hours after detail render
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    const addr = document.getElementById('vendor-address')?.textContent;
+    const hrs  = document.getElementById('vendor-hours')?.textContent;
+    const sAddr = document.getElementById('sidebar-address');
+    const sHrs  = document.getElementById('sidebar-hours');
+    if (sAddr && addr) sAddr.textContent = addr;
+    if (sHrs  && hrs)  sHrs.textContent = hrs;
+  }, 100);
+});
+</script>
+
+</body>
+</html>

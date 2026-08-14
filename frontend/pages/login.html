@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Log in to your Maitri account to access your favourites and reviews.">
+  <title>Log In — Maitri</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/pages/auth.css">
+</head>
+<body>
+
+  <nav class="navbar" id="main-navbar" role="navigation" aria-label="Main navigation">
+    <div class="container">
+      <div class="navbar__inner">
+        <a href="../index.html" class="navbar__logo" aria-label="Maitri Home">
+          <div class="navbar__logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 22 22" fill="none"><path d="M11 6l1.5 3.5H16l-2.75 2 1 3.5L11 13l-3.25 2 1-3.5L6 9.5h3.5L11 6z" fill="white"/></svg>
+          </div>
+          <span class="navbar__logo-text">Maitr<span>i</span></span>
+        </a>
+        <div class="navbar__auth" style="margin-left: auto;">
+          <span style="font-size: var(--font-size-sm); color: var(--color-text-muted);">New to Maitri?</span>
+          <a href="register.html" class="btn btn--primary btn--sm">Sign Up Free</a>
+        </div>
+        <button class="navbar__hamburger" id="navbar-hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navbar-mobile">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="navbar__mobile" id="navbar-mobile">
+    <a href="../index.html" class="navbar__mobile-link">🏠 Home</a>
+    <a href="vendors.html" class="navbar__mobile-link">🏪 Browse Vendors</a>
+    <div class="navbar__mobile-divider"></div>
+    <a href="register.html" class="btn btn--primary btn--full">Sign Up Free</a>
+  </div>
+
+  <main class="auth-page" id="main-content">
+
+    <!-- Left panel -->
+    <div class="auth-panel" aria-hidden="true">
+      <div class="auth-panel__logo">
+        <div class="auth-panel__logo-mark">🌿</div>
+        <span class="auth-panel__logo-text">Maitr<span>i</span></span>
+      </div>
+      <h2 class="auth-panel__title">Welcome<br>Back!</h2>
+      <p class="auth-panel__subtitle">
+        Log in to access your favourites, reviews, and stay connected with your local community in Peenya &amp; Nagasandra.
+      </p>
+      <div class="auth-panel__features">
+        <div class="auth-panel__feature">
+          <div class="auth-panel__feature-icon">❤️</div>
+          <div class="auth-panel__feature-text">
+            <strong>Your Favourites</strong>
+            Quickly access vendors you've saved
+          </div>
+        </div>
+        <div class="auth-panel__feature">
+          <div class="auth-panel__feature-icon">⭐</div>
+          <div class="auth-panel__feature-text">
+            <strong>Your Reviews</strong>
+            Manage reviews you've submitted
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right form panel -->
+    <div class="auth-form-panel">
+      <div class="auth-form-container">
+
+        <!-- Mobile logo -->
+        <div class="auth-mobile-logo">
+          <div class="auth-mobile-logo__mark" aria-hidden="true">🌿</div>
+          <span class="auth-mobile-logo__text">Maitr<span>i</span></span>
+        </div>
+
+        <div class="auth-form-header">
+          <h1>Log In</h1>
+          <p>Welcome back to your community platform</p>
+        </div>
+
+        <!-- Role tabs -->
+        <div class="auth-role-tabs" role="tablist" aria-label="Login as">
+          <button class="auth-role-tab active" role="tab" aria-selected="true" id="tab-user">👤 User</button>
+          <button class="auth-role-tab" role="tab" aria-selected="false" id="tab-vendor">🏪 Vendor</button>
+          <button class="auth-role-tab" role="tab" aria-selected="false" id="tab-admin">🛡️ Admin</button>
+        </div>
+
+        <div class="auth-form-card">
+          <div class="alert alert--info mb-4" role="note">
+            <span class="alert__icon">ℹ️</span>
+            <div class="alert__text">
+              <strong>Phase 2 — Static UI</strong><br>
+              Authentication arrives in Phase 3. Form validation is active.
+            </div>
+          </div>
+
+          <form id="login-form" novalidate aria-label="Login form">
+
+            <div class="form-group">
+              <label class="form-label" for="login-email">Email Address <span class="required" aria-label="required">*</span></label>
+              <div class="input-icon-wrapper">
+                <span class="input-icon" aria-hidden="true">✉️</span>
+                <input type="email" id="login-email" name="email" class="form-control"
+                       placeholder="you@example.com" autocomplete="email" required
+                       aria-required="true">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="login-password">
+                Password <span class="required" aria-label="required">*</span>
+                <a href="#" style="float:right; font-size: var(--font-size-xs); font-weight: 400; color: var(--color-primary);">Forgot password?</a>
+              </label>
+              <div class="input-icon-wrapper">
+                <span class="input-icon" aria-hidden="true">🔒</span>
+                <input type="password" id="login-password" name="password" class="form-control"
+                       placeholder="Your password" autocomplete="current-password" required
+                       aria-required="true">
+                <button type="button" class="btn-toggle-password" aria-label="Show password">👁️</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-check">
+                <input type="checkbox" name="rememberMe">
+                <span class="form-check__label">Keep me logged in for 30 days</span>
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn--primary btn--full btn--lg">
+              Log In
+            </button>
+
+          </form>
+        </div>
+
+        <div class="auth-switch">
+          Don't have an account? <a href="register.html">Sign up free →</a>
+        </div>
+        <div class="auth-switch mt-4">
+          Are you a vendor? <a href="vendor-register.html">Register your business →</a>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/mock-data.js"></script>
+<script src="../js/components.js"></script>
+<script src="../js/auth.js"></script>
+</body>
+</html>

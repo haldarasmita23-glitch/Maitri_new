@@ -1,0 +1,30 @@
+# ─────────────────────────────────────────────────────────────────
+# Maitri Backend — LOCAL DEVELOPMENT Configuration (EXAMPLE / TEMPLATE)
+# File: application-local.properties.example
+#
+# ✅  THIS FILE IS COMMITTED to Git — it contains NO real secrets.
+#
+# HOW TO USE:
+#   1. Copy this file: application-local.properties.example
+#   2. Rename the copy to: application-local.properties
+#   3. The renamed file is gitignored — safe to put real values in it.
+#   4. Adjust values as needed for your local setup.
+# ─────────────────────────────────────────────────────────────────
+
+# ─── MongoDB ──────────────────────────────────────────────────────
+# For standard local MongoDB with no authentication:
+spring.data.mongodb.uri=${MONGODB_URI:mongodb://localhost:27017/maitri_db}
+spring.data.mongodb.database=maitri_db
+
+# If your local MongoDB has auth enabled, use:
+# spring.data.mongodb.uri=mongodb://your_username:your_password@localhost:27017/maitri_db
+
+# ─── JWT Configuration (Phase 3) ──────────────────────────────────
+# jwt.secret=${JWT_SECRET:local-dev-secret-replace-in-production-abc123xyz}
+# jwt.expiration.ms=${JWT_EXPIRATION_MS:86400000}
+
+# ─── Logging ──────────────────────────────────────────────────────
+logging.level.com.maitri=DEBUG
+logging.level.org.springframework.data.mongodb=DEBUG
+logging.level.org.springframework.security=DEBUG
+logging.pattern.console=%d{HH:mm:ss} [%level] %logger{20} - %msg%n

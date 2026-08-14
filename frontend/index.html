@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Maitri — Discover trusted local businesses in Peenya and Nagasandra, Bengaluru. Find street food, tailors, printing, and repair services near you.">
+  <meta name="keywords" content="Peenya, Nagasandra, Bengaluru, local businesses, street food, tailors, printing, mobile repair">
+  <title>Maitri — Your Local Community Platform in Peenya &amp; Nagasandra</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/pages/home.css">
+</head>
+<body>
+
+<!-- ─── Page Wrapper ─────────────────────────────────────────── -->
+<div class="page-wrapper">
+
+  <!-- ─── Navbar ─────────────────────────────────────────────── -->
+  <nav class="navbar" id="main-navbar" role="navigation" aria-label="Main navigation">
+    <div class="container">
+      <div class="navbar__inner">
+
+        <!-- Logo -->
+        <a href="index.html" class="navbar__logo" aria-label="Maitri Home">
+          <div class="navbar__logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M11 2C6.03 2 2 6.03 2 11s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9z" fill="rgba(255,255,255,0.2)"/>
+              <path d="M11 6l1.5 3.5H16l-2.75 2 1 3.5L11 13l-3.25 2 1-3.5L6 9.5h3.5L11 6z" fill="white"/>
+            </svg>
+          </div>
+          <span class="navbar__logo-text">Maitr<span>i</span></span>
+        </a>
+
+        <!-- Desktop Nav -->
+        <nav class="navbar__nav" aria-label="Site links">
+          <a href="index.html" class="navbar__link">Home</a>
+          <a href="pages/vendors.html" class="navbar__link">Browse Vendors</a>
+          <a href="pages/about.html" class="navbar__link">About</a>
+        </nav>
+
+        <!-- Auth Buttons -->
+        <div class="navbar__auth">
+          <a href="pages/login.html" class="btn btn--ghost btn--sm">Log In</a>
+          <a href="pages/register.html" class="btn btn--primary btn--sm">Sign Up</a>
+        </div>
+
+        <!-- Hamburger -->
+        <button class="navbar__hamburger"
+                id="navbar-hamburger"
+                aria-label="Open menu"
+                aria-expanded="false"
+                aria-controls="navbar-mobile">
+          <span></span><span></span><span></span>
+        </button>
+
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="navbar__mobile" id="navbar-mobile" role="navigation" aria-label="Mobile navigation">
+    <a href="index.html" class="navbar__mobile-link">🏠 Home</a>
+    <a href="pages/vendors.html" class="navbar__mobile-link">🏪 Browse Vendors</a>
+    <a href="pages/about.html" class="navbar__mobile-link">ℹ️ About</a>
+    <div class="navbar__mobile-divider"></div>
+    <div class="navbar__mobile-auth">
+      <a href="pages/login.html" class="btn btn--outline btn--full">Log In</a>
+      <a href="pages/register.html" class="btn btn--primary btn--full">Sign Up Free</a>
+    </div>
+  </div>
+
+  <!-- ─── Main Content ────────────────────────────────────────── -->
+  <main class="page-main" id="main-content">
+
+    <!-- ── Hero ───────────────────────────────────────────────── -->
+    <section class="hero" aria-labelledby="hero-heading">
+      <div class="hero__bg-circle hero__bg-circle--1" aria-hidden="true"></div>
+      <div class="hero__bg-circle hero__bg-circle--2" aria-hidden="true"></div>
+
+      <div class="container">
+        <div class="hero__inner">
+
+          <!-- Left content -->
+          <div class="hero__content">
+            <div class="hero__kicker" aria-label="Service area">
+              📍 Peenya &amp; Nagasandra, Bengaluru
+            </div>
+
+            <h1 class="hero__title" id="hero-heading">
+              Discover Trusted<br>
+              <span>Local Businesses</span><br>
+              Near You
+            </h1>
+
+            <p class="hero__subtitle">
+              Maitri connects residents and students in Peenya and Nagasandra
+              with the best local street food, tailors, printing shops, and repair services.
+            </p>
+
+            <!-- Search -->
+            <div class="hero__search">
+              <form id="hero-search-form" role="search" aria-label="Search vendors">
+                <div class="search-box">
+                  <span class="search-box__icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                  </span>
+                  <input type="search"
+                         id="hero-search-input"
+                         class="search-box__input"
+                         placeholder="Search dosa, tailor, mobile repair…"
+                         aria-label="Search for vendors">
+                  <button type="submit" class="btn btn--accent btn--sm search-box__btn" aria-label="Search">
+                    Search
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- CTAs -->
+            <div class="hero__cta">
+              <a href="pages/vendors.html" class="btn btn--white btn--lg">
+                Browse Vendors
+              </a>
+              <a href="pages/vendor-register.html" class="btn btn--outline-white btn--lg">
+                List Your Business
+              </a>
+            </div>
+
+            <!-- Stats -->
+            <div class="hero__stats" aria-label="Platform statistics">
+              <div>
+                <span class="hero__stat-value" data-count="12" data-suffix="+">12+</span>
+                <span class="hero__stat-label">Local Vendors</span>
+              </div>
+              <div>
+                <span class="hero__stat-value" data-count="4" data-suffix="">4</span>
+                <span class="hero__stat-label">Categories</span>
+              </div>
+              <div>
+                <span class="hero__stat-value" data-count="500" data-suffix="+">500+</span>
+                <span class="hero__stat-label">Happy Users</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: phone mockup -->
+          <div class="hero__visual" aria-hidden="true">
+            <div class="hero__phone-mockup">
+              <div class="hero__phone-screen">
+                <div class="hero__phone-header">🌿 Maitri — Near You</div>
+                <div class="hero__phone-cards">
+                  <div class="hero__phone-card">
+                    <div class="hero__phone-card-emoji">🍛</div>
+                    <div class="hero__phone-card-info">
+                      <div class="hero__phone-card-name">Shree Sagar Tiffin</div>
+                      <div class="hero__phone-card-cat">Street Food · Peenya</div>
+                    </div>
+                    <div class="hero__phone-card-rating">★ 4.6</div>
+                  </div>
+                  <div class="hero__phone-card">
+                    <div class="hero__phone-card-emoji">📱</div>
+                    <div class="hero__phone-card-info">
+                      <div class="hero__phone-card-name">TechFix Solutions</div>
+                      <div class="hero__phone-card-cat">Mobile Repair · Peenya</div>
+                    </div>
+                    <div class="hero__phone-card-rating">★ 4.7</div>
+                  </div>
+                  <div class="hero__phone-card">
+                    <div class="hero__phone-card-emoji">🧵</div>
+                    <div class="hero__phone-card-info">
+                      <div class="hero__phone-card-name">Divya Fashion Boutique</div>
+                      <div class="hero__phone-card-cat">Tailors · Nagasandra</div>
+                    </div>
+                    <div class="hero__phone-card-rating">★ 4.7</div>
+                  </div>
+                  <div class="hero__phone-card">
+                    <div class="hero__phone-card-emoji">🥤</div>
+                    <div class="hero__phone-card-info">
+                      <div class="hero__phone-card-name">Peenya Juice Corner</div>
+                      <div class="hero__phone-card-cat">Street Food · Peenya</div>
+                    </div>
+                    <div class="hero__phone-card-rating">★ 4.8</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Categories Section ──────────────────────────────────── -->
+    <section class="section categories-section" id="categories" aria-labelledby="categories-heading">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-label">Browse by Category</span>
+          <h2 id="categories-heading">What are you looking for?</h2>
+          <p class="section-subtitle">
+            Explore trusted local businesses across our four service categories
+            in Peenya and Nagasandra.
+          </p>
+        </div>
+
+        <div class="category-grid" id="category-grid" role="list" aria-label="Service categories">
+          <!-- Rendered by home.js -->
+          <div class="spinner" aria-label="Loading categories"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── How It Works ────────────────────────────────────────── -->
+    <section class="section how-it-works" aria-labelledby="how-heading">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-label">Simple &amp; Free</span>
+          <h2 id="how-heading">How Maitri Works</h2>
+          <p class="section-subtitle">
+            Find the right local business in three easy steps.
+          </p>
+        </div>
+
+        <div class="how-steps">
+          <div class="how-step animate-on-scroll">
+            <div class="how-step__number" aria-hidden="true">1</div>
+            <span class="how-step__icon" aria-hidden="true">🔍</span>
+            <h3 class="how-step__title">Search or Browse</h3>
+            <p class="how-step__desc">
+              Search by name, service type, or browse categories to find vendors near you in Peenya or Nagasandra.
+            </p>
+          </div>
+          <div class="how-step animate-on-scroll">
+            <div class="how-step__number" aria-hidden="true">2</div>
+            <span class="how-step__icon" aria-hidden="true">⭐</span>
+            <h3 class="how-step__title">Check Reviews</h3>
+            <p class="how-step__desc">
+              Read genuine reviews from other community members and check ratings before you visit.
+            </p>
+          </div>
+          <div class="how-step animate-on-scroll">
+            <div class="how-step__number" aria-hidden="true">3</div>
+            <span class="how-step__icon" aria-hidden="true">🤝</span>
+            <h3 class="how-step__title">Connect &amp; Visit</h3>
+            <p class="how-step__desc">
+              Get the vendor's address, phone number, and opening hours. Visit and support your local community.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Featured Vendors ────────────────────────────────────── -->
+    <section class="section featured-vendors" aria-labelledby="featured-heading">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-label">Top Rated</span>
+          <h2 id="featured-heading">Featured Vendors</h2>
+          <p class="section-subtitle">
+            Highest-rated businesses trusted by the Peenya &amp; Nagasandra community.
+          </p>
+        </div>
+
+        <div class="vendor-grid" id="featured-vendors-grid" role="list" aria-label="Featured vendors">
+          <div class="spinner" aria-label="Loading vendors"></div>
+        </div>
+
+        <div class="text-center mt-8">
+          <a href="pages/vendors.html" class="btn btn--outline btn--lg">
+            View All Vendors →
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Testimonials ────────────────────────────────────────── -->
+    <section class="section testimonials" aria-labelledby="testimonials-heading">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-label">Community Voices</span>
+          <h2 id="testimonials-heading">What People Are Saying</h2>
+        </div>
+        <div class="testimonials-grid" id="testimonials-grid" aria-label="Community testimonials">
+          <div class="spinner" aria-label="Loading testimonials"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CTA Banner ──────────────────────────────────────────── -->
+    <section class="cta-banner" aria-labelledby="cta-heading">
+      <div class="container">
+        <h2 id="cta-heading">Own a Local Business?</h2>
+        <p>Join Maitri and get discovered by hundreds of residents in Peenya and Nagasandra. Free to list. Free forever.</p>
+        <div class="cta-banner__actions">
+          <a href="pages/vendor-register.html" class="btn btn--accent btn--xl">
+            List Your Business Free
+          </a>
+          <a href="pages/about.html" class="btn btn--outline-white btn--xl">
+            Learn More
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ─── Footer ─────────────────────────────────────────────── -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer__grid">
+
+        <!-- Brand -->
+        <div class="footer__brand">
+          <a href="index.html" class="navbar__logo" aria-label="Maitri Home">
+            <div class="navbar__logo-mark" aria-hidden="true">
+              <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 6l1.5 3.5H16l-2.75 2 1 3.5L11 13l-3.25 2 1-3.5L6 9.5h3.5L11 6z" fill="white"/>
+              </svg>
+            </div>
+            <span class="navbar__logo-text">Maitr<span>i</span></span>
+          </a>
+          <p class="footer__tagline">
+            Connecting residents and students in Peenya &amp; Nagasandra with trusted local businesses.
+          </p>
+          <div class="footer__backend-status" id="footer-backend-status" aria-live="polite">
+            <span class="status-dot status-dot--amber js-health-dot" aria-hidden="true"></span>
+            <span class="js-health-text">Checking backend…</span>
+          </div>
+        </div>
+
+        <!-- Browse -->
+        <div class="footer__col">
+          <h4>Browse</h4>
+          <ul class="footer__links" role="list">
+            <li><a href="pages/vendors.html?category=street-food" class="footer__link">🍛 Street Food</a></li>
+            <li><a href="pages/vendors.html?category=tailors" class="footer__link">🧵 Tailors</a></li>
+            <li><a href="pages/vendors.html?category=printing" class="footer__link">🖨️ Printing &amp; Xerox</a></li>
+            <li><a href="pages/vendors.html?category=repair" class="footer__link">📱 Mobile/Laptop Repair</a></li>
+          </ul>
+        </div>
+
+        <!-- Community -->
+        <div class="footer__col">
+          <h4>Community</h4>
+          <ul class="footer__links" role="list">
+            <li><a href="pages/about.html" class="footer__link">About Maitri</a></li>
+            <li><a href="pages/vendor-register.html" class="footer__link">List Your Business</a></li>
+            <li><a href="pages/register.html" class="footer__link">Create Account</a></li>
+          </ul>
+        </div>
+
+        <!-- Account -->
+        <div class="footer__col">
+          <h4>Account</h4>
+          <ul class="footer__links" role="list">
+            <li><a href="pages/login.html" class="footer__link">Log In</a></li>
+            <li><a href="pages/register.html" class="footer__link">Sign Up</a></li>
+            <li><a href="pages/vendor-register.html" class="footer__link">Vendor Registration</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer__bottom">
+        <span class="footer__copyright">
+          © 2026 Maitri. All rights reserved. Made with ❤️ for Peenya &amp; Nagasandra.
+        </span>
+        <div class="footer__bottom-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</div><!-- end .page-wrapper -->
+
+<!-- Toast container (appended by JS) -->
+
+<!-- Scripts -->
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/mock-data.js"></script>
+<script src="js/components.js"></script>
+<script src="js/home.js"></script>
+
+</body>
+</html>

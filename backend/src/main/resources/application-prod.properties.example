@@ -1,0 +1,44 @@
+# ─────────────────────────────────────────────────────────────────
+# Maitri Backend — PRODUCTION Configuration (EXAMPLE / TEMPLATE)
+# File: application-prod.properties.example
+#
+# ✅  THIS FILE IS COMMITTED — it contains NO real secrets.
+# ⚠️  The ACTUAL application-prod.properties is GITIGNORED.
+#
+# In production, these values should be supplied via:
+#   - Environment variables on the EC2 instance
+#   - AWS Secrets Manager
+#   - AWS Parameter Store
+#
+# HOW TO USE:
+#   1. Copy this file on the production server
+#   2. Rename to: application-prod.properties
+#   3. Fill in all ${...} values with real production values
+# ─────────────────────────────────────────────────────────────────
+
+# ─── MongoDB — Production Connection ──────────────────────────────
+# MUST be set via MONGODB_URI environment variable in production.
+# Format: mongodb://username:password@host:27017/maitri_db
+# Example (replace with your actual AWS EC2 MongoDB host):
+spring.data.mongodb.uri=${MONGODB_URI}
+spring.data.mongodb.database=maitri_db
+
+# ─── JWT Configuration ────────────────────────────────────────────
+# JWT_SECRET MUST be a long, cryptographically random string.
+# Generate: openssl rand -hex 64
+jwt.secret=${JWT_SECRET}
+jwt.expiration.ms=${JWT_EXPIRATION_MS:86400000}
+
+# ─── Admin Seeding ────────────────────────────────────────────────
+admin.seed.email=${ADMIN_EMAIL}
+admin.seed.password=${ADMIN_PASSWORD}
+
+# ─── Logging ──────────────────────────────────────────────────────
+# INFO level in production — less noise, but captures important events.
+logging.level.com.maitri=INFO
+logging.level.org.springframework=WARN
+logging.level.org.springframework.security=WARN
+
+# ─── CORS ─────────────────────────────────────────────────────────
+# Set to your actual production domain
+cors.allowed.origins=${CORS_ALLOWED_ORIGINS}

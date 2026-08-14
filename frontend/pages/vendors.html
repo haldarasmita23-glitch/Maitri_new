@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Browse trusted local vendors in Peenya and Nagasandra, Bengaluru. Find street food, tailors, printing shops, and mobile repair services.">
+  <title>Browse Vendors — Maitri</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/pages/vendors.css">
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- Navbar -->
+  <nav class="navbar" id="main-navbar" role="navigation" aria-label="Main navigation">
+    <div class="container">
+      <div class="navbar__inner">
+        <a href="../index.html" class="navbar__logo" aria-label="Maitri Home">
+          <div class="navbar__logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 22 22" fill="none"><path d="M11 6l1.5 3.5H16l-2.75 2 1 3.5L11 13l-3.25 2 1-3.5L6 9.5h3.5L11 6z" fill="white"/></svg>
+          </div>
+          <span class="navbar__logo-text">Maitr<span>i</span></span>
+        </a>
+        <nav class="navbar__nav" aria-label="Site links">
+          <a href="../index.html" class="navbar__link">Home</a>
+          <a href="vendors.html" class="navbar__link active">Browse Vendors</a>
+          <a href="about.html" class="navbar__link">About</a>
+        </nav>
+        <div class="navbar__auth">
+          <a href="login.html" class="btn btn--ghost btn--sm">Log In</a>
+          <a href="register.html" class="btn btn--primary btn--sm">Sign Up</a>
+        </div>
+        <button class="navbar__hamburger" id="navbar-hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navbar-mobile">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="navbar__mobile" id="navbar-mobile" role="navigation" aria-label="Mobile navigation">
+    <a href="../index.html" class="navbar__mobile-link">🏠 Home</a>
+    <a href="vendors.html" class="navbar__mobile-link active">🏪 Browse Vendors</a>
+    <a href="about.html" class="navbar__mobile-link">ℹ️ About</a>
+    <div class="navbar__mobile-divider"></div>
+    <div class="navbar__mobile-auth">
+      <a href="login.html" class="btn btn--outline btn--full">Log In</a>
+      <a href="register.html" class="btn btn--primary btn--full">Sign Up Free</a>
+    </div>
+  </div>
+
+  <!-- Page Hero -->
+  <header class="page-hero">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">Home</a>
+        <span class="breadcrumb__sep" aria-hidden="true">›</span>
+        <span class="breadcrumb__current">Browse Vendors</span>
+      </nav>
+      <h1>Browse Local Vendors</h1>
+      <p>Trusted businesses in Peenya &amp; Nagasandra, Bengaluru</p>
+    </div>
+  </header>
+
+  <main class="page-main" id="main-content">
+    <section class="browse-section">
+      <div class="container">
+
+        <!-- Controls -->
+        <div class="browse-controls">
+          <!-- Search -->
+          <div class="search-box">
+            <span class="search-box__icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            </span>
+            <input type="search"
+                   id="vendor-search"
+                   class="search-box__input"
+                   placeholder="Search vendors, services…"
+                   aria-label="Search vendors">
+          </div>
+
+          <!-- Category chips -->
+          <div class="browse-controls__filters">
+            <div class="filter-bar" id="category-filter-bar" role="group" aria-label="Filter by category">
+              <!-- Rendered by vendors.js -->
+            </div>
+          </div>
+
+          <!-- Sort + count -->
+          <div class="browse-controls__right">
+            <label for="sort-select" class="sr-only">Sort vendors</label>
+            <select id="sort-select" class="sort-select" aria-label="Sort vendors by">
+              <option value="rating">Top Rated</option>
+              <option value="reviews">Most Reviewed</option>
+              <option value="name">A–Z</option>
+            </select>
+            <span class="results-count" id="results-count" aria-live="polite" aria-atomic="true"></span>
+          </div>
+        </div>
+
+        <!-- Vendor Grid -->
+        <div class="vendor-grid" id="vendor-grid" role="list" aria-label="Vendor listings">
+          <div class="spinner" aria-label="Loading vendors"></div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer__bottom" style="border-top: none; padding-top: 0;">
+        <span class="footer__copyright">© 2026 Maitri. Made with ❤️ for Peenya &amp; Nagasandra.</span>
+        <div class="footer__backend-status" aria-live="polite">
+          <span class="status-dot status-dot--amber js-health-dot" aria-hidden="true"></span>
+          <span class="js-health-text">Checking backend…</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/mock-data.js"></script>
+<script src="../js/components.js"></script>
+<script src="../js/vendors.js"></script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Create your Maitri account to discover and save local vendors in Peenya and Nagasandra, Bengaluru.">
+  <title>Sign Up — Maitri</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/pages/auth.css">
+</head>
+<body>
+
+  <!-- Navbar (minimal) -->
+  <nav class="navbar" id="main-navbar" role="navigation" aria-label="Main navigation">
+    <div class="container">
+      <div class="navbar__inner">
+        <a href="../index.html" class="navbar__logo" aria-label="Maitri Home">
+          <div class="navbar__logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 22 22" fill="none"><path d="M11 6l1.5 3.5H16l-2.75 2 1 3.5L11 13l-3.25 2 1-3.5L6 9.5h3.5L11 6z" fill="white"/></svg>
+          </div>
+          <span class="navbar__logo-text">Maitr<span>i</span></span>
+        </a>
+        <div class="navbar__auth" style="margin-left: auto;">
+          <span style="font-size: var(--font-size-sm); color: var(--color-text-muted);">Already have an account?</span>
+          <a href="login.html" class="btn btn--outline btn--sm">Log In</a>
+        </div>
+        <button class="navbar__hamburger" id="navbar-hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navbar-mobile">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="navbar__mobile" id="navbar-mobile">
+    <a href="../index.html" class="navbar__mobile-link">🏠 Home</a>
+    <a href="vendors.html" class="navbar__mobile-link">🏪 Browse Vendors</a>
+    <div class="navbar__mobile-divider"></div>
+    <a href="login.html" class="btn btn--outline btn--full">Log In</a>
+  </div>
+
+  <main class="auth-page" id="main-content">
+
+    <!-- Left branding panel -->
+    <div class="auth-panel" aria-hidden="true">
+      <div class="auth-panel__logo">
+        <div class="auth-panel__logo-mark">🌿</div>
+        <span class="auth-panel__logo-text">Maitr<span>i</span></span>
+      </div>
+      <h2 class="auth-panel__title">Join Your<br>Local Community</h2>
+      <p class="auth-panel__subtitle">
+        Create a free account to save your favourite vendors, write reviews, and stay connected with Peenya &amp; Nagasandra.
+      </p>
+      <div class="auth-panel__features">
+        <div class="auth-panel__feature">
+          <div class="auth-panel__feature-icon">❤️</div>
+          <div class="auth-panel__feature-text">
+            <strong>Save Favourites</strong>
+            Bookmark vendors you love for quick access
+          </div>
+        </div>
+        <div class="auth-panel__feature">
+          <div class="auth-panel__feature-icon">⭐</div>
+          <div class="auth-panel__feature-text">
+            <strong>Write Reviews</strong>
+            Help your community find the best local shops
+          </div>
+        </div>
+        <div class="auth-panel__feature">
+          <div class="auth-panel__feature-icon">🔔</div>
+          <div class="auth-panel__feature-text">
+            <strong>Get Notified</strong>
+            Receive updates about vendors and deals
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right form panel -->
+    <div class="auth-form-panel">
+      <div class="auth-form-container">
+
+        <!-- Mobile logo -->
+        <div class="auth-mobile-logo">
+          <div class="auth-mobile-logo__mark" aria-hidden="true">🌿</div>
+          <span class="auth-mobile-logo__text">Maitr<span>i</span></span>
+        </div>
+
+        <div class="auth-form-header">
+          <h1>Create Account</h1>
+          <p>Join thousands of Peenya &amp; Nagasandra residents</p>
+        </div>
+
+        <div class="auth-form-card">
+          <div class="alert alert--info mb-4" role="note">
+            <span class="alert__icon">ℹ️</span>
+            <div class="alert__text">
+              <strong>Phase 2 — Static UI</strong><br>
+              Authentication is coming in Phase 3. Form validation is live now.
+            </div>
+          </div>
+
+          <form id="register-form" novalidate aria-label="User registration form">
+
+            <!-- Full Name -->
+            <div class="form-group">
+              <label class="form-label" for="reg-name">Full Name <span class="required" aria-label="required">*</span></label>
+              <div class="input-icon-wrapper">
+                <span class="input-icon" aria-hidden="true">👤</span>
+                <input type="text" id="reg-name" name="name" class="form-control"
+                       placeholder="e.g. Kavitha Sharma" autocomplete="name" required
+                       aria-required="true">
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+              <label class="form-label" for="reg-email">Email Address <span class="required" aria-label="required">*</span></label>
+              <div class="input-icon-wrapper">
+                <span class="input-icon" aria-hidden="true">✉️</span>
+                <input type="email" id="reg-email" name="email" class="form-control"
+                       placeholder="you@example.com" autocomplete="email" required
+                       aria-required="true">
+              </div>
+            </div>
+
+            <!-- Phone -->
+            <div class="form-group">
+              <label class="form-label" for="reg-phone">Mobile Number <span class="text-muted">(optional)</span></label>
+              <div class="input-icon-wrapper">
+                <span class="input-icon" aria-hidden="true">📱</span>
+                <input type="tel" id="reg-phone" name="phone" class="form-control"
+                       placeholder="10-digit mobile number" autocomplete="tel"
+                       pattern="[6-9][0-9]{9}">
+              </div>
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+              <label class="form-label" for="reg-password">Password <span class="required" aria-label="required">*</span></label>
+              <div class="input-icon-wrapper">
+                <span class="input-icon" aria-hidden="true">🔒</span>
+                <input type="password" id="reg-password" name="password" class="form-control"
+                       placeholder="At least 8 characters" autocomplete="new-password" required
+                       aria-required="true" minlength="8">
+                <button type="button" class="btn-toggle-password" aria-label="Show password">👁️</button>
+              </div>
+              <span class="form-hint">Minimum 8 characters</span>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="form-group">
+              <label class="form-label" for="reg-confirm">Confirm Password <span class="required" aria-label="required">*</span></label>
+              <div class="input-icon-wrapper">
+                <span class="input-icon" aria-hidden="true">🔒</span>
+                <input type="password" id="reg-confirm" name="confirmPassword" class="form-control"
+                       placeholder="Re-enter your password" autocomplete="new-password" required
+                       aria-required="true">
+                <button type="button" class="btn-toggle-password" aria-label="Show password">👁️</button>
+              </div>
+            </div>
+
+            <!-- Terms -->
+            <div class="form-group">
+              <label class="form-check">
+                <input type="checkbox" id="reg-agree" name="agree" required aria-required="true">
+                <span class="form-check__label">
+                  I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                </span>
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn--primary btn--full btn--lg">
+              Create My Account
+            </button>
+          </form>
+        </div>
+
+        <div class="auth-switch">
+          Already have an account? <a href="login.html">Log in</a>
+        </div>
+
+        <div class="auth-switch mt-4">
+          Are you a vendor? <a href="vendor-register.html">Register your business →</a>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/mock-data.js"></script>
+<script src="../js/components.js"></script>
+<script src="../js/auth.js"></script>
+</body>
+</html>
