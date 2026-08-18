@@ -1,8 +1,12 @@
 package com.maitri.exception;
 
 import com.maitri.dto.ApiResponse;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -111,6 +115,100 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.METHOD_NOT_ALLOWED)
                 .body(ApiResponse.error("HTTP method '" + ex.getMethod() + "' is not supported for this endpoint."));
+    }
+
+    /**
+     * Handles duplicate email registration attempts.
+     *
+     * WHEN TRIGGERED:
+     *   AuthService.register() finds an existing user with the same email.
+     *
+     * HTTP Status: 409 Conflict
+     */
+    @ExceptionHandler(DuplicateEmailException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDuplicateEmail(DuplicateEmailException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Handles failed login attempts (wrong email or password).
+     *
+     * WHEN TRIGGERED:
+     *   AuthService.login() cannot find the user or password does not match.
+     *
+     * SECURITY: Message is always generic — never reveals whether email or password was wrong.
+     *
+     * HTTP Status: 401 Unauthorized
+     */
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidCredentials(InvalidCredentialsException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Handles attempts to access a resource the authenticated user is not allowed to use.
+     *
+     * WHEN TRIGGERED:
+     *   An authenticated user tries to access an endpoint that requires a higher role.
+     *   Example: a USER trying to call an ADMIN-only endpoint.
+     *
+     * HTTP Status: 403 Forbidden
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error("You do not have permission to perform this action."));
+    }
+
+    /**
+     * Handles authentication failures (unauthenticated access to protected endpoints).
+     *
+     * WHEN TRIGGERED:
+     *   A request reaches a protected endpoint without a valid JWT.
+     *   Spring Security's AuthenticationEntryPoint propagates this.
+     *
+     * HTTP Status: 401 Unauthorized
+     */
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAuthenticationException(AuthenticationException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error("Authentication required. Please log in."));
+    }
+
+    /**
+     * Handles JWT token expiration.
+     *
+     * WHEN TRIGGERED:
+     *   A request is made with a valid but expired JWT token.
+     *
+     * HTTP Status: 401 Unauthorized
+     */
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<ApiResponse<Void>> handleExpiredJwt(ExpiredJwtException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error("Your session has expired. Please log in again."));
+    }
+
+    /**
+     * Handles invalid JWT tokens (malformed, wrong signature, etc.).
+     *
+     * WHEN TRIGGERED:
+     *   A request is made with a tampered or malformed JWT token.
+     *
+     * HTTP Status: 401 Unauthorized
+     */
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ApiResponse<Void>> handleJwtException(JwtException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error("Invalid authentication token. Please log in again."));
     }
 
     /**

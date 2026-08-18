@@ -1,15 +1,27 @@
 package com.maitri.config;
 
+import com.maitri.security.JwtAuthenticationFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -18,91 +30,119 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Security Configuration for Maitri Backend.
+ * Security Configuration for Maitri Backend — Phase 3A (JWT Authentication).
  *
  * ─── WHAT THIS FILE DOES ───────────────────────────────────────────────────
  *
  * This class controls how HTTP requests are secured.
- * Think of it as the "security rulebook" for the entire backend.
+ * It is the "security rulebook" for the entire backend.
  *
- * Currently (Phase 1 — Foundation):
- *   All API requests are OPEN (permitted) because we haven't built
- *   authentication yet. Phase 3 will lock this down by adding
- *   JWT token validation and role-based access rules.
+ * Phase 3A adds:
+ *   - JWT authentication filter (JwtAuthenticationFilter) on every request
+ *   - Explicit public vs protected endpoint rules
+ *   - DaoAuthenticationProvider backed by our UserDetailsServiceImpl
+ *   - AuthenticationManager bean for use in AuthService
  *
- * ─── KEY CONCEPTS EXPLAINED ────────────────────────────────────────────────
+ * ─── ENDPOINT ACCESS RULES ───────────────────────────────────────────────
  *
- * CSRF (Cross-Site Request Forgery):
- *   A type of attack where a malicious website tricks a user's browser
- *   into making a request to your API. We DISABLE CSRF because:
- *   - REST APIs use JWT tokens (not browser cookies) for authentication
- *   - CSRF protection is only needed when cookies carry auth state
+ *   PUBLIC (no JWT required):
+ *     GET  /api/health          — Liveness check
+ *     POST /api/auth/register   — Public registration
+ *     POST /api/auth/login      — Login (returns JWT)
  *
- * STATELESS Session Management:
- *   Traditional web apps store session data on the server (stateful).
- *   We use STATELESS because:
- *   - Each request carries a JWT token with the user's identity
- *   - No server-side session storage is needed
- *   - This scales better for production (multiple servers don't need to share session state)
+ *   PROTECTED (valid JWT required):
+ *     GET  /api/auth/me         — Current user profile
+ *     All other /api/** paths   — Protected by default
  *
- * CORS (Cross-Origin Resource Sharing):
- *   A browser security rule that blocks frontend code from calling a
- *   backend on a DIFFERENT origin (domain + port).
- *   Example problem: Frontend at localhost:5500 calling backend at localhost:8080
- *   → Browser blocks this by default.
- *   → Our CorsConfiguration tells the browser: "localhost:5500 is allowed."
+ * ─── KEY CONCEPTS ────────────────────────────────────────────────────────
  *
- * ─── PHASE 3 TODO ──────────────────────────────────────────────────────────
- *   - Add JwtAuthenticationFilter before UsernamePasswordAuthenticationFilter
- *   - Replace .anyRequest().permitAll() with role-specific rules
- *   - Add AuthenticationProvider and AuthenticationManager beans
- * ───────────────────────────────────────────────────────────────────────────
+ *   CSRF: Disabled — REST APIs with JWT don't use browser cookies for auth.
  *
- * @Configuration  — Marks this as a Spring configuration class (defines beans)
- * @EnableWebSecurity — Activates Spring Security for web requests
- * @EnableMethodSecurity — Allows @PreAuthorize("hasRole('ADMIN')") on methods (Phase 3+)
+ *   STATELESS: No server-side sessions. Each request carries a JWT.
+ *
+ *   JWT FILTER: Runs before UsernamePasswordAuthenticationFilter.
+ *     Extracts the Bearer token, validates it, and sets authentication
+ *     in the SecurityContext if valid.
+ *
+ *   DaoAuthenticationProvider: Used by Spring Security's login mechanism.
+ *     Loads the user by email, verifies the BCrypt password.
+ *
+ * @Configuration      — Marks this as a Spring configuration class
+ * @EnableWebSecurity  — Activates Spring Security for web requests
+ * @EnableMethodSecurity — Enables @PreAuthorize on controller methods
+ * @RequiredArgsConstructor — Constructor injection for all final fields
  */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final UserDetailsService userDetailsService;
 
     /**
      * Security Filter Chain — The main security rulebook.
      *
-     * Spring Security works as a chain of filters.
-     * Every HTTP request passes through these filters before reaching a controller.
-     * This method defines what that chain looks like.
+     * Defines:
+     *   - Which endpoints are public
+     *   - Which endpoints require authentication
+     *   - That sessions are stateless
+     *   - That the JWT filter runs before standard auth filters
      *
-     * @param http — Spring Security's fluent configuration builder
+     * @param http Spring Security's fluent configuration builder
      * @return The configured filter chain
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // 1. Enable CORS using our configuration below
+                // ── CORS ─────────────────────────────────────────────────────────
+                // Apply our CORS rules to allow the frontend to call the API
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // 2. Disable CSRF (safe for stateless REST APIs with JWT)
+                // ── CSRF ─────────────────────────────────────────────────────────
+                // Disabled: JWT in Authorization header is not vulnerable to CSRF.
+                // CSRF is only a risk when the browser auto-sends cookies with requests.
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // 3. Define which requests require authentication
-                //    PHASE 1: All requests are open.
-                //    PHASE 3: This will be replaced with specific role rules, e.g.:
-                //      .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                //      .requestMatchers("/api/users/me").hasAnyRole("USER", "VENDOR")
-                //      .requestMatchers(HttpMethod.GET, "/api/vendors").permitAll()
+                // ── Authorization Rules ───────────────────────────────────────────
+                // Define exactly which endpoints are public and which require a JWT.
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()  // PHASE 1 ONLY — open access
+
+                        // Public endpoints — no JWT required
+                        .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+
+                        // All other requests require authentication (valid JWT)
+                        .anyRequest().authenticated()
                 )
 
-                // 4. Stateless sessions — no server-side session storage
+                // ── Session Management ────────────────────────────────────────────
+                // STATELESS: No server-side sessions. Each request is fully self-contained.
+                // Spring Security will NEVER create an HttpSession for authentication.
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                );
+                )
 
-        // PHASE 3 ADDITION: Add JWT filter here
-        // http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                // ── Exception Handling ────────────────────────────────────────────────
+                // Return 401 (not 403) when an unauthenticated request hits a protected
+                // endpoint. 401 = "you need to authenticate", 403 = "authenticated but
+                // not authorized". Spring Security defaults to 403 without this.
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authenticationEntryPoint())
+                )
+
+                // ── Authentication Provider ───────────────────────────────────────
+                // Wire in our DaoAuthenticationProvider (uses our UserDetailsService
+                // and BCryptPasswordEncoder for credential verification)
+                .authenticationProvider(authenticationProvider())
+
+                // ── JWT Filter ────────────────────────────────────────────────────
+                // Inject our JWT filter BEFORE Spring's default username/password filter.
+                // This means: for every request, we first try to authenticate via JWT.
+                // If no valid JWT is found, the request proceeds as anonymous.
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -112,12 +152,11 @@ public class SecurityConfig {
      *
      * During local development:
      *   - http://localhost:5500  → VS Code Live Server
-     *   - http://127.0.0.1:5500 → VS Code Live Server (alternate address)
-     *   - http://localhost:8080  → Direct backend access / Postman-via-browser
+     *   - http://127.0.0.1:5500 → VS Code Live Server (alternate)
+     *   - http://localhost:8080  → Direct backend / Postman via browser
      *
      * In production (Phase 15):
      *   This will be updated to only allow the real production domain.
-     *   Hardcoded origins will be replaced with values from environment config.
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -135,10 +174,10 @@ public class SecurityConfig {
                 "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
         ));
 
-        // Allow all headers (the Authorization: Bearer <token> header must pass)
+        // Allow all headers (Authorization: Bearer <token> must pass through)
         configuration.setAllowedHeaders(List.of("*"));
 
-        // Allow credentials (needed for Authorization header to be sent cross-origin)
+        // Allow credentials (needed for Authorization header cross-origin)
         configuration.setAllowCredentials(true);
 
         // Cache preflight response for 1 hour (reduces OPTIONS requests)
@@ -154,21 +193,69 @@ public class SecurityConfig {
     /**
      * BCrypt Password Encoder — Securely hashes passwords before storing them.
      *
-     * WHY BCRYPT:
-     *   - BCrypt is an adaptive hashing algorithm designed for passwords.
-     *   - Unlike MD5 or SHA, BCrypt is intentionally slow (computationally expensive).
-     *   - Strength 12 = 2^12 = 4096 iterations of hashing.
-     *   - This makes brute-force attacks impractical.
-     *   - Even if the database is compromised, plaintext passwords cannot be recovered.
+     * Strength 12 = 2^12 = 4096 iterations. Intentionally slow to resist brute-force.
+     * Even if the database is compromised, plaintext passwords cannot be recovered.
      *
-     * HOW IT WORKS:
-     *   Registration: password "abc123" → BCrypt → "$2a$12$Ge8..."  (stored in DB)
-     *   Login: user enters "abc123" → BCrypt compares → match → login succeeds
-     *
-     * This bean is registered now and will be used in Phase 3 (authentication).
+     * Registration: "password123" → BCrypt → "$2a$12$Ge8..."  (stored in DB)
+     * Login:        "password123" → BCrypt.matches() → match → login succeeds
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(12);
+    }
+
+    /**
+     * Authentication Provider — Wires our UserDetailsService and PasswordEncoder
+     * into Spring Security's authentication mechanism.
+     *
+     * DaoAuthenticationProvider:
+     *   - Loads the user from MongoDB by email (via UserDetailsServiceImpl)
+     *   - Verifies the submitted password against the stored BCrypt hash
+     *   - Throws BadCredentialsException if the password is wrong
+     */
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
+    }
+
+    /**
+     * Authentication Manager — Used programmatically to trigger authentication.
+     *
+     * AuthService uses this to authenticate user credentials during login.
+     * Spring's AuthenticationConfiguration creates the manager using the
+     * authenticationProvider() bean defined above.
+     *
+     * @param config Spring's authentication configuration
+     * @return The configured AuthenticationManager
+     */
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
+            throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+    /**
+     * Authentication Entry Point — Returns HTTP 401 when an unauthenticated request
+     * reaches a protected endpoint.
+     *
+     * Without this, Spring Security defaults to 403 Forbidden, which is semantically
+     * incorrect for unauthenticated access:
+     *   401 = "You need to authenticate (provide credentials)"
+     *   403 = "You are authenticated, but not authorized for this resource"
+     *
+     * This entry point writes a minimal JSON response consistent with ApiResponse format.
+     */
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, authException) -> {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.getWriter().write(
+                    "{\"success\":false,\"message\":\"Authentication required. Please log in.\"}"
+            );
+        };
     }
 }

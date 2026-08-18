@@ -162,6 +162,21 @@
             <scope>test</scope>
         </dependency>
 
+        <!--
+            Flapdoodle Embedded MongoDB (test scope only)
+            PURPOSE: Provides an in-memory MongoDB instance during mvn test.
+            WHY: Integration tests (AuthControllerTest) need a real MongoDB connection.
+                 Flapdoodle spins one up automatically — no external MongoDB required.
+            ARTIFACT: spring3x is the correct variant for Spring Boot 3.x / Spring Data 4.x.
+                      (spring31x was discontinued after 4.11.0; spring3x is the successor)
+        -->
+        <dependency>
+            <groupId>de.flapdoodle.embed</groupId>
+            <artifactId>de.flapdoodle.embed.mongo.spring3x</artifactId>
+            <version>4.18.0</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <!-- ─── Build Configuration ────────────────────────────── -->

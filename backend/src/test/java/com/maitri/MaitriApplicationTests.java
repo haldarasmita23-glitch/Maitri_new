@@ -2,7 +2,7 @@ package com.maitri;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
 /**
  * Maitri Application — Spring Context Integration Test
@@ -16,26 +16,17 @@ import org.springframework.test.context.ActiveProfiles;
  *   Command: mvn test
  *   Or: Right-click this file in your IDE → Run
  *
- * ⚠️  IMPORTANT — PREREQUISITE:
- *   This test starts the full Spring Boot application context,
- *   which REQUIRES a running MongoDB instance on localhost:27017.
- *
- *   Before running tests:
- *   1. Make sure MongoDB is started on your machine.
- *   2. Make sure application-local.properties exists.
- *
- *   If MongoDB is not running, the test will fail with a connection error —
- *   this is expected and does NOT indicate a code problem.
+ * NOTE — Phase 3A:
+ *   This test now uses Flapdoodle embedded MongoDB (test scope dependency).
+ *   No external MongoDB is required for this test to run.
+ *   The embedded MongoDB is started automatically by Spring Boot Test.
  *
  * @SpringBootTest:
  *   Starts the full application context (all beans, security, MongoDB connection).
  *   This is an integration test, not a unit test.
- *
- * @ActiveProfiles("local"):
- *   Tells Spring to use application-local.properties during the test.
  */
 @SpringBootTest
-@ActiveProfiles("local")
+@TestPropertySource(locations = "classpath:application.properties")
 class MaitriApplicationTests {
 
     /**
@@ -45,12 +36,10 @@ class MaitriApplicationTests {
      * Spring application context loads without throwing an exception.
      *
      * If ANY of the following are wrong, this test will fail:
-     *   - MongoDB is not running
      *   - A @Bean is misconfigured
-     *   - A required property is missing
+     *   - A required property is missing (jwt.secret, admin.initial.*)
      *   - A class has a syntax error or missing import
-     *
-     * Think of this as the "does the engine start?" test.
+     *   - Circular dependencies exist
      */
     @Test
     void contextLoads() {
