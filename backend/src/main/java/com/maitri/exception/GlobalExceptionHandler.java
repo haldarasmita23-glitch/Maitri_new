@@ -216,6 +216,22 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles user operations where the authenticated user cannot be resolved.
+     *
+     * WHEN TRIGGERED:
+     *   GET/PUT /api/users/me when the JWT subject email has no matching user.
+     *   (Defensive — protects against deleted accounts holding stale tokens.)
+     *
+     * HTTP Status: 404 Not Found
+     */
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUserNotFound(UserNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    /**
      * Handles a VENDOR account trying to create a second vendor profile.
      *
      * WHEN TRIGGERED:

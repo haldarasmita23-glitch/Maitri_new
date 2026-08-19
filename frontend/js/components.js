@@ -171,7 +171,10 @@ const Navbar = {
       authAreas.forEach(area => {
         if (area.dataset.guestMarkup) area.innerHTML = area.dataset.guestMarkup;
       });
-      mobileMenus.forEach(menu => menu.querySelector('[data-auth-logout]')?.remove());
+      mobileMenus.forEach(menu => {
+        menu.querySelector('[data-auth-logout]')?.remove();
+        menu.querySelector('[data-auth-profile]')?.remove();
+      });
       return;
     }
 
@@ -180,25 +183,39 @@ const Navbar = {
       const greeting = document.createElement('span');
       greeting.style.cssText = 'font-size: var(--font-size-sm); color: var(--color-text-muted);';
       greeting.textContent = `Hi, ${user.name || user.email}`;
+      const profile = document.createElement('a');
+      profile.href = this.profileHref();
+      profile.className = 'btn btn--ghost btn--sm';
+      profile.textContent = '👤 My Profile';
       const logout = document.createElement('button');
       logout.type = 'button';
       logout.className = 'btn btn--outline btn--sm';
       logout.textContent = 'Log Out';
       logout.addEventListener('click', () => this.logout());
-      area.append(greeting, logout);
+      area.append(greeting, profile, logout);
     });
 
     mobileMenus.forEach(menu => {
       const existing = menu.querySelector('[data-auth-logout]');
       if (existing) return;
+      const profile = document.createElement('a');
+      profile.href = this.profileHref();
+      profile.className = 'btn btn--outline btn--full';
+      profile.dataset.authProfile = 'true';
+      profile.textContent = '👤 My Profile';
       const logout = document.createElement('button');
       logout.type = 'button';
       logout.className = 'btn btn--outline btn--full';
       logout.dataset.authLogout = 'true';
       logout.textContent = 'Log Out';
       logout.addEventListener('click', () => this.logout());
-      menu.appendChild(logout);
+      menu.append(profile, logout);
     });
+  },
+
+  /** Relative href to the user profile page, valid from both /pages/ and the root. */
+  profileHref() {
+    return window.location.pathname.includes('/pages/') ? 'user-profile.html' : 'pages/user-profile.html';
   },
 
   async restoreSession() {

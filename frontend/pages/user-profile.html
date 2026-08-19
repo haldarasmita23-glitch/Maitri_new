@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="View and edit your Maitri profile — name, phone, language preference, locality and profile photo.">
+  <title>My Profile — Maitri</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/pages/user-profile.css">
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- Navbar -->
+  <nav class="navbar" id="main-navbar" role="navigation" aria-label="Main navigation">
+    <div class="container">
+      <div class="navbar__inner">
+        <a href="../index.html" class="navbar__logo" aria-label="Maitri Home">
+          <div class="navbar__logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 22 22" fill="none"><path d="M11 6l1.5 3.5H16l-2.75 2 1 3.5L11 13l-3.25 2 1-3.5L6 9.5h3.5L11 6z" fill="white"/></svg>
+          </div>
+          <span class="navbar__logo-text">Maitr<span>i</span></span>
+        </a>
+        <nav class="navbar__nav" aria-label="Site links">
+          <a href="../index.html" class="navbar__link">Home</a>
+          <a href="vendors.html" class="navbar__link">Browse Vendors</a>
+          <a href="about.html" class="navbar__link">About</a>
+        </nav>
+        <div class="navbar__auth">
+          <a href="login.html" class="btn btn--ghost btn--sm">Log In</a>
+          <a href="register.html" class="btn btn--primary btn--sm">Sign Up</a>
+        </div>
+        <button class="navbar__hamburger" id="navbar-hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navbar-mobile">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="navbar__mobile" id="navbar-mobile" role="navigation" aria-label="Mobile navigation">
+    <a href="../index.html" class="navbar__mobile-link">🏠 Home</a>
+    <a href="vendors.html" class="navbar__mobile-link">🏪 Browse Vendors</a>
+    <a href="about.html" class="navbar__mobile-link">ℹ️ About</a>
+    <div class="navbar__mobile-divider"></div>
+    <div class="navbar__mobile-auth">
+      <a href="login.html" class="btn btn--outline btn--full">Log In</a>
+      <a href="register.html" class="btn btn--primary btn--full">Sign Up Free</a>
+    </div>
+  </div>
+
+  <!-- Page Hero -->
+  <header class="page-hero">
+    <div class="container">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="../index.html">Home</a>
+        <span class="breadcrumb__sep" aria-hidden="true">›</span>
+        <span class="breadcrumb__current">My Profile</span>
+      </nav>
+      <h1>My Profile</h1>
+      <p>View and update your Maitri account details</p>
+    </div>
+  </header>
+
+  <main class="page-main" id="main-content">
+
+    <!-- Not logged in -->
+    <section id="profile-login-required" class="profile-section hidden">
+      <div class="container">
+        <div class="profile-card profile-card--empty">
+          <div class="alert alert--info" role="status">
+            <span class="alert__icon" aria-hidden="true">🔐</span>
+            <div class="alert__text">
+              <div class="alert__title">Log in to view your profile</div>
+              Please <a href="login.html">log in</a> to view and edit your Maitri profile.
+            </div>
+          </div>
+          <div class="profile-card__empty-actions">
+            <a href="login.html" class="btn btn--primary">Log In</a>
+            <a href="register.html" class="btn btn--outline">Create an Account</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Profile -->
+    <section id="profile-content" class="profile-section hidden">
+      <div class="container">
+        <div class="profile-layout">
+
+          <!-- Summary card -->
+          <aside class="profile-card profile-summary" aria-label="Profile summary">
+            <div class="profile-summary__avatar">
+              <img id="profile-avatar-img" class="profile-summary__avatar-img hidden" alt="Profile photo" referrerpolicy="no-referrer">
+              <div id="profile-avatar-fallback" class="profile-summary__avatar-fallback" aria-hidden="true">👤</div>
+            </div>
+            <h2 class="profile-summary__name" id="profile-summary-name">—</h2>
+            <p class="profile-summary__email" id="profile-summary-email">—</p>
+            <div class="profile-summary__meta">
+              <span class="badge" id="profile-summary-role">Member</span>
+              <span class="profile-summary__lang" id="profile-summary-lang" title="Preferred language">🌐 English</span>
+            </div>
+            <dl class="profile-summary__details">
+              <div>
+                <dt>Phone</dt>
+                <dd id="profile-summary-phone">Not set</dd>
+              </div>
+              <div>
+                <dt>Area</dt>
+                <dd id="profile-summary-area">Not set</dd>
+              </div>
+              <div>
+                <dt>City</dt>
+                <dd id="profile-summary-city">Not set</dd>
+              </div>
+            </dl>
+            <p class="profile-summary__joined" id="profile-summary-joined"></p>
+          </aside>
+
+          <!-- Edit form -->
+          <div class="profile-card profile-edit">
+            <div class="profile-edit__header">
+              <h2>Edit Profile</h2>
+              <p>Fields marked with <span class="required" aria-label="required">*</span> are required.</p>
+            </div>
+
+            <form id="profile-form" novalidate aria-label="Edit profile form">
+              <div class="form-group">
+                <label class="form-label" for="pf-name">Full Name <span class="required" aria-label="required">*</span></label>
+                <div class="input-icon-wrapper">
+                  <span class="input-icon" aria-hidden="true">👤</span>
+                  <input type="text" id="pf-name" name="name" class="form-control"
+                         placeholder="e.g. Kavitha Sharma" autocomplete="name" required
+                         aria-required="true">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="pf-email">Email Address</label>
+                <div class="input-icon-wrapper">
+                  <span class="input-icon" aria-hidden="true">✉️</span>
+                  <input type="email" id="pf-email" name="email" class="form-control" disabled
+                         placeholder="you@example.com" aria-describedby="pf-email-hint">
+                </div>
+                <span class="form-hint" id="pf-email-hint">Your email is your login and cannot be changed.</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="pf-phone">Phone Number</label>
+                <div class="input-icon-wrapper">
+                  <span class="input-icon" aria-hidden="true">📞</span>
+                  <input type="tel" id="pf-phone" name="phone" class="form-control"
+                         placeholder="10-digit mobile number" autocomplete="tel"
+                         inputmode="numeric" maxlength="10" aria-describedby="pf-phone-hint">
+                </div>
+                <span class="form-hint" id="pf-phone-hint">Optional. We only use this to contact you about your account.</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="pf-language">Preferred Language</label>
+                <select id="pf-language" name="preferredLanguage" class="form-control" aria-describedby="pf-language-hint">
+                  <option value="en">English</option>
+                  <option value="hi">हिन्दी (Hindi)</option>
+                  <option value="kn">ಕನ್ನಡ (Kannada)</option>
+                </select>
+                <span class="form-hint" id="pf-language-hint">We'll use this language for future communications.</span>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="pf-area">Area</label>
+                  <select id="pf-area" name="area" class="form-control">
+                    <option value="">Select your area</option>
+                    <option value="Peenya">Peenya</option>
+                    <option value="Peenya 1st Stage">Peenya 1st Stage</option>
+                    <option value="Peenya 2nd Stage">Peenya 2nd Stage</option>
+                    <option value="Peenya Industrial Area">Peenya Industrial Area</option>
+                    <option value="Nagasandra">Nagasandra</option>
+                    <option value="Nagasandra Main Road">Nagasandra Main Road</option>
+                    <option value="Jalahalli">Jalahalli</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="pf-city">City</label>
+                  <input type="text" id="pf-city" name="city" class="form-control"
+                         placeholder="e.g. Bengaluru" autocomplete="address-level2">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="pf-photo">Profile Photo URL</label>
+                <div class="input-icon-wrapper">
+                  <span class="input-icon" aria-hidden="true">🖼️</span>
+                  <input type="url" id="pf-photo" name="profilePhoto" class="form-control"
+                         placeholder="https://example.com/photo.jpg" aria-describedby="pf-photo-hint">
+                </div>
+                <span class="form-hint" id="pf-photo-hint">Optional. Paste a link to a square photo (e.g. from Google Photos).</span>
+              </div>
+
+              <div class="profile-edit__actions">
+                <button type="submit" class="btn btn--primary btn--lg">
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer__bottom" style="border-top: none; padding-top: 0;">
+        <span class="footer__copyright">© 2026 Maitri. Made with ❤️ for Peenya &amp; Nagasandra.</span>
+        <div class="footer__backend-status" aria-live="polite">
+          <span class="status-dot status-dot--amber js-health-dot" aria-hidden="true"></span>
+          <span class="js-health-text">Checking backend…</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/mock-data.js"></script>
+<script src="../js/components.js"></script>
+<script src="../js/auth.js"></script>
+<script src="../js/user-profile.js"></script>
+</body>
+</html>

@@ -220,6 +220,10 @@ public class AuthService {
                 .email(user.getEmail())
                 .role(user.getRole())
                 .active(user.isActive())
+                .phone(user.getPhone())
+                .preferredLanguage(user.getPreferredLanguage() != null ? user.getPreferredLanguage() : "en")
+                .location(user.getLocation())
+                .profilePhoto(user.getProfilePhoto())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

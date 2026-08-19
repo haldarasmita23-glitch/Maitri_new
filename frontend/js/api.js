@@ -112,6 +112,18 @@ const API = {
     return this.request(`/vendors/${encodeURIComponent(id)}/reject`, { method: 'PATCH', auth: true });
   },
 
+  // ── User Profile (Phase 6) ─────────────────────────────────────
+
+  /** Authenticated USER/ADMIN fetches their own editable profile. */
+  getUserProfile() {
+    return this.request('/users/me', { auth: true });
+  },
+
+  /** Authenticated USER/ADMIN updates their own editable profile. */
+  updateUserProfile(payload) {
+    return this.request('/users/me', { method: 'PUT', body: payload, auth: true });
+  },
+
   /**
    * Check if the backend is reachable.
    * @returns {Promise<{ok: boolean, data?: object, error?: string}>}

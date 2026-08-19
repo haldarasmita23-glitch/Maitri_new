@@ -1,0 +1,206 @@
+/* ─────────────────────────────────────────────────────────────────
+   Maitri — My Profile page styles (Phase 6)
+   ───────────────────────────────────────────────────────────────── */
+
+.profile-section {
+  padding: var(--space-8) 0 var(--space-12);
+}
+
+/* ── Layout ───────────────────────────────────────────────────── */
+
+.profile-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+/* ── Cards ────────────────────────────────────────────────────── */
+
+.profile-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-8);
+}
+
+.profile-card--empty {
+  max-width: 520px;
+  margin: 0 auto;
+  text-align: center;
+  padding: var(--space-12) var(--space-8);
+}
+
+.profile-card--empty .alert {
+  text-align: left;
+  margin-bottom: var(--space-6);
+}
+
+.profile-card__empty-actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ── Summary card ─────────────────────────────────────────────── */
+
+.profile-summary {
+  position: sticky;
+  top: calc(var(--navbar-height) + var(--space-4));
+  text-align: center;
+}
+
+.profile-summary__avatar {
+  width: 96px;
+  height: 96px;
+  margin: 0 auto var(--space-4);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background: var(--color-primary-50);
+  border: 3px solid var(--color-primary-100);
+}
+
+.profile-summary__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.profile-summary__avatar-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: var(--color-primary);
+}
+
+.profile-summary__name {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1);
+  word-break: break-word;
+}
+
+.profile-summary__email {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-4);
+  word-break: break-word;
+}
+
+.profile-summary__meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  flex-wrap: wrap;
+}
+
+.profile-summary__lang {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-light);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+}
+
+.profile-summary__details {
+  margin: 0 0 var(--space-4);
+  text-align: left;
+}
+
+.profile-summary__details > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.profile-summary__details > div:last-child {
+  border-bottom: none;
+}
+
+.profile-summary__details dt {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.profile-summary__details dd {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  text-align: right;
+  word-break: break-word;
+}
+
+.profile-summary__joined {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* ── Edit form ────────────────────────────────────────────────── */
+
+.profile-edit__header {
+  margin-bottom: var(--space-6);
+}
+
+.profile-edit__header h2 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.profile-edit__header p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.profile-edit__actions {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border-light);
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+
+@media (max-width: 860px) {
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-summary {
+    position: static;
+  }
+
+  .profile-summary__avatar {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+@media (max-width: 560px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-section {
+    padding: var(--space-6) 0 var(--space-8);
+  }
+}

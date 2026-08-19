@@ -119,6 +119,29 @@ public class User {
     private boolean active = true;
 
     /**
+     * Business/contact phone number (Phase 6). Optional.
+     */
+    private String phone;
+
+    /**
+     * User's preferred app language code (Phase 6).
+     * Defaults to "en" per the documented schema. Users can change it
+     * from their profile page.
+     */
+    @Builder.Default
+    private String preferredLanguage = "en";
+
+    /**
+     * User's locality — { area, city } (Phase 6). Optional.
+     */
+    private UserLocation location;
+
+    /**
+     * Profile photo URL (Phase 6). Optional.
+     */
+    private String profilePhoto;
+
+    /**
      * Timestamp of when this account was created.
      * Set once during registration. Never changed after that.
      */
