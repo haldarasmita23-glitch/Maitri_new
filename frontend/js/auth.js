@@ -1,9 +1,48 @@
 /**
  * Maitri — Auth Pages JavaScript
  *
- * Phase 2: Client-side form validation and UI feedback only.
- * No actual API calls — Phase 3 will wire these up.
+ * Phase 3B: Client-side validation, authentication API calls, and session state.
  */
+
+const AuthSession = {
+  token() {
+    return localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+  },
+
+  save(authData) {
+    localStorage.setItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN, authData.token);
+    localStorage.setItem(CONFIG.STORAGE_KEYS.USER_DATA, JSON.stringify(authData.user));
+    window.dispatchEvent(new CustomEvent('maitri:auth-change', { detail: authData.user }));
+  },
+
+  clear() {
+    localStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+    localStorage.removeItem(CONFIG.STORAGE_KEYS.USER_DATA);
+    window.dispatchEvent(new CustomEvent('maitri:auth-change', { detail: null }));
+  },
+
+  async restore() {
+    if (!this.token()) return null;
+
+    try {
+      const result = await API.getCurrentUser();
+      if (result.ok && result.data?.success && result.data.data) {
+        localStorage.setItem(CONFIG.STORAGE_KEYS.USER_DATA, JSON.stringify(result.data.data));
+        window.dispatchEvent(new CustomEvent('maitri:auth-change', { detail: result.data.data }));
+        return result.data.data;
+      }
+      if (result.status === 401) this.clear();
+    } catch {
+      // Keep the local session during a temporary network outage.
+    }
+    return null;
+  },
+
+  logout() {
+    this.clear();
+    window.location.href = '../index.html';
+  },
+};
 
 document.addEventListener('DOMContentLoaded', () => {
   initPasswordToggles();
@@ -55,15 +94,22 @@ function initLoginForm() {
     }
     if (!valid) return;
 
-    // Phase 2: show "coming soon" notice
     const btn = form.querySelector('button[type="submit"]');
     setLoading(btn, true);
+    try {
+      const result = await API.login({ email, password });
+      if (!result.ok || !result.data?.success) {
+        Toast.error('Login failed', apiErrorMessage(result, 'Invalid email or password.'));
+        return;
+      }
 
-    await delay(800); // simulate network
-
-    setLoading(btn, false);
-    Toast.info('Authentication coming soon!',
-      'Login will be available in Phase 3. For now, browse vendors without logging in.');
+      AuthSession.save(result.data.data);
+      window.location.href = '../index.html';
+    } catch {
+      Toast.error('Unable to log in', 'Please check your connection and try again.');
+    } finally {
+      setLoading(btn, false);
+    }
   });
 }
 
@@ -80,7 +126,6 @@ function initRegisterForm() {
 
     const name     = form.querySelector('#reg-name')?.value.trim();
     const email    = form.querySelector('#reg-email')?.value.trim();
-    const phone    = form.querySelector('#reg-phone')?.value.trim();
     const password = form.querySelector('#reg-password')?.value;
     const confirm  = form.querySelector('#reg-confirm')?.value;
     const agree    = form.querySelector('#reg-agree')?.checked;
@@ -93,10 +138,6 @@ function initRegisterForm() {
     }
     if (!email || !isValidEmail(email)) {
       showFieldError('reg-email', 'Please enter a valid email address.');
-      valid = false;
-    }
-    if (phone && !isValidPhone(phone)) {
-      showFieldError('reg-phone', 'Enter a valid 10-digit mobile number.');
       valid = false;
     }
     if (!password || password.length < 8) {
@@ -115,11 +156,20 @@ function initRegisterForm() {
 
     const btn = form.querySelector('button[type="submit"]');
     setLoading(btn, true);
-    await delay(1000);
-    setLoading(btn, false);
+    try {
+      const result = await API.register({ name, email, password, role: 'USER' });
+      if (!result.ok || !result.data?.success) {
+        Toast.error('Registration failed', apiErrorMessage(result, 'Please review your details and try again.'));
+        return;
+      }
 
-    Toast.info('Registration coming soon!',
-      'User accounts will be available in Phase 3.');
+      AuthSession.save(result.data.data);
+      window.location.href = '../index.html';
+    } catch {
+      Toast.error('Unable to create account', 'Please check your connection and try again.');
+    } finally {
+      setLoading(btn, false);
+    }
   });
 }
 
@@ -170,13 +220,8 @@ function initVendorRegisterForm() {
     e.preventDefault();
     if (!validateStep(form, currentStep)) return;
 
-    const btn = form.querySelector('button[type="submit"]');
-    setLoading(btn, true);
-    await delay(1200);
-    setLoading(btn, false);
-
-    Toast.info('Vendor registration coming soon!',
-      'Vendors will be able to register in Phase 3. Your details have been noted.');
+    Toast.info('Vendor applications are not available yet.',
+      'Your business details were not sent or saved. This workflow will be connected in the Vendor Module.');
   });
 }
 
@@ -215,9 +260,12 @@ function initRoleTabs() {
 
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
+      tabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
       tab.classList.add('active');
-      // Role-specific behaviour can be added in Phase 3
+      tab.setAttribute('aria-selected', 'true');
     });
   });
 }
@@ -229,8 +277,12 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-function isValidPhone(phone) {
-  return /^[6-9]\d{9}$/.test(phone.replace(/\s+/g, ''));
+function apiErrorMessage(result, fallback) {
+  const response = result?.data;
+  if (Array.isArray(response?.errors) && response.errors.length) {
+    return response.errors.join(' ');
+  }
+  return response?.message || fallback;
 }
 
 function showFieldError(fieldId, message) {
@@ -266,8 +318,4 @@ function setLoading(btn, loading) {
   btn.disabled = loading;
   btn.classList.toggle('btn--loading', loading);
   if (!loading) btn.disabled = false;
-}
-
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }

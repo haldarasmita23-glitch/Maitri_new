@@ -254,15 +254,15 @@
 
         <div class="auth-form-header">
           <h1>List Your Business</h1>
-          <p>Fill in your details and we'll get you live in 24–48 hours</p>
+          <p>Business-profile submissions will be connected in a later module.</p>
         </div>
 
-        <!-- Phase 2 info banner -->
+        <!-- Vendor module status -->
         <div class="alert alert--info mb-4" role="note">
           <span class="alert__icon">ℹ️</span>
           <div class="alert__text">
-            <strong>Phase 2 — Static UI</strong><br>
-            Vendor registration will be connected to the backend in Phase 3. Your details are not saved yet.
+            <strong>Vendor applications are not available yet.</strong><br>
+            This business-registration form is not connected to the backend. Details entered here are not sent or saved.
           </div>
         </div>
 
@@ -490,18 +490,18 @@
 
           </form>
 
-          <!-- ── Success State (shown after submit) ──────── -->
+          <!-- ── Future success state (not shown until Vendor Module) ──────── -->
           <div class="vendor-success" id="vendor-success">
             <div class="vendor-success__icon">🎉</div>
-            <h2 style="color: var(--color-primary-dark); margin-bottom: var(--space-4);">Application Received!</h2>
+            <h2 style="color: var(--color-primary-dark); margin-bottom: var(--space-4);">Vendor Module Coming Soon</h2>
             <p style="font-size: var(--font-size-lg); color: var(--color-text-secondary); margin-bottom: var(--space-6);">
-              Thank you for listing your business on Maitri. Our team will review your details and get you live within <strong>24–48 hours</strong>.
+              Business applications are not being accepted yet. Details entered in this form are not sent or saved.
             </p>
             <div class="alert alert--info" role="note" style="text-align: left;">
               <span class="alert__icon">ℹ️</span>
               <div class="alert__text">
-                <strong>Phase 2 — Static UI</strong><br>
-                In the live version, you'll receive a confirmation email and be able to manage your listing from your vendor dashboard.
+                <strong>Vendor Module pending</strong><br>
+                Business applications and vendor dashboards will be added in a later module.
               </div>
             </div>
             <div class="flex gap-4 mt-8" style="justify-content: center; flex-wrap: wrap;">
@@ -540,22 +540,6 @@
     });
   });
 
-  // ── Override submit to show success panel ───────────────
-  document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('vendor-register-form');
-    const success = document.getElementById('vendor-success');
-    if (!form || !success) return;
-
-    // Wrap the original submit so after auth.js fires,
-    // we also toggle the success panel on completion
-    form.addEventListener('submit', () => {
-      // auth.js will show the toast; we show success UI after a short delay
-      setTimeout(() => {
-        form.style.display = 'none';
-        success.style.display = 'block';
-      }, 1400); // matches auth.js delay(1200) + buffer
-    });
-  });
 </script>
 </body>
 </html>

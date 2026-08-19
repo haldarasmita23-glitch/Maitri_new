@@ -1,23 +1,42 @@
 /**
  * Maitri — API Client
  *
- * Thin fetch() wrapper. Phase 2 uses this only to call /api/health.
- * In Phase 3+ all auth/vendor/review endpoints will be called through here.
+ * Thin fetch() wrapper. Auth endpoints return HTTP status alongside the
+ * standard API response so forms can display backend validation messages.
  */
 
 const API = {
+  async request(path, { method = 'GET', body, auth = false } = {}) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (auth) {
+      const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+      if (token) headers.Authorization = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${CONFIG.API_BASE_URL}${path}`, {
+      method,
+      headers,
+      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+    });
+
+    let data = null;
+    try {
+      data = await response.json();
+    } catch {
+      data = { success: false, message: 'The server returned an invalid response.' };
+    }
+
+    return { ok: response.ok, status: response.status, data };
+  },
+
   /**
    * Generic GET request.
    * @param {string} path - e.g. '/health'
    * @returns {Promise<object>} Parsed ApiResponse JSON
    */
-  async get(path) {
-    const url = `${CONFIG.API_BASE_URL}${path}`;
-    const res = await fetch(url, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
-    return res.json();
+  async get(path, auth = false) {
+    const result = await this.request(path, { auth });
+    return result.data;
   },
 
   /**
@@ -28,18 +47,20 @@ const API = {
    * @returns {Promise<object>}
    */
   async post(path, body, auth = false) {
-    const url = `${CONFIG.API_BASE_URL}${path}`;
-    const headers = { 'Content-Type': 'application/json' };
-    if (auth) {
-      const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-    }
-    const res = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body),
-    });
-    return res.json();
+    const result = await this.request(path, { method: 'POST', body, auth });
+    return result.data;
+  },
+
+  login(credentials) {
+    return this.request('/auth/login', { method: 'POST', body: credentials });
+  },
+
+  register(account) {
+    return this.request('/auth/register', { method: 'POST', body: account });
+  },
+
+  getCurrentUser() {
+    return this.request('/auth/me', { auth: true });
   },
 
   /**

@@ -144,6 +144,97 @@ const Navbar = {
 
     // Active link highlighting
     this.highlightActiveLink();
+    this.cacheGuestState();
+    this.renderAuthState();
+    window.addEventListener('maitri:auth-change', event => this.renderAuthState(event.detail));
+    this.restoreSession();
+  },
+
+  cacheGuestState() {
+    document.querySelectorAll('.navbar__auth').forEach(area => {
+      area.dataset.guestMarkup = area.innerHTML;
+    });
+  },
+
+  storedUser() {
+    try {
+      return JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA));
+    } catch {
+      return null;
+    }
+  },
+
+  renderAuthState(user = this.storedUser()) {
+    const authAreas = document.querySelectorAll('.navbar__auth');
+    const mobileMenus = document.querySelectorAll('#navbar-mobile');
+    if (!user) {
+      authAreas.forEach(area => {
+        if (area.dataset.guestMarkup) area.innerHTML = area.dataset.guestMarkup;
+      });
+      mobileMenus.forEach(menu => menu.querySelector('[data-auth-logout]')?.remove());
+      return;
+    }
+
+    authAreas.forEach(area => {
+      area.textContent = '';
+      const greeting = document.createElement('span');
+      greeting.style.cssText = 'font-size: var(--font-size-sm); color: var(--color-text-muted);';
+      greeting.textContent = `Hi, ${user.name || user.email}`;
+      const logout = document.createElement('button');
+      logout.type = 'button';
+      logout.className = 'btn btn--outline btn--sm';
+      logout.textContent = 'Log Out';
+      logout.addEventListener('click', () => this.logout());
+      area.append(greeting, logout);
+    });
+
+    mobileMenus.forEach(menu => {
+      const existing = menu.querySelector('[data-auth-logout]');
+      if (existing) return;
+      const logout = document.createElement('button');
+      logout.type = 'button';
+      logout.className = 'btn btn--outline btn--full';
+      logout.dataset.authLogout = 'true';
+      logout.textContent = 'Log Out';
+      logout.addEventListener('click', () => this.logout());
+      menu.appendChild(logout);
+    });
+  },
+
+  async restoreSession() {
+    if (typeof AuthSession !== 'undefined') {
+      await AuthSession.restore();
+      return;
+    }
+
+    const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+    if (!token) return;
+
+    try {
+      const result = await API.getCurrentUser();
+      if (result.ok && result.data?.success && result.data.data) {
+        localStorage.setItem(CONFIG.STORAGE_KEYS.USER_DATA, JSON.stringify(result.data.data));
+        window.dispatchEvent(new CustomEvent('maitri:auth-change', { detail: result.data.data }));
+      } else if (result.status === 401) {
+        localStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+        localStorage.removeItem(CONFIG.STORAGE_KEYS.USER_DATA);
+        window.dispatchEvent(new CustomEvent('maitri:auth-change', { detail: null }));
+      }
+    } catch {
+      // Keep the local session during a temporary network outage.
+    }
+  },
+
+  logout() {
+    if (typeof AuthSession !== 'undefined') {
+      AuthSession.logout();
+      return;
+    }
+
+    localStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+    localStorage.removeItem(CONFIG.STORAGE_KEYS.USER_DATA);
+    window.dispatchEvent(new CustomEvent('maitri:auth-change', { detail: null }));
+    window.location.href = window.location.pathname.includes('/pages/') ? '../index.html' : 'index.html';
   },
 
   highlightActiveLink() {

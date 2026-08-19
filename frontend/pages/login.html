@@ -92,7 +92,7 @@
         </div>
 
         <!-- Role tabs -->
-        <div class="auth-role-tabs" role="tablist" aria-label="Login as">
+        <div class="auth-role-tabs" role="tablist" aria-label="Account type (your role is confirmed after login)">
           <button class="auth-role-tab active" role="tab" aria-selected="true" id="tab-user">👤 User</button>
           <button class="auth-role-tab" role="tab" aria-selected="false" id="tab-vendor">🏪 Vendor</button>
           <button class="auth-role-tab" role="tab" aria-selected="false" id="tab-admin">🛡️ Admin</button>
@@ -102,8 +102,7 @@
           <div class="alert alert--info mb-4" role="note">
             <span class="alert__icon">ℹ️</span>
             <div class="alert__text">
-              <strong>Phase 2 — Static UI</strong><br>
-              Authentication arrives in Phase 3. Form validation is active.
+              Your account role is confirmed securely after you log in.
             </div>
           </div>
 
@@ -131,13 +130,6 @@
                        aria-required="true">
                 <button type="button" class="btn-toggle-password" aria-label="Show password">👁️</button>
               </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-check">
-                <input type="checkbox" name="rememberMe">
-                <span class="form-check__label">Keep me logged in for 30 days</span>
-              </label>
             </div>
 
             <button type="submit" class="btn btn--primary btn--full btn--lg">
