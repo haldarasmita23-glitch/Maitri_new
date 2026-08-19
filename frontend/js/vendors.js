@@ -37,9 +37,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-function buildCategoryFilters() {
+async function buildCategoryFilters() {
   const bar = document.getElementById('category-filter-bar');
   if (!bar) return;
+
+  const categories = await Categories.load();
 
   const allChip = `
     <button class="filter-chip ${!currentCategory ? 'active' : ''}"
@@ -49,11 +51,11 @@ function buildCategoryFilters() {
     </button>
   `;
 
-  const chips = MOCK_CATEGORIES.map(cat => `
+  const chips = categories.map(cat => `
     <button class="filter-chip ${currentCategory === cat.id ? 'active' : ''}"
             data-cat="${cat.id}"
             onclick="selectCategory('${cat.id}', this)">
-      ${cat.icon} ${cat.name}
+      ${cat.icon} ${escapeHtml(cat.name)}
     </button>
   `).join('');
 

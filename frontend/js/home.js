@@ -21,16 +21,17 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-function renderCategoryCards() {
+async function renderCategoryCards() {
   const grid = document.getElementById('category-grid');
   if (!grid) return;
 
-  grid.innerHTML = MOCK_CATEGORIES.map(cat => `
-    <a href="vendors.html?category=${cat.id}"
+  const categories = await Categories.load();
+  grid.innerHTML = categories.map(cat => `
+    <a href="vendors.html?category=${encodeURIComponent(cat.id)}"
        class="category-card animate-on-scroll"
-       aria-label="Browse ${cat.name} vendors">
+       aria-label="Browse ${escapeHtml(cat.name)} vendors">
       <div class="category-card__icon" aria-hidden="true">${cat.icon}</div>
-      <span class="category-card__name">${cat.name}</span>
+      <span class="category-card__name">${escapeHtml(cat.name)}</span>
       <span class="category-card__count">${cat.vendorCount} vendors</span>
     </a>
   `).join('');

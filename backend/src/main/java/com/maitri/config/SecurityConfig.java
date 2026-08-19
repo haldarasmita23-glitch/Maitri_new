@@ -113,6 +113,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        // Phase 4: category browsing is public; create/update/disable stay ADMIN-only
+                        .requestMatchers(HttpMethod.GET, "/api/categories").permitAll()
 
                         // All other requests require authentication (valid JWT)
                         .anyRequest().authenticated()

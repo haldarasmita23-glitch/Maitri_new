@@ -166,6 +166,38 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles category operations that reference a category which does not exist.
+     *
+     * WHEN TRIGGERED:
+     *   PUT /api/categories/{id} or PATCH /api/categories/{id}/disable with an unknown id.
+     *
+     * HTTP Status: 404 Not Found
+     */
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleCategoryNotFound(CategoryNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Handles attempts to create/update a category with a name or slug already in use.
+     *
+     * WHEN TRIGGERED:
+     *   POST /api/categories with a duplicate name/slug, or
+     *   PUT /api/categories/{id} whose new name/slug belongs to another category.
+     *
+     * HTTP Status: 409 Conflict
+     */
+    @ExceptionHandler(DuplicateCategoryNameException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDuplicateCategoryName(
+            DuplicateCategoryNameException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    /**
      * Handles authentication failures (unauthenticated access to protected endpoints).
      *
      * WHEN TRIGGERED:
