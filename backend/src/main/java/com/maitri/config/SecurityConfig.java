@@ -116,6 +116,14 @@ public class SecurityConfig {
                         // Phase 4: category browsing is public; create/update/disable stay ADMIN-only
                         .requestMatchers(HttpMethod.GET, "/api/categories").permitAll()
 
+                        // ── Phase 5: Vendor browsing is public ──────────────
+                        // NOTE: order matters (first match wins). "/api/vendors/me"
+                        // must be declared BEFORE the wildcard "/api/vendors/*",
+                        // otherwise it would be exposed publicly.
+                        .requestMatchers(HttpMethod.GET, "/api/vendors/me").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/vendors").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/vendors/*").permitAll()
+
                         // All other requests require authentication (valid JWT)
                         .anyRequest().authenticated()
                 )

@@ -26,24 +26,26 @@ async function renderCategoryCards() {
   if (!grid) return;
 
   const categories = await Categories.load();
+  const counts = await Vendors.countByCategory();
+
   grid.innerHTML = categories.map(cat => `
     <a href="vendors.html?category=${encodeURIComponent(cat.id)}"
        class="category-card animate-on-scroll"
        aria-label="Browse ${escapeHtml(cat.name)} vendors">
       <div class="category-card__icon" aria-hidden="true">${cat.icon}</div>
       <span class="category-card__name">${escapeHtml(cat.name)}</span>
-      <span class="category-card__count">${cat.vendorCount} vendors</span>
+      <span class="category-card__count">${counts[cat.id] ?? cat.vendorCount} vendors</span>
     </a>
   `).join('');
 }
 
 
-function renderFeaturedVendors() {
+async function renderFeaturedVendors() {
   const grid = document.getElementById('featured-vendors-grid');
   if (!grid) return;
 
-  // Pick top-rated vendors (3 highest rated)
-  const featured = [...MOCK_VENDORS]
+  // Pick top-rated vendors (3 highest rated) from the live vendor list
+  const featured = (await Vendors.load())
     .sort((a, b) => b.averageRating - a.averageRating)
     .slice(0, 3);
 
@@ -110,14 +112,15 @@ function buildVendorCard(v) {
 }
 
 
-function toggleFav(btn, vendorId) {
+async function toggleFav(btn, vendorId) {
   const added = Favourites.toggle(vendorId);
   btn.innerHTML = added ? '❤️' : '🤍';
   btn.classList.toggle('active', added);
   btn.setAttribute('aria-label', added ? 'Remove from favourites' : 'Add to favourites');
+  const vendors = await Vendors.load();
   Toast[added ? 'success' : 'info'](
     added ? 'Added to favourites' : 'Removed from favourites',
-    added ? `${MOCK_VENDORS.find(v=>v.id===vendorId)?.shopName} saved!` : ''
+    added ? `${vendors.find(v => v.id === vendorId)?.shopName} saved!` : ''
   );
 }
 

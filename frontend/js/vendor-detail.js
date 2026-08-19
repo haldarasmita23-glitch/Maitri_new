@@ -2,7 +2,7 @@
  * Maitri — Vendor Detail Page JavaScript
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   const vendorId = params.get('id');
 
@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  const vendor = getVendorById(vendorId);
+  const vendor = await Vendors.getById(vendorId);
   if (!vendor) {
     showError('Vendor not found.');
     return;
@@ -50,8 +50,7 @@ function renderVendorDetail(v) {
   // Category badge
   const catEl = document.getElementById('vendor-category-badge');
   if (catEl) {
-    const cat = getCategoryById(v.categoryId);
-    catEl.innerHTML = `<span class="badge badge--primary">${cat?.icon || ''} ${v.categoryName}</span>`;
+    catEl.innerHTML = `<span class="badge badge--primary">${v.emoji} ${v.categoryName}</span>`;
   }
 
   // Rating
@@ -92,6 +91,10 @@ function renderVendorDetail(v) {
   const phoneEl = document.getElementById('vendor-phone');
   if (phoneEl) phoneEl.textContent = v.phone;
 
+  // Call button — wire the tel: href directly so it works for live API data
+  const phoneLink = document.getElementById('sidebar-phone-link');
+  if (phoneLink) phoneLink.href = 'tel:' + v.phone.replace(/ /g, '');
+
   // Tags
   const tagsEl = document.getElementById('vendor-tags');
   if (tagsEl) {
@@ -107,6 +110,12 @@ function renderVendorDetail(v) {
   // Sidebar vendor name
   const sidebarName = document.getElementById('sidebar-vendor-name');
   if (sidebarName) sidebarName.textContent = v.shopName;
+
+  // Sidebar location/hours (set directly — the detail render is now async)
+  const sAddr = document.getElementById('sidebar-address');
+  if (sAddr) sAddr.textContent = v.address;
+  const sHrs = document.getElementById('sidebar-hours');
+  if (sHrs) sHrs.textContent = `${formatTime(v.openingTime)} – ${formatTime(v.closingTime)}`;
 }
 
 

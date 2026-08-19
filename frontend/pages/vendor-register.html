@@ -254,15 +254,15 @@
 
         <div class="auth-form-header">
           <h1>List Your Business</h1>
-          <p>Business-profile submissions will be connected in a later module.</p>
+          <p>Create a free vendor account and submit your business listing in minutes.</p>
         </div>
 
         <!-- Vendor module status -->
         <div class="alert alert--info mb-4" role="note">
           <span class="alert__icon">ℹ️</span>
           <div class="alert__text">
-            <strong>Vendor applications are not available yet.</strong><br>
-            This business-registration form is not connected to the backend. Details entered here are not sent or saved.
+            <strong>Free to list, always.</strong><br>
+            Your account is created instantly and your listing goes to our team for review before it goes live.
           </div>
         </div>
 
@@ -277,7 +277,7 @@
         <div class="auth-steps-labels" aria-hidden="true">
           <span>Business Info</span>
           <span>Location &amp; Hours</span>
-          <span>Contact</span>
+          <span>Contact &amp; Account</span>
         </div>
 
         <!-- ── Multi-Step Form ─────────────────────────────── -->
@@ -422,10 +422,10 @@
             </div><!-- end step 2 -->
 
 
-            <!-- ── STEP 3: Contact ────────────────────────── -->
+            <!-- ── STEP 3: Contact & Account ──────────────── -->
             <div class="vendor-step hidden" id="vendor-step-3">
               <h3 style="font-size: var(--font-size-lg); color: var(--color-primary-dark); margin-bottom: var(--space-5);">
-                Step 3 — Contact Details
+                Step 3 — Contact Details &amp; Account
               </h3>
 
               <!-- Owner Name -->
@@ -469,6 +469,37 @@
                 <span class="form-hint">We'll use this to notify you when your listing is approved.</span>
               </div>
 
+              <!-- Account -->
+              <h4 style="font-size: var(--font-size-md); color: var(--color-primary-dark); margin: var(--space-6) 0 var(--space-4);">
+                Create Your Account
+              </h4>
+
+              <div class="form-group">
+                <label class="form-label" for="vr-password">
+                  Password <span class="required" aria-label="required">*</span>
+                </label>
+                <div class="input-icon-wrapper">
+                  <span class="input-icon" aria-hidden="true">🔒</span>
+                  <input type="password" id="vr-password" name="password" class="form-control"
+                         placeholder="At least 8 characters" minlength="8" required aria-required="true"
+                         autocomplete="new-password">
+                  <button type="button" class="btn-toggle-password" aria-label="Show password">👁️</button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="vr-confirm">
+                  Confirm Password <span class="required" aria-label="required">*</span>
+                </label>
+                <div class="input-icon-wrapper">
+                  <span class="input-icon" aria-hidden="true">🔒</span>
+                  <input type="password" id="vr-confirm" name="confirmPassword" class="form-control"
+                         placeholder="Re-enter your password" required aria-required="true"
+                         autocomplete="new-password">
+                  <button type="button" class="btn-toggle-password" aria-label="Show password">👁️</button>
+                </div>
+              </div>
+
               <!-- Terms -->
               <div class="form-group">
                 <label class="form-check">
@@ -490,18 +521,18 @@
 
           </form>
 
-          <!-- ── Future success state (not shown until Vendor Module) ──────── -->
+          <!-- ── Success state (shown after a successful submission) ──────── -->
           <div class="vendor-success" id="vendor-success">
             <div class="vendor-success__icon">🎉</div>
-            <h2 style="color: var(--color-primary-dark); margin-bottom: var(--space-4);">Vendor Module Coming Soon</h2>
+            <h2 style="color: var(--color-primary-dark); margin-bottom: var(--space-4);">Application Submitted!</h2>
             <p style="font-size: var(--font-size-lg); color: var(--color-text-secondary); margin-bottom: var(--space-6);">
-              Business applications are not being accepted yet. Details entered in this form are not sent or saved.
+              Your business is now in review. We'll notify you by email once it's approved and live on Maitri.
             </p>
             <div class="alert alert--info" role="note" style="text-align: left;">
-              <span class="alert__icon">ℹ️</span>
+              <span class="alert__icon">⏳</span>
               <div class="alert__text">
-                <strong>Vendor Module pending</strong><br>
-                Business applications and vendor dashboards will be added in a later module.
+                <strong>Pending review</strong><br>
+                Most listings are reviewed within 24 hours. You can log in anytime with the account you just created.
               </div>
             </div>
             <div class="flex gap-4 mt-8" style="justify-content: center; flex-wrap: wrap;">

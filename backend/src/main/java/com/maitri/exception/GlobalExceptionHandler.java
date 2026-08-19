@@ -198,6 +198,56 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles vendor operations that reference a vendor which does not exist,
+     * or a vendor that is not publicly visible (PENDING/REJECTED).
+     *
+     * WHEN TRIGGERED:
+     *   GET /api/vendors/{id} with an unknown or non-APPROVED id, or
+     *   GET/PUT /api/vendors/me when the account has no profile yet, or
+     *   PATCH /api/vendors/{id}/approve|reject with an unknown id.
+     *
+     * HTTP Status: 404 Not Found
+     */
+    @ExceptionHandler(VendorNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleVendorNotFound(VendorNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Handles a VENDOR account trying to create a second vendor profile.
+     *
+     * WHEN TRIGGERED:
+     *   POST /api/vendors/apply when the authenticated user already has a profile.
+     *
+     * HTTP Status: 409 Conflict
+     */
+    @ExceptionHandler(DuplicateVendorProfileException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDuplicateVendorProfile(
+            DuplicateVendorProfileException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Handles vendor operations that reference a category that cannot be used.
+     *
+     * WHEN TRIGGERED:
+     *   POST /api/vendors/apply or PUT /api/vendors/me with a DISABLED category.
+     *   (An UNKNOWN category slug throws CategoryNotFoundException → 404 instead.)
+     *
+     * HTTP Status: 400 Bad Request
+     */
+    @ExceptionHandler(InvalidCategoryException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidCategory(InvalidCategoryException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    /**
      * Handles authentication failures (unauthenticated access to protected endpoints).
      *
      * WHEN TRIGGERED:

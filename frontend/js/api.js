@@ -63,6 +63,55 @@ const API = {
     return this.request('/auth/me', { auth: true });
   },
 
+  // ── Vendors (Phase 5) ─────────────────────────────────────────
+
+  /**
+   * Approved vendors, optionally filtered by category slug and search text.
+   * @returns {Promise<object>} Parsed ApiResponse (list lives at .data)
+   */
+  async getVendors({ category, q } = {}) {
+    const params = new URLSearchParams();
+    if (category) params.set('category', category);
+    if (q) params.set('q', q);
+    const query = params.toString();
+    return this.get(`/vendors${query ? `?${query}` : ''}`);
+  },
+
+  /** Single approved vendor detail. @returns {Promise<object>} ApiResponse */
+  async getVendor(id) {
+    return this.get(`/vendors/${encodeURIComponent(id)}`);
+  },
+
+  /** Authenticated VENDOR submits a business listing (→ PENDING). */
+  async applyVendor(payload) {
+    return this.post('/vendors/apply', payload, true);
+  },
+
+  /** Authenticated VENDOR fetches their own listing. */
+  getMyVendor() {
+    return this.request('/vendors/me', { auth: true });
+  },
+
+  /** Authenticated VENDOR updates their own listing. */
+  updateMyVendor(payload) {
+    return this.request('/vendors/me', { method: 'PUT', body: payload, auth: true });
+  },
+
+  /** ADMIN: pending vendor review queue. */
+  getAdminPendingVendors() {
+    return this.request('/vendors/admin/pending', { auth: true });
+  },
+
+  /** ADMIN: approve a vendor. */
+  approveVendor(id) {
+    return this.request(`/vendors/${encodeURIComponent(id)}/approve`, { method: 'PATCH', auth: true });
+  },
+
+  /** ADMIN: reject a vendor. */
+  rejectVendor(id) {
+    return this.request(`/vendors/${encodeURIComponent(id)}/reject`, { method: 'PATCH', auth: true });
+  },
+
   /**
    * Check if the backend is reachable.
    * @returns {Promise<{ok: boolean, data?: object, error?: string}>}

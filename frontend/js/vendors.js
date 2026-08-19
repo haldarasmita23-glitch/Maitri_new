@@ -75,13 +75,15 @@ function selectCategory(categoryId, btn) {
 }
 
 
-function renderVendors() {
+async function renderVendors() {
   const grid = document.getElementById('vendor-grid');
   const countEl = document.getElementById('results-count');
   if (!grid) return;
 
-  // Search + filter
-  let vendors = searchVendors(currentQuery, currentCategory);
+  const all = await Vendors.load();
+
+  // Search + filter (local — the API list is already category/search aware)
+  let vendors = filterVendors(all, currentQuery, currentCategory);
 
   // Sort
   if (currentSort === 'rating') {
@@ -121,6 +123,27 @@ function clearSearch() {
   if (input) input.value = '';
   buildCategoryFilters();
   renderVendors();
+}
+
+
+/** Case-insensitive category + keyword filtering over the loaded vendor list. */
+function filterVendors(vendors, query, categoryId) {
+  let list = vendors;
+  if (categoryId) {
+    list = list.filter(v => v.categoryId === categoryId);
+  }
+
+  const q = query.trim().toLowerCase();
+  if (q) {
+    list = list.filter(v =>
+      (v.shopName || '').toLowerCase().includes(q) ||
+      (v.description || '').toLowerCase().includes(q) ||
+      (v.area || '').toLowerCase().includes(q) ||
+      (v.tags || []).some(t => t.toLowerCase().includes(q))
+    );
+  }
+
+  return list.slice();
 }
 
 
@@ -165,11 +188,12 @@ function buildVendorCard(v) {
 }
 
 
-function toggleFav(btn, vendorId) {
+async function toggleFav(btn, vendorId) {
   const added = Favourites.toggle(vendorId);
   btn.innerHTML = added ? '❤️' : '🤍';
   btn.classList.toggle('active', added);
-  const v = MOCK_VENDORS.find(x => x.id === vendorId);
+  const vendors = await Vendors.load();
+  const v = vendors.find(x => x.id === vendorId);
   Toast[added ? 'success' : 'info'](
     added ? 'Added to favourites' : 'Removed from favourites',
     v ? v.shopName : ''

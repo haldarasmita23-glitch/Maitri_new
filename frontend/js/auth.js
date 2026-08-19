@@ -220,8 +220,69 @@ function initVendorRegisterForm() {
     e.preventDefault();
     if (!validateStep(form, currentStep)) return;
 
-    Toast.info('Vendor applications are not available yet.',
-      'Your business details were not sent or saved. This workflow will be connected in the Vendor Module.');
+    // Password checks (required beyond the generic required-field validation)
+    const password = document.getElementById('vr-password')?.value;
+    const confirm  = document.getElementById('vr-confirm')?.value;
+    let valid = true;
+    if (!password || password.length < 8) {
+      showFieldError('vr-password', 'Password must be at least 8 characters.');
+      valid = false;
+    }
+    if (password !== confirm) {
+      showFieldError('vr-confirm', 'Passwords do not match.');
+      valid = false;
+    }
+    if (!valid) return;
+
+    const category = document.querySelector('input[name="category"]:checked')?.value;
+
+    const payload = {
+      shopName:     document.getElementById('vr-shop-name')?.value.trim(),
+      ownerName:    document.getElementById('vr-owner-name')?.value.trim(),
+      categoryId:   category,
+      description:  document.getElementById('vr-description')?.value.trim(),
+      address:      document.getElementById('vr-address')?.value.trim(),
+      area:         document.getElementById('vr-area')?.value,
+      phone:        document.getElementById('vr-phone')?.value.trim(),
+      openingTime:  document.getElementById('vr-open-time')?.value,
+      closingTime:  document.getElementById('vr-close-time')?.value,
+    };
+
+    const email = document.getElementById('vr-email')?.value.trim();
+
+    const btn = form.querySelector('button[type="submit"]');
+    setLoading(btn, true);
+    try {
+      // 1. Create the VENDOR account (role=VENDOR is allowed via public register)
+      const account = await API.register({
+        name: payload.ownerName,
+        email,
+        password,
+        role: 'VENDOR',
+      });
+      if (!account.ok || !account.data?.success) {
+        Toast.error('Account creation failed', apiErrorMessage(account, 'Please review your details and try again.'));
+        return;
+      }
+      AuthSession.save(account.data.data);
+
+      // 2. Submit the business listing (status → PENDING)
+      const listing = await API.applyVendor(payload);
+      if (!listing.success) {
+        Toast.error('Listing submission failed', listing.message || 'Please try again.');
+        return;
+      }
+
+      // 3. Success — replace the form with the success panel
+      form.style.display = 'none';
+      const success = document.getElementById('vendor-success');
+      if (success) success.style.display = 'block';
+      Toast.success('Application submitted!', 'Your business is now pending review.');
+    } catch {
+      Toast.error('Unable to submit', 'Please check your connection and try again.');
+    } finally {
+      setLoading(btn, false);
+    }
   });
 }
 
