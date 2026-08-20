@@ -310,6 +310,39 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles duplicate review submission attempts (Phase 7).
+     *
+     * WHEN TRIGGERED:
+     *   POST /api/reviews when the user has already reviewed that vendor.
+     *   Business rule: one review per user per vendor.
+     *
+     * HTTP Status: 409 Conflict
+     */
+    @ExceptionHandler(DuplicateReviewException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDuplicateReview(DuplicateReviewException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Handles review operations that reference a review which does not exist
+     * or the user doesn't have permission to access (Phase 7).
+     *
+     * WHEN TRIGGERED:
+     *   PUT/DELETE /api/reviews/{id} with an invalid review ID or
+     *   user tries to modify a review that doesn't belong to them.
+     *
+     * HTTP Status: 404 Not Found
+     */
+    @ExceptionHandler(ReviewNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleReviewNotFound(ReviewNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    /**
      * Catch-all handler for any other unexpected exceptions.
      *
      * WHEN TRIGGERED:

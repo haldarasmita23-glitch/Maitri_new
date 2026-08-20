@@ -124,6 +124,38 @@ const API = {
     return this.request('/users/me', { method: 'PUT', body: payload, auth: true });
   },
 
+  // ── Reviews (Phase 7) ──────────────────────────────────────────
+
+  /** Authenticated USER submits a review for a vendor. */
+  submitReview(payload) {
+    return this.request('/reviews', { method: 'POST', body: payload, auth: true });
+  },
+
+  /** PUBLIC: Get paginated reviews for a vendor. */
+  getVendorReviews(vendorId, page = 0, size = 10) {
+    return this.get(`/reviews/vendor/${encodeURIComponent(vendorId)}?page=${page}&size=${size}`);
+  },
+
+  /** PUBLIC: Get rating summary for a vendor. */
+  getVendorRatingSummary(vendorId) {
+    return this.get(`/reviews/vendor/${encodeURIComponent(vendorId)}/summary`);
+  },
+
+  /** Authenticated USER: Get their own reviews. */
+  getMyReviews() {
+    return this.request('/reviews/my', { auth: true });
+  },
+
+  /** Authenticated USER: Update their own review. */
+  updateReview(reviewId, payload) {
+    return this.request(`/reviews/${encodeURIComponent(reviewId)}`, { method: 'PUT', body: payload, auth: true });
+  },
+
+  /** Authenticated USER: Delete their own review. */
+  deleteReview(reviewId) {
+    return this.request(`/reviews/${encodeURIComponent(reviewId)}`, { method: 'DELETE', auth: true });
+  },
+
   /**
    * Check if the backend is reachable.
    * @returns {Promise<{ok: boolean, data?: object, error?: string}>}

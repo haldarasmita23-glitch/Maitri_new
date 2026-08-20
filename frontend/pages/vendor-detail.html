@@ -179,13 +179,7 @@
 
               <!-- Write a Review -->
               <div class="write-review">
-                <h4>Write a Review</h4>
-                <div class="alert alert--info mb-4" role="note">
-                  <span class="alert__icon">ℹ️</span>
-                  <div class="alert__text">
-                    You can submit reviews without an account in Phase 2. Full account-based reviews arrive in Phase 3.
-                  </div>
-                </div>
+                <h4 id="write-review-title">Write a Review</h4>
                 <form id="review-form" novalidate aria-label="Submit a review">
                   <div class="form-group">
                     <label class="form-label">Your Rating <span class="required" aria-label="required">*</span></label>
@@ -199,9 +193,10 @@
                     <input type="hidden" id="rating-value" name="rating">
                   </div>
                   <div class="form-group">
-                    <label class="form-label" for="review-text">Your Review <span class="required" aria-label="required">*</span></label>
+                    <label class="form-label" for="review-text">Your Review</label>
                     <textarea id="review-text" name="review" class="form-control" rows="3"
-                              placeholder="Share your experience with this vendor…" minlength="10" required></textarea>
+                              placeholder="Share your experience with this vendor…" aria-describedby="review-text-hint"></textarea>
+                    <span class="form-hint" id="review-text-hint">Optional — at least 10 characters if you add text.</span>
                   </div>
                   <button type="submit" class="btn btn--primary">Submit Review</button>
                 </form>

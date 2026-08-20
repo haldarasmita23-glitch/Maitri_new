@@ -124,6 +124,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/vendors").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/vendors/*").permitAll()
 
+                        // ── Phase 7: Review viewing is public ───────────────
+                        // NOTE: order matters. "/api/reviews/my" must be declared
+                        // BEFORE the wildcard "/api/reviews/vendor/*", otherwise
+                        // it would be exposed publicly.
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/my").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/vendor/**").permitAll()
+
                         // All other requests require authentication (valid JWT)
                         .anyRequest().authenticated()
                 )

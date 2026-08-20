@@ -802,6 +802,22 @@ select.form-control {
   line-height: var(--line-height-relaxed);
 }
 
+.review-card__actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+  margin-top: var(--space-1);
+}
+
+.btn--danger-text {
+  color: var(--color-error);
+}
+
+.btn--danger-text:hover {
+  color: var(--color-error);
+  background: var(--color-error-bg);
+}
+
 
 /* ══════════════════════════════════════════════════════════════════
    INFO ITEM (key-value pair)
