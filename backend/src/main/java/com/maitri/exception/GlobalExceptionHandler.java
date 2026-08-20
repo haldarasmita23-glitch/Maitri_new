@@ -343,6 +343,38 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles attempts to favourite a vendor the user has already favourited (Phase 8).
+     *
+     * WHEN TRIGGERED:
+     *   POST /api/favourites when the user has already saved that vendor.
+     *   Business rule: one favourite per user per vendor.
+     *
+     * HTTP Status: 409 Conflict
+     */
+    @ExceptionHandler(DuplicateFavouriteException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDuplicateFavourite(DuplicateFavouriteException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Handles favourite operations that reference a favourite which does not exist
+     * for the authenticated user (Phase 8).
+     *
+     * WHEN TRIGGERED:
+     *   DELETE /api/favourites/{vendorId} for a vendor the user never favourited.
+     *
+     * HTTP Status: 404 Not Found
+     */
+    @ExceptionHandler(FavouriteNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleFavouriteNotFound(FavouriteNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    /**
      * Catch-all handler for any other unexpected exceptions.
      *
      * WHEN TRIGGERED:

@@ -80,6 +80,9 @@ async function renderVendors() {
   const countEl = document.getElementById('results-count');
   if (!grid) return;
 
+  // Load favourite state before rendering so heart buttons reflect the server
+  await Favourites.load();
+
   const all = await Vendors.load();
 
   // Search + filter (local — the API list is already category/search aware)
@@ -189,7 +192,8 @@ function buildVendorCard(v) {
 
 
 async function toggleFav(btn, vendorId) {
-  const added = Favourites.toggle(vendorId);
+  const added = await Favourites.toggle(vendorId);
+  if (added === null) return; // login / blocked prompt already shown
   btn.innerHTML = added ? '❤️' : '🤍';
   btn.classList.toggle('active', added);
   const vendors = await Vendors.load();

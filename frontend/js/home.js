@@ -44,6 +44,9 @@ async function renderFeaturedVendors() {
   const grid = document.getElementById('featured-vendors-grid');
   if (!grid) return;
 
+  // Load favourite state before rendering so heart buttons reflect the server
+  await Favourites.load();
+
   // Pick top-rated vendors (3 highest rated) from the live vendor list
   const featured = (await Vendors.load())
     .sort((a, b) => b.averageRating - a.averageRating)
@@ -113,7 +116,8 @@ function buildVendorCard(v) {
 
 
 async function toggleFav(btn, vendorId) {
-  const added = Favourites.toggle(vendorId);
+  const added = await Favourites.toggle(vendorId);
+  if (added === null) return; // login / blocked prompt already shown
   btn.innerHTML = added ? '❤️' : '🤍';
   btn.classList.toggle('active', added);
   btn.setAttribute('aria-label', added ? 'Remove from favourites' : 'Add to favourites');

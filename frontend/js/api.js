@@ -156,6 +156,28 @@ const API = {
     return this.request(`/reviews/${encodeURIComponent(reviewId)}`, { method: 'DELETE', auth: true });
   },
 
+  // ── Favourites (Phase 8) ────────────────────────────────────────
+
+  /** Authenticated USER/ADMIN: Get their own favourites (with vendor details). */
+  getFavourites() {
+    return this.request('/favourites', { auth: true });
+  },
+
+  /** Authenticated USER/ADMIN: Add an approved vendor to favourites. */
+  addFavourite(vendorId) {
+    return this.request('/favourites', { method: 'POST', body: { vendorId }, auth: true });
+  },
+
+  /** Authenticated USER/ADMIN: Remove a vendor from favourites. */
+  removeFavourite(vendorId) {
+    return this.request(`/favourites/${encodeURIComponent(vendorId)}`, { method: 'DELETE', auth: true });
+  },
+
+  /** Authenticated USER/ADMIN: Check whether a vendor is favourited. */
+  isFavourite(vendorId) {
+    return this.request(`/favourites/${encodeURIComponent(vendorId)}`, { auth: true });
+  },
+
   /**
    * Check if the backend is reachable.
    * @returns {Promise<{ok: boolean, data?: object, error?: string}>}

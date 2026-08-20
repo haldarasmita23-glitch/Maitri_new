@@ -403,29 +403,215 @@ function searchVendors(query, categoryId = null) {
   );
 }
 
-/** Favourites (localStorage) */
+/**
+ * Favourites — API-backed module (Phase 8).
+ *
+ * Replaces the original localStorage-only mock with backend storage for
+ * authenticated USER/ADMIN accounts, while keeping the SAME method surface
+ * (get/add/remove/toggle/has) so existing call sites keep working.
+ *
+ * ─── BEHAVIOUR ──────────────────────────────────────────────────────────────
+ *   Logged-in USER/ADMIN  → favourites are stored in the backend (source of truth)
+ *   Logged-out user       → old localStorage ids are shown for display only;
+ *                           attempting to favourite shows a login prompt
+ *   VENDOR                → favourite controls are blocked (no USER operations)
+ *   401                   → login prompt (token invalid/expired)
+ *   404                   → treated as "not favourited"
+ *   Offline / API down    → falls back to localStorage ids (best effort)
+ *
+ * The in-memory Set is the single source of truth for button state; call
+ * `await Favourites.load()` before rendering cards so `has()` reflects the
+ * server state.
+ */
 const Favourites = {
-  get() {
+  /** In-memory cache of favourited vendor ids (populated by load()). */
+  _ids: new Set(),
+
+  /** Auth key the cache was loaded for (avoids redundant refetches). */
+  _loadedFor: null,
+
+  /** The locally stored user (or null). Safe when components.js is absent. */
+  currentUser() {
     try {
-      return JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FAVOURITES) || '[]');
-    } catch { return []; }
-  },
-  add(vendorId) {
-    const favs = this.get();
-    if (!favs.includes(vendorId)) {
-      favs.push(vendorId);
-      localStorage.setItem(CONFIG.STORAGE_KEYS.FAVOURITES, JSON.stringify(favs));
+      return (typeof Navbar !== 'undefined' && Navbar.storedUser())
+        || JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA))
+        || null;
+    } catch {
+      return null;
     }
   },
-  remove(vendorId) {
-    const favs = this.get().filter(id => id !== vendorId);
-    localStorage.setItem(CONFIG.STORAGE_KEYS.FAVOURITES, JSON.stringify(favs));
+
+  /** A stable key for the current auth state (used to guard reloads). */
+  authKey() {
+    const u = this.currentUser();
+    return u ? `${u.role}:${u.id || u.email}` : 'anon';
   },
-  toggle(vendorId) {
-    if (this.has(vendorId)) { this.remove(vendorId); return false; }
-    this.add(vendorId); return true;
+
+  /** Whether backend favourite operations are permitted for this session. */
+  canUseBackend() {
+    const u = this.currentUser();
+    if (!u || u.role === 'VENDOR') return false;
+    return !!localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
   },
+
+  /**
+   * Populates the in-memory set from the backend (or localStorage when
+   * logged out). Call once before rendering favourite buttons.
+   */
+  async load(force = false) {
+    const key = this.authKey();
+    if (!force && this._loadedFor === key) return;
+    this._ids.clear();
+    this._loadedFor = key;
+
+    const u = this.currentUser();
+
+    // Vendors never have favourites.
+    if (u && u.role === 'VENDOR') {
+      this._ids.clear();
+      return;
+    }
+
+    if (u && localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN)) {
+      try {
+        const res = await API.getFavourites();
+        if (res.ok && res.data && res.data.success && Array.isArray(res.data.data)) {
+          res.data.data.forEach(f => {
+            if (f && f.vendorId) this._ids.add(f.vendorId);
+          });
+        } else if (res.status === 401) {
+          this._loadLocalFallback();
+        }
+      } catch {
+        // Backend unreachable — fall back to local ids (best effort).
+        this._loadLocalFallback();
+      }
+    } else {
+      // Logged out — keep local ids visible for display compatibility.
+      this._loadLocalFallback();
+    }
+  },
+
+  /** All favourited vendor ids (in-memory). */
+  get() {
+    return Array.from(this._ids);
+  },
+
+  /** Whether a vendor is currently favourited (in-memory). */
   has(vendorId) {
-    return this.get().includes(vendorId);
+    return this._ids.has(vendorId);
+  },
+
+  /**
+   * Adds a vendor to favourites.
+   * @returns {Promise<boolean|null>} true=favourited, false=not, null=blocked (prompt shown)
+   */
+  async add(vendorId) {
+    return this._backendAdd(vendorId);
+  },
+
+  /**
+   * Removes a vendor from favourites.
+   * @returns {Promise<boolean|null>} true=removed, false=not, null=blocked (prompt shown)
+   */
+  async remove(vendorId) {
+    return this._backendRemove(vendorId);
+  },
+
+  /**
+   * Toggles the favourite state of a vendor.
+   * @returns {Promise<boolean|null>} new favourited state, or null if blocked (prompt shown)
+   */
+  async toggle(vendorId) {
+    if (this._ids.has(vendorId)) {
+      const removed = await this._backendRemove(vendorId);
+      if (removed === null) return null; // blocked — prompt already shown
+      return false;                       // now not favourited
+    }
+    return this._backendAdd(vendorId);    // returns true if favourited now
+  },
+
+  // ─── Backend helpers ────────────────────────────────────────────
+
+  async _backendAdd(vendorId) {
+    if (!this.canUseBackend()) {
+      this.promptBlocked();
+      return null;
+    }
+    try {
+      const res = await API.addFavourite(vendorId);
+      if (res.ok && res.data && res.data.success) {
+        this._ids.add(vendorId);
+        this._loadedFor = this.authKey();
+        return true;
+      }
+      if (res.status === 401) {
+        this.promptLogin();
+        return null;
+      }
+      if (res.status === 404) {
+        this._ids.delete(vendorId); // vendor no longer available → not favourited
+        return false;
+      }
+      Toast.error('Could not save favourite', (res.data && res.data.message) || 'Please try again.');
+      return false;
+    } catch {
+      Toast.error('Network error', 'Please check your connection and try again.');
+      return false;
+    }
+  },
+
+  async _backendRemove(vendorId) {
+    if (!this.canUseBackend()) {
+      this.promptBlocked();
+      return null;
+    }
+    try {
+      const res = await API.removeFavourite(vendorId);
+      if (res.ok && res.data && res.data.success) {
+        this._ids.delete(vendorId);
+        this._loadedFor = this.authKey();
+        return true;
+      }
+      if (res.status === 401) {
+        this.promptLogin();
+        return null;
+      }
+      if (res.status === 404) {
+        this._ids.delete(vendorId); // already not favourited
+        return false;
+      }
+      Toast.error('Could not remove favourite', (res.data && res.data.message) || 'Please try again.');
+      return false;
+    } catch {
+      Toast.error('Network error', 'Please check your connection and try again.');
+      return false;
+    }
+  },
+
+  _loadLocalFallback() {
+    try {
+      JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.FAVOURITES) || '[]')
+        .forEach(id => this._ids.add(id));
+    } catch {
+      // Ignore malformed local data.
+    }
+  },
+
+  promptBlocked() {
+    const u = this.currentUser();
+    if (u && u.role === 'VENDOR') {
+      Toast.warning('Not available for business accounts', 'Vendor accounts cannot save favourites.');
+      return;
+    }
+    this.promptLogin();
+  },
+
+  promptLogin() {
+    Toast.warning('Log in required', 'Please log in to save your favourite vendors.');
+    const onSubPage = window.location.pathname.includes('/pages/');
+    setTimeout(() => {
+      window.location.href = onSubPage ? 'login.html' : 'pages/login.html';
+    }, 1600);
   },
 };

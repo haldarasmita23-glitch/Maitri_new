@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderVendorDetail(vendor);
   initTabs();
   initRatingInput();
+  await Favourites.load();
   initFavButton(vendor.id);
 
   const currentUser = getCurrentUser();
@@ -468,8 +469,9 @@ function initFavButton(vendorId) {
 
   updateBtn();
 
-  btn.addEventListener('click', () => {
-    const added = Favourites.toggle(vendorId);
+  btn.addEventListener('click', async () => {
+    const added = await Favourites.toggle(vendorId);
+    if (added === null) return; // login / blocked prompt already shown
     updateBtn();
     Toast[added ? 'success' : 'info'](
       added ? 'Saved to favourites!' : 'Removed from favourites',
