@@ -7,6 +7,8 @@ import com.maitri.exception.DuplicateVendorProfileException;
 import com.maitri.exception.InvalidCategoryException;
 import com.maitri.exception.VendorNotFoundException;
 import com.maitri.model.Category;
+import com.maitri.model.NotificationType;
+import com.maitri.model.Role;
 import com.maitri.model.User;
 import com.maitri.model.Vendor;
 import com.maitri.model.VendorStatus;
@@ -49,6 +51,7 @@ public class VendorService {
 
     private final VendorRepository vendorRepository;
     private final CategoryRepository categoryRepository;
+    private final NotificationService notificationService;
 
     // ─── Apply ────────────────────────────────────────────────────────────────
 
@@ -197,6 +200,17 @@ public class VendorService {
         vendor.setStatus(VendorStatus.APPROVED);
         Vendor saved = vendorRepository.save(vendor);
         log.info("[Vendor] Approved: id={}, shop={}", saved.getId(), saved.getShopName());
+
+        // Phase 10 trigger — notify the vendor's owner account (fail-safe).
+        notificationService.notifyUser(
+                saved.getUserId(),
+                Role.VENDOR,
+                NotificationType.VERIFICATION,
+                "Vendor Approved",
+                "Congratulations! Your business '" + saved.getShopName()
+                        + "' has been approved and is now visible on Maitri."
+        );
+
         Category category = categoryRepository.findById(saved.getCategoryId()).orElse(null);
         return toResponse(saved, category);
     }
@@ -207,6 +221,17 @@ public class VendorService {
         vendor.setStatus(VendorStatus.REJECTED);
         Vendor saved = vendorRepository.save(vendor);
         log.info("[Vendor] Rejected: id={}, shop={}", saved.getId(), saved.getShopName());
+
+        // Phase 10 trigger — notify the vendor's owner account (fail-safe).
+        notificationService.notifyUser(
+                saved.getUserId(),
+                Role.VENDOR,
+                NotificationType.VERIFICATION,
+                "Vendor Rejected",
+                "Your business '" + saved.getShopName()
+                        + "' was not approved at this time. Please contact support for details."
+        );
+
         Category category = categoryRepository.findById(saved.getCategoryId()).orElse(null);
         return toResponse(saved, category);
     }

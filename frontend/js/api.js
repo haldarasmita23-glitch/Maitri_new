@@ -227,6 +227,28 @@ const API = {
     return this.request(`/complaints/${encodeURIComponent(id)}/note`, { method: 'PATCH', body: { adminNote }, auth: true });
   },
 
+  // ── Notifications (Phase 10) ──────────────────────────────────────
+
+  /** Authenticated USER/VENDOR/ADMIN: Get their own notifications, newest first. */
+  getNotifications() {
+    return this.request('/notifications', { auth: true });
+  },
+
+  /** Authenticated USER/VENDOR/ADMIN: Get their unread notification count. */
+  getUnreadCount() {
+    return this.request('/notifications/unread-count', { auth: true });
+  },
+
+  /** Authenticated USER/VENDOR/ADMIN: Mark one notification as read. */
+  markNotificationRead(id) {
+    return this.request(`/notifications/${encodeURIComponent(id)}/read`, { method: 'PUT', auth: true });
+  },
+
+  /** Authenticated USER/VENDOR/ADMIN: Mark all notifications as read. */
+  markAllNotificationsRead() {
+    return this.request('/notifications/read-all', { method: 'PUT', auth: true });
+  },
+
   /**
    * Check if the backend is reachable.
    * @returns {Promise<{ok: boolean, data?: object, error?: string}>}

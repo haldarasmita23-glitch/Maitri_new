@@ -393,6 +393,23 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles notification operations that reference a notification which does not
+     * exist or belongs to another account (Phase 10).
+     *
+     * WHEN TRIGGERED:
+     *   PUT /api/notifications/{id}/read with an unknown id, or
+     *   an id that belongs to a different account.
+     *
+     * HTTP Status: 404 Not Found
+     */
+    @ExceptionHandler(NotificationNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotificationNotFound(NotificationNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    /**
      * Handles invalid complaint status values or illegal status transitions (Phase 9).
      *
      * WHEN TRIGGERED:

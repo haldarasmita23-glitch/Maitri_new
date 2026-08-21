@@ -7,7 +7,9 @@ import com.maitri.dto.review.VendorRatingsSummary;
 import com.maitri.exception.DuplicateReviewException;
 import com.maitri.exception.ReviewNotFoundException;
 import com.maitri.exception.VendorNotFoundException;
+import com.maitri.model.NotificationType;
 import com.maitri.model.Review;
+import com.maitri.model.Role;
 import com.maitri.model.User;
 import com.maitri.model.Vendor;
 import com.maitri.model.VendorStatus;
@@ -59,6 +61,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final VendorRepository vendorRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     /**
      * Creates a new review for a vendor.
@@ -100,6 +103,15 @@ public class ReviewService {
 
         // Recalculate vendor's average rating
         updateVendorRating(request.getVendorId());
+
+        // Phase 10 trigger — REVIEW notification to the vendor's owner
+        notificationService.notifyUser(
+                vendor.getUserId(),
+                Role.VENDOR,
+                NotificationType.REVIEW,
+                "New Review Received",
+                user.getName() + " left a " + request.getRating() + "-star review for " + vendor.getShopName() + "."
+        );
 
         log.info("[Review] Created: reviewId={}, userId={}, vendorId={}, rating={}",
                 savedReview.getId(), user.getId(), request.getVendorId(), request.getRating());

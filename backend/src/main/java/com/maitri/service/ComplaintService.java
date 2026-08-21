@@ -10,7 +10,10 @@ import com.maitri.exception.InvalidComplaintStatusException;
 import com.maitri.exception.VendorNotFoundException;
 import com.maitri.model.Complaint;
 import com.maitri.model.ComplaintStatus;
+import com.maitri.model.Notification;
+import com.maitri.model.NotificationType;
 import com.maitri.model.Role;
+import com.maitri.repository.NotificationRepository;
 import com.maitri.model.User;
 import com.maitri.model.Vendor;
 import com.maitri.model.VendorStatus;
@@ -63,6 +66,7 @@ public class ComplaintService {
     private final ComplaintRepository complaintRepository;
     private final VendorRepository vendorRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     // ─── USER / ADMIN: create ────────────────────────────────────────────────
 
@@ -226,8 +230,9 @@ public class ComplaintService {
         Complaint complaint = complaintRepository.findByIdAndVendorId(complaintId, vendor.getId())
                 .orElseThrow(() -> new ComplaintNotFoundException("Complaint not found or access denied."));
 
+        ComplaintStatus oldStatus = complaint.getStatus();
         ComplaintStatus target = parseStatus(request.getStatus());
-        validateVendorTransition(complaint.getStatus(), target);
+        validateVendorTransition(oldStatus, target);
 
         complaint.setStatus(target);
         complaint.setUpdatedAt(LocalDateTime.now());
@@ -235,6 +240,17 @@ public class ComplaintService {
         Complaint saved = complaintRepository.save(complaint);
         log.info("[Complaint] Status updated by vendor: complaintId={}, vendorId={}, newStatus={}",
                 complaintId, vendor.getId(), target);
+
+        // Phase 10 trigger — COMPLAINT notification to the complainant on status change
+        if (!oldStatus.equals(target)) {
+            notificationService.notifyUser(
+                    complaint.getUserId(),
+                    Role.USER,
+                    NotificationType.COMPLAINT,
+                    "Complaint Status Updated",
+                    "Your complaint status has been updated to " + target.name() + "."
+            );
+        }
         return toResponse(saved, false);
     }
 
@@ -266,6 +282,7 @@ public class ComplaintService {
      */
     public ComplaintResponse adminUpdateStatus(String complaintId, ComplaintStatusRequest request) {
         Complaint complaint = findById(complaintId);
+        ComplaintStatus oldStatus = complaint.getStatus();
         ComplaintStatus target = parseStatus(request.getStatus());
 
         complaint.setStatus(target);
@@ -274,6 +291,17 @@ public class ComplaintService {
         Complaint saved = complaintRepository.save(complaint);
         log.info("[Complaint] Status updated by admin: complaintId={}, newStatus={}",
                 complaintId, target);
+
+        // Phase 10 trigger — COMPLAINT notification to the complainant on status change
+        if (!oldStatus.equals(target)) {
+            notificationService.notifyUser(
+                    complaint.getUserId(),
+                    Role.USER,
+                    NotificationType.COMPLAINT,
+                    "Complaint Status Updated",
+                    "Your complaint status has been updated to " + target.name() + "."
+            );
+        }
         return toResponse(saved, true);
     }
 
