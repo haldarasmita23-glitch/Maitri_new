@@ -375,6 +375,42 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles complaint operations that reference a complaint which does not exist
+     * or the caller doesn't have permission to access (Phase 9).
+     *
+     * WHEN TRIGGERED:
+     *   GET/PUT/DELETE /api/complaints/{id} with an invalid complaint ID, or
+     *   a user tries to access/update/delete a complaint that doesn't belong to them,
+     *   or a vendor tries to access/update a complaint that isn't about their business.
+     *
+     * HTTP Status: 404 Not Found
+     */
+    @ExceptionHandler(ComplaintNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleComplaintNotFound(ComplaintNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Handles invalid complaint status values or illegal status transitions (Phase 9).
+     *
+     * WHEN TRIGGERED:
+     *   PATCH /api/complaints/{id}/status with a value that is not
+     *   PENDING | IN_PROGRESS | RESOLVED, or
+     *   a VENDOR attempts to skip PENDING → RESOLVED directly,
+     *   or a transition is attempted from a terminal (RESOLVED) state.
+     *
+     * HTTP Status: 400 Bad Request
+     */
+    @ExceptionHandler(InvalidComplaintStatusException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidComplaintStatus(InvalidComplaintStatusException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    /**
      * Catch-all handler for any other unexpected exceptions.
      *
      * WHEN TRIGGERED:

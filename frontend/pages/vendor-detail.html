@@ -111,6 +111,9 @@
               <button class="detail-tab" data-tab="tab-reviews" role="tab" aria-selected="false" aria-controls="tab-reviews" id="tab-btn-reviews">
                 ⭐ Reviews
               </button>
+              <button class="detail-tab" data-tab="tab-complaints" role="tab" aria-selected="false" aria-controls="tab-complaints" id="tab-btn-complaints">
+                📋 Complaints
+              </button>
             </div>
 
             <!-- About Tab -->
@@ -209,6 +212,17 @@
 
             </div>
 
+            <!-- Complaints Tab (Phase 9) -->
+            <div id="tab-complaints" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-complaints">
+              <div class="write-review">
+                <h4>Raise a Complaint</h4>
+                <p class="form-hint" style="margin-bottom: var(--space-4);">
+                  Found an issue with this vendor? Let us know and we'll help resolve it.
+                </p>
+                <div id="complaint-form-container"></div>
+              </div>
+            </div>
+
           </div><!-- end main col -->
 
           <!-- ── Sidebar ──────────────────────────────────────── -->
@@ -281,6 +295,7 @@
 <script src="../js/vendors-data.js"></script>
 <script src="../js/components.js"></script>
 <script src="../js/vendor-detail.js"></script>
+<script src="../js/complaints.js"></script>
 
 <script>
 function handlePhoneClick(e) {

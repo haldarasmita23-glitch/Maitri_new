@@ -820,6 +820,95 @@ select.form-control {
 
 
 /* ══════════════════════════════════════════════════════════════════
+   COMPLAINT CARD (Phase 9)
+   Modelled on .review-card — same tokens, same BEM conventions.
+   ══════════════════════════════════════════════════════════════════ */
+
+.complaint-card {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5) var(--space-6);
+  border: 1px solid var(--color-border-light);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  transition: box-shadow var(--transition-base);
+}
+
+.complaint-card + .complaint-card {
+  margin-top: var(--space-4);
+}
+
+.complaint-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.complaint-card__type {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-snug);
+}
+
+.complaint-card__vendor {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+  margin-top: var(--space-1);
+}
+
+.complaint-card__description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+}
+
+.complaint-card__meta {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.complaint-card__actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+  margin-top: var(--space-1);
+}
+
+/* Inline edit form that replaces a card's content while editing */
+.complaint-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+@media (max-width: 560px) {
+  .complaint-card {
+    padding: var(--space-4) var(--space-4);
+  }
+
+  .complaint-card__header {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .complaint-card__meta {
+    gap: var(--space-2);
+    flex-direction: column;
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
    INFO ITEM (key-value pair)
    ══════════════════════════════════════════════════════════════════ */
 

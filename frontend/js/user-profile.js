@@ -62,6 +62,26 @@ async function initUserProfile() {
   showProfileView(contentEl, loginRequiredEl);
   renderProfile(profile);
   bindProfileForm();
+
+  // Phase 9 — My Complaints (only for USER/ADMIN accounts; VENDOR accounts
+  // cannot raise complaints, so the section renders a role-specific message).
+  const complaintsContainer = document.getElementById('my-complaints-container');
+  if (complaintsContainer) {
+    const role = (profile && profile.role) || (readStoredUser() && readStoredUser().role) || 'USER';
+    if (role === 'VENDOR') {
+      complaintsContainer.innerHTML = `
+        <div class="alert alert--warning" role="note">
+          <span class="alert__icon">⚠️</span>
+          <div class="alert__text">
+            <strong>Not available for business accounts</strong><br>
+            Vendor accounts cannot raise complaints.
+          </div>
+        </div>
+      `;
+    } else {
+      renderMyComplaints(complaintsContainer);
+    }
+  }
 }
 
 // ── Rendering ───────────────────────────────────────────────────

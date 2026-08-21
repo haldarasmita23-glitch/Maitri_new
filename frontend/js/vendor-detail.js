@@ -26,6 +26,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const currentUser = getCurrentUser();
   const myReview = await renderReviews(vendor.id, currentUser);
   await initReviewForm(vendor.id, currentUser, myReview);
+
+  // Phase 9 — Raise a Complaint (USER-only functionality)
+  const complaintContainer = document.getElementById('complaint-form-container');
+  if (complaintContainer) {
+    await initComplaintForm(vendor.id, complaintContainer);
+  }
 });
 
 

@@ -178,6 +178,55 @@ const API = {
     return this.request(`/favourites/${encodeURIComponent(vendorId)}`, { auth: true });
   },
 
+  // ── Complaints (Phase 9) ───────────────────────────────────────
+
+  /** Authenticated USER/ADMIN: Get their own complaints (with vendor details). */
+  getMyComplaints() {
+    return this.request('/complaints/my', { auth: true });
+  },
+
+  /** Authenticated USER/ADMIN: Get one of their own complaints. */
+  getComplaint(id) {
+    return this.request(`/complaints/${encodeURIComponent(id)}`, { auth: true });
+  },
+
+  /** Authenticated USER/ADMIN: Raise a complaint against an approved vendor. */
+  createComplaint(payload) {
+    return this.request('/complaints', { method: 'POST', body: payload, auth: true });
+  },
+
+  /** Authenticated USER/ADMIN: Edit their own PENDING complaint. */
+  updateComplaint(id, payload) {
+    return this.request(`/complaints/${encodeURIComponent(id)}`, { method: 'PUT', body: payload, auth: true });
+  },
+
+  /** Authenticated USER/ADMIN: Delete their own PENDING complaint. */
+  deleteComplaint(id) {
+    return this.request(`/complaints/${encodeURIComponent(id)}`, { method: 'DELETE', auth: true });
+  },
+
+  /** Authenticated VENDOR/ADMIN: Get complaints about the vendor's own business. */
+  getVendorComplaints() {
+    return this.request('/complaints/vendor/me', { auth: true });
+  },
+
+  /** Authenticated VENDOR/ADMIN: Update a complaint's status (shared endpoint).
+   *  VENDOR transitions are scoped to their own business; ADMIN may do any transition. */
+  updateComplaintStatus(id, status) {
+    return this.request(`/complaints/${encodeURIComponent(id)}/status`, { method: 'PATCH', body: { status }, auth: true });
+  },
+
+  /** ADMIN: Get all complaints, optionally filtered by status. */
+  getAdminComplaints(status) {
+    const query = status ? `?status=${encodeURIComponent(status)}` : '';
+    return this.request(`/complaints/admin${query}`, { auth: true });
+  },
+
+  /** ADMIN: Set/update the internal admin note on a complaint. */
+  setAdminNote(id, adminNote) {
+    return this.request(`/complaints/${encodeURIComponent(id)}/note`, { method: 'PATCH', body: { adminNote }, auth: true });
+  },
+
   /**
    * Check if the backend is reachable.
    * @returns {Promise<{ok: boolean, data?: object, error?: string}>}
