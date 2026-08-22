@@ -1,0 +1,73 @@
+/* Admin Vendors Page Styles */
+
+.pending-vendors-list {
+  padding: var(--space-4) var(--space-6);
+}
+
+.pending-vendors-list .empty-state {
+  text-align: center;
+  padding: var(--space-8) var(--space-10);
+}
+
+.pending-vendors-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.pending-vendor-card {
+  background-color: var(--color-bg-card);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.pending-vendor-card__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.pending-vendor-card__shop {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.pending-vendor-card__status {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-error);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.pending-vendor-card__actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.pending-vendor-card__actions .btn {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-xs);
+}
+
+@media (max-width: 640px) {
+  .pending-vendor-card {
+    padding: var(--space-3);
+  }
+
+  .pending-vendor-card__actions {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .pending-vendor-card__actions .btn {
+    width: 100%;
+  }
+}
