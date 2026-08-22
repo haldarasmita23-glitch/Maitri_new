@@ -67,6 +67,7 @@ public interface ChatRepository extends MongoRepository<Chat, String> {
      * @param userId The user's id
      * @return The chat message if present and user is a participant
      */
+    @Query("{'_id': ?0, '$or': [{'senderId': ?1}, {'receiverId': ?1}]}")
     Optional<Chat> findByIdAndParticipant(String id, String userId);
 
     /**

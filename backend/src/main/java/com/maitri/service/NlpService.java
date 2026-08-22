@@ -21,10 +21,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class NlpService {
 
-/**
- * NlpService — Core NLP processing for review analysis.
-public class NlpService {
-
     // Fixed English stop-words set for token filtering
     private static final Set<String> STOP_WORDS = new HashSet<>(Arrays.asList(
             "a", "an", "the", "and", "or", "but", "is", "are", "was", "were",
@@ -68,7 +64,15 @@ public class NlpService {
         return result;
     }
 
-    // Aspect keywords mapping to review topics
+    // Aspect keywords mapping to review topics.
+    // Each entry maps an aspect name to its associated keyword patterns.
+    private static final Map<String, Set<String>> ASPECT_KEYWORDS = new HashMap<>(Map.of(
+            "food",     new HashSet<>(Arrays.asList("taste", "flavor", "spicy", "bland", "delicious", "food")),
+            "pricing",  new HashSet<>(Arrays.asList("price", "cost", "expensive", "cheap", "overpriced", "pricing")),
+            "delivery", new HashSet<>(Arrays.asList("delivery", "shipping", "fast", "slow", "late")),
+            "quality",  new HashSet<>(Arrays.asList("quality", "workmanship", "material", "build")),
+            "staff",    new HashSet<>(Arrays.asList("staff", "service", "worker", "employee", "attendant"))
+    ));
 
     /** Default confidence threshold for sentiment/aspect determination. */
     private static final double CONFIDENCE_THRESHOLD = 0.5;
@@ -104,7 +108,7 @@ public class NlpService {
      * Analyzes the sentiment of the given text.
      * Uses a rule-based keyword approach:
      * - Positive keywords: good, excellent, great, amazing, wonderful, etc.
-     * - Negative keywords: poor, bad, terrible, awful, awful, etc.
+     * - Negative keywords: poor, bad, terrible, awful, etc.
      * - Neutral: neither positive nor negative keywords found
      *
      * @param text The text to analyze (already preprocessed recommended)
@@ -119,20 +123,23 @@ public class NlpService {
         Set<String> positiveKeywords = new HashSet<>(Arrays.asList(
                 "good", "great", "excellent", "awesome", "amazing", "wonderful",
                 "fantastic", "perfect", "love", "loved", "enjoy", "enjoyed",
-                "best", "best", "super", "perfect", "impressed", "impressive"
+                "best", "super", "impressed", "impressive"
         ));
 
         // Negative keywords and their weights
         Set<String> negativeKeywords = new HashSet<>(Arrays.asList(
                 "bad", "poor", "terrible", "awful", "hate", "hated",
                 "worst", "disappointing", "disappointed", "angry", "frustrating",
-                "waste", "useless", "disappointing"
+                "waste", "useless"
         ));
 
-        // Tokenize the text
-        Set<String> tokens = Arrays.asList(text.toLowerCase().split("\\s+"))
-                .filter(token -> !STOP_WORDS.contains(token) && !token.isEmpty())
-                .collect(Collectors.toSet());
+        // Tokenize the text — fix: use explicit loop, not Arrays.asList().filter()
+        Set<String> tokens = new HashSet<>();
+        for (String token : text.toLowerCase().split("\\s+")) {
+            if (!STOP_WORDS.contains(token) && !token.isEmpty()) {
+                tokens.add(token);
+            }
+        }
 
         int positiveCount = 0;
         int negativeCount = 0;
@@ -184,19 +191,20 @@ public class NlpService {
             return Collections.emptyList();
         }
 
-        // Tokenize and count frequencies
-        Map<String, Long> frequencyMap = Arrays.asList(text.toLowerCase().split("\\s+"))
-                .filter(token -> !STOP_WORDS.contains(token) && !token.isEmpty())
-                .collect(Collectors.groupingBy(
-                        String::identity,
-                        Collectors.counting()
-                ));
+        // Tokenize and count frequencies — fix: use explicit loop, not Arrays.asList().filter()
+        Map<String, Long> frequencyMap = new HashMap<>();
+        for (String token : text.toLowerCase().split("\\s+")) {
+            if (!STOP_WORDS.contains(token) && !token.isEmpty()) {
+                frequencyMap.put(token, frequencyMap.getOrDefault(token, 0L) + 1);
+            }
+        }
 
         // Sort by frequency (descending) and return top N
+        // fix: use Map.Entry.comparingByValue() and Map.Entry::getValue/getKey
         return frequencyMap.entrySet().stream()
-                .sorted(Map.<String, Long>comparingByValue().reversed())
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
                 .limit(maxKeywords)
-                .map(Map::getKey)
+                .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
     }
 
