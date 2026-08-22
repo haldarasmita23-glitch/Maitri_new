@@ -28,5 +28,8 @@ public enum NotificationType {
     REVIEW,
 
     /** A vendor's verification status changed (approved / rejected). */
-    VERIFICATION
+    VERIFICATION,
+
+    /** A new chat message was received. */
+    CHAT
 }

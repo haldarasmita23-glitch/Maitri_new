@@ -1,0 +1,89 @@
+package com.maitri.repository;
+
+import com.maitri.model.Chat;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Chat Repository — data access for the Chat/Contact Module (Phase 11).
+ *
+ * ─── ACCESS PATTERNS ─────────────────────────────────────────────────────────
+ *   Every query is scoped by participant — a user/vendor can only ever reach
+ *   their own conversations. There is deliberately NO unscoped findAll-style
+ *   finder for application use, and no cross-user lookup.
+ *
+ * ─── METHODS ─────────────────────────────────────────────────────────────────
+ *   findConversation — messages between two parties, paginated, newest first
+ *   findConversationsForUser — list of conversations (last message per partner)
+ *   countUnreadForUser — unread message count
+ *   markAsRead — mark messages as read
+ *   findByIdAndParticipant — fetch one message by id if user is participant
+ *   save — store a new message
+ */
+public interface ChatRepository extends MongoRepository<Chat, String> {
+
+    /**
+     * Finds all messages between two parties (both directions), newest first.
+     *
+     * @param userId1    First party's id
+     * @param userId2    Second party's id
+     * @param pageable   Pagination parameters
+     * @return Page of messages between the two parties
+     */
+    @Query("{'$or': ["
+            + "{'senderId': ?0, 'receiverId': ?1}, "
+            + "{'senderId': ?1, 'receiverId': ?0}"
+            + "]}")
+    Page<Chat> findConversation(String userId1, String userId2, Pageable pageable);
+
+    /**
+     * Lists all conversations for a user (latest message per conversation partner),
+     * ordered by timestamp descending.
+     *
+     * @param userId The user's id
+     * @return List of latest messages per conversation partner, newest first
+     */
+    @Query("{'$or': [{'senderId': ?0}, {'receiverId': ?0}]}")
+    List<Chat> findLatestMessagesPerPartner(String userId);
+
+    /**
+     * Counts unread messages for a user (where user is receiver and read=false).
+     *
+     * @param userId The user's id
+     * @return Number of unread messages
+     */
+    long countByReceiverIdAndReadFalse(String userId);
+
+    /**
+     * Finds a chat message by id only if the given user is a participant (sender or receiver).
+     * Returns empty for unknown ids AND for messages where user is not a participant.
+     *
+     * @param id     The message's id
+     * @param userId The user's id
+     * @return The chat message if present and user is a participant
+     */
+    Optional<Chat> findByIdAndParticipant(String id, String userId);
+
+    /**
+     * Marks all unread messages from a specific sender to a receiver as read.
+     *
+     * @param senderId   The sender's id
+     * @param receiverId The receiver's id
+     * @return Number of messages updated
+     */
+    long markMessagesAsRead(String senderId, String receiverId);
+
+    /**
+     * Finds unread messages from a specific sender to a receiver.
+     *
+     * @param senderId   The sender's id
+     * @param receiverId The receiver's id
+     * @return List of unread messages
+     */
+    List<Chat> findBySenderIdAndReceiverIdAndReadFalse(String senderId, String receiverId);
+}

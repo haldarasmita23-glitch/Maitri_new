@@ -249,6 +249,33 @@ const API = {
     return this.request('/notifications/read-all', { method: 'PUT', auth: true });
   },
 
+  // ── Chat / Contact (Phase 11) ──────────────────────────────────────
+
+  /** Authenticated USER/VENDOR/ADMIN: List their conversations. */
+  async getChats() {
+    return this.get('/api/chats', { auth: true });
+  },
+
+  /** Authenticated participant: Get a single chat/message by ID. */
+  async getChat(chatId) {
+    return this.get(`/api/chats/${encodeURIComponent(chatId)}`, { auth: true });
+  },
+
+  /** Authenticated participant: Send a new message (TEXT or IMAGE). */
+  async sendMessage(chatId, payload) {
+    return this.post(`/api/chats/${encodeURIComponent(chatId)}/messages`, payload, true);
+  },
+
+  /** Authenticated participant: Mark a conversation as read. */
+  async markChatRead(chatId) {
+    return this.put(`/api/chats/${encodeURIComponent(chatId)}/read`, null, true);
+  },
+
+  /** Authenticated USER/VENDOR/ADMIN: Get total unread message count. */
+  async getUnreadCount() {
+    return this.get('/api/chats/unread-count', { auth: true });
+  },
+
   /**
    * Check if the backend is reachable.
    * @returns {Promise<{ok: boolean, data?: object, error?: string}>}

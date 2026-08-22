@@ -410,6 +410,40 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles chat operations that reference a chat which does not exist or
+     * the caller doesn't have permission to access (Phase 11).
+     *
+     * WHEN TRIGGERED:
+     *   GET /api/chats/{chatId} with an unknown id, or
+     *   a user tries to access a conversation that doesn't involve them.
+     *
+     * HTTP Status: 404 Not Found
+     */
+    @ExceptionHandler(ChatNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleChatNotFound(ChatNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    /**
+     * Handles chat access control violations (Phase 11).
+     *
+     * WHEN TRIGGERED:
+     *   A user attempts to access a conversation they are not a participant of.
+     *   A USER attempts to message another USER.
+     *   A VENDOR attempts to message another VENDOR.
+     *
+     * HTTP Status: 403 Forbidden
+     */
+    @ExceptionHandler(ChatAccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleChatAccessDenied(ChatAccessDeniedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
+    /**
      * Handles invalid complaint status values or illegal status transitions (Phase 9).
      *
      * WHEN TRIGGERED:
