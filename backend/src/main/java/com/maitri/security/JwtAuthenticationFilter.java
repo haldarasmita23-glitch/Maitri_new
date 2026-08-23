@@ -115,8 +115,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // no authentication has been set for this request yet.
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            // Load user from MongoDB via UserDetailsService
-            UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+            // Load user from MongoDB via UserDetailsService.
+            // If the email does not exist in the DB (e.g. a stale or fabricated token),
+            // treat the request as unauthenticated and let Spring Security return 401.
+            final UserDetails userDetails;
+            try {
+                userDetails = userDetailsService.loadUserByUsername(userEmail);
+            } catch (org.springframework.security.core.userdetails.UsernameNotFoundException ex) {
+                log.debug("JWT references unknown user '{}' — treating as unauthenticated.", userEmail);
+                filterChain.doFilter(request, response);
+                return;
+            }
 
             // ── Step 5: Validate token against the loaded user ─────────────────
             if (jwtService.isTokenValid(jwt, userDetails)) {

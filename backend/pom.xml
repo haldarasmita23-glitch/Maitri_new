@@ -163,6 +163,16 @@
         </dependency>
 
         <!--
+            springdoc-openapi
+            PURPOSE: Auto-generates Swagger UI and OpenAPI 3 docs at /swagger-ui.html.
+        -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+
+        <!--
             Flapdoodle Embedded MongoDB (test scope only)
             PURPOSE: Provides an in-memory MongoDB instance during mvn test.
             WHY: Integration tests (AuthControllerTest) need a real MongoDB connection.

@@ -18,10 +18,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -447,7 +449,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.success").value(false));
     }
 
-    @Test
+@Test
     @DisplayName("15. POST /api/auth/login — non-existent email: 401 Unauthorized")
     void login_nonExistentEmail_returns401() throws Exception {
 
@@ -464,7 +466,78 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.message").value("Invalid email or password."));
     }
 
-    // ═══════════════════════════════════════════════════════════════════════════
+    // ═════════════════════════════════════════════════════════════════════════════════════════════
+    // AUTHENTICATION INTEGRATION TESTS
+    // ═════════════════════════════════════════════════════════════════════════════════════════════
+
+@Test
+    @DisplayName("Malformed JWT token: 401 Unauthorized")
+    void getMe_withMalformedJwt_returns401() throws Exception {
+        mockMvc.perform(get(ME_URL)
+                        .header("Authorization", "Bearer this.is.not.a.valid.jwt.token"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    @DisplayName("Missing Bearer prefix: 401 Unauthorized")
+    void getMe_withoutBearerPrefix_returns401() throws Exception {
+        User user = seedUser(TEST_EMAIL, TEST_PASSWORD, Role.USER);
+
+        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+                .username(user.getEmail())
+                .password(user.getPassword())
+                .authorities(List.of(new SimpleGrantedAuthority("ROLE_USER")))
+                .build();
+        String token = jwtService.generateToken(userDetails);
+
+        // Missing "Bearer " prefix
+        mockMvc.perform(get(ME_URL)
+                        .header("Authorization", token))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    @DisplayName("JWT with unknown user: 401 Unauthorized")
+    void getMe_withUnknownUserInJwt_returns401() throws Exception {
+        // Generate token for a user that doesn't exist in DB
+        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+                .username("unknown@maitri.test")
+                .password("password")
+                .authorities(List.of(new SimpleGrantedAuthority("ROLE_USER")))
+                .build();
+        String token = jwtService.generateToken(userDetails);
+
+        mockMvc.perform(get(ME_URL)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    @DisplayName("Invalid JWT signature: 401 Unauthorized")
+    void getMe_withInvalidSignature_returns401() throws Exception {
+        User user = seedUser(TEST_EMAIL, TEST_PASSWORD, Role.USER);
+
+        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+                .username(user.getEmail())
+                .password(user.getPassword())
+                .authorities(List.of(new SimpleGrantedAuthority("ROLE_USER")))
+                .build();
+        String validToken = jwtService.generateToken(userDetails);
+
+        // Tamper the signature part (third segment)
+        String[] parts = validToken.split("\\.");
+        String tamperedToken = parts[0] + "." + parts[1] + ".invalidsignature";
+
+        mockMvc.perform(get(ME_URL)
+                        .header("Authorization", "Bearer " + tamperedToken))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    // ═════════════════════════════════════════════════════════════════════════════════════════════
     // Private Helpers
     // ═══════════════════════════════════════════════════════════════════════════
 
@@ -489,5 +562,17 @@ class AuthControllerTest {
                 .updatedAt(now)
                 .build();
         return userRepository.save(user);
+    }
+
+    /**
+     * Creates a Spring Security UserDetails for the given email and role.
+     * Used for generating JWT tokens in tests.
+     */
+    private UserDetails createUserDetails(String email, String role) {
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(email)
+                .password("dummy")
+                .authorities(List.of(new SimpleGrantedAuthority("ROLE_" + role)))
+                .build();
     }
 }

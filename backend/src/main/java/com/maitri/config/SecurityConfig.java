@@ -111,9 +111,10 @@ public class SecurityConfig {
 
                         // Public endpoints — no JWT required
                         .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/nlp/health").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                        // Phase 4: category browsing is public; create/update/disable stay ADMIN-only
+                        .requestMatchers(HttpMethod.POST, "/api/auth/logout").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories").permitAll()
 
                         // ── Phase 5: Vendor browsing is public ──────────────
@@ -130,6 +131,18 @@ public class SecurityConfig {
                         // it would be exposed publicly.
                         .requestMatchers(HttpMethod.GET, "/api/reviews/my").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/reviews/vendor/**").permitAll()
+
+                        // Public vendor ratings summary
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/vendor/**/summary").permitAll()
+
+                        // Swagger/OpenAPI (development only)
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+
+                        // Actuator health (if enabled)
+                        .requestMatchers("/actuator/health").permitAll()
+
+                        // WebSocket (if used later)
+                        .requestMatchers("/ws/**").permitAll()
 
                         // All other requests require authentication (valid JWT)
                         .anyRequest().authenticated()

@@ -60,24 +60,17 @@ public interface ChatRepository extends MongoRepository<Chat, String> {
     long countByReceiverIdAndReadFalse(String userId);
 
     /**
-     * Finds a chat message by id only if the given user is a participant (sender or receiver).
-     * Returns empty for unknown ids AND for messages where user is not a participant.
+     * Finds the most recent chat message between two specific participants (either direction).
+     * Used to verify that a conversation exists between a user and a partner.
      *
-     * @param id     The message's id
-     * @param userId The user's id
-     * @return The chat message if present and user is a participant
+     * @param userId1 First participant's id
+     * @param userId2 Second participant's id
+     * @return The most recent message between them, or empty if none
      */
-    @Query("{'_id': ?0, '$or': [{'senderId': ?1}, {'receiverId': ?1}]}")
-    Optional<Chat> findByIdAndParticipant(String id, String userId);
+    @Query(value = "{'$or': [{'senderId': ?0, 'receiverId': ?1}, {'senderId': ?1, 'receiverId': ?0}]}",
+           sort = "{'timestamp': -1}")
+    Optional<Chat> findFirstConversationBetween(String userId1, String userId2);
 
-    /**
-     * Marks all unread messages from a specific sender to a receiver as read.
-     *
-     * @param senderId   The sender's id
-     * @param receiverId The receiver's id
-     * @return Number of messages updated
-     */
-    long markMessagesAsRead(String senderId, String receiverId);
 
     /**
      * Finds unread messages from a specific sender to a receiver.

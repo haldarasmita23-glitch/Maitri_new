@@ -1,137 +1,174 @@
 package com.maitri.controller;
 
+import com.maitri.dto.ApiResponse;
 import com.maitri.dto.chat.ChatCreateRequest;
 import com.maitri.dto.chat.ChatMessageRequest;
 import com.maitri.dto.chat.ChatMessageResponse;
 import com.maitri.dto.chat.ChatConversationResponse;
 import com.maitri.dto.chat.UnreadCountResponse;
+import com.maitri.exception.ChatAccessDeniedException;
 import com.maitri.exception.ChatNotFoundException;
+import com.maitri.exception.UserNotFoundException;
 import com.maitri.model.MessageType;
 import com.maitri.model.Role;
 import com.maitri.model.User;
+import com.maitri.repository.UserRepository;
 import com.maitri.service.ChatService;
-import com.maitri.service.NotificationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
+/**
+ * Chat Controller — Phase 11 (Chat / Contact Module).
+ *
+ * ─── ENDPOINTS & ACCESS ──────────────────────────────────────────────────────
+ *   GET    /api/chats                       — USER|VENDOR|ADMIN: list conversations
+ *   POST   /api/chats                       — USER|VENDOR|ADMIN: start conversation
+ *   GET    /api/chats/{chatId}              — USER|VENDOR|ADMIN: get conversation
+ *   POST   /api/chats/{chatId}/messages     — USER|VENDOR|ADMIN: send message
+ *   PUT    /api/chats/{chatId}/read         — USER|VENDOR|ADMIN: mark as read
+ *   GET    /api/chats/unread-count          — USER|VENDOR|ADMIN: unread count
+ *
+ * ─── MESSAGING RULES ─────────────────────────────────────────────────────────
+ *   - USER can only message VENDOR (not another USER)
+ *   - VENDOR can only message USER (not another VENDOR)
+ *   - ADMIN can message anyone
+ *
+ * All responses follow the standard ApiResponse<T> wrapper pattern.
+ */
 @RestController
 @RequestMapping("/api/chats")
 @RequiredArgsConstructor
 public class ChatController {
 
     private final ChatService chatService;
-    private final NotificationService notificationService;
+    private final UserRepository userRepository;
+
+    // ─── Helper: extract the caller's role from authentication ────────────────
+    private Role extractRole(Authentication auth) {
+        Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
+        for (GrantedAuthority a : authorities) {
+            String r = a.getAuthority();
+            if ("ROLE_ADMIN".equals(r))  return Role.ADMIN;
+            if ("ROLE_VENDOR".equals(r)) return Role.VENDOR;
+        }
+        return Role.USER;
+    }
+
+    // ─── Helper: resolve the caller's User entity from authentication ─────────
+    private User resolveUser(Authentication auth) {
+        String email = auth.getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Authenticated user not found: " + email));
+    }
 
     /**
      * GET /api/chats
      * List authenticated user's conversations (newest activity first).
      */
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public List<ChatConversationResponse> getChats(Authentication authentication) {
-        return chatService.getConversations(authentication);
-    }
-
-    /**
-     * GET /api/chats/{chatId}
-     * Get a single conversation/messages by ID.
-     * Returns 404 if user is not a participant.
-     */
-    @GetMapping("/{chatId}")
-    @ResponseStatus(HttpStatus.OK)
-    public ChatConversationResponse getChat(@PathVariable String chatId, Authentication authentication) {
-        try {
-            return chatService.getConversation(authentication, chatId);
-        } catch (ChatNotFoundException e) {
-            throw new ChatNotFoundException(e.getMessage());
-        }
-    }
-
-    /**
-     * POST /api/chats
-     * Create/start a new conversation with a vendor (USER) or user (VENDOR).
-     * USER can only message VENDOR, VENDOR can only message USER.
-     * ADMIN can message anyone.
-     * Uses ChatCreateRequest which contains receiverId and receiverRole.
-     */
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ChatConversationResponse startConversation(
-            @RequestBody ChatCreateRequest request,
+    public ResponseEntity<ApiResponse<List<ChatConversationResponse>>> getChats(
             Authentication authentication) {
-
-        // Convert ChatCreateRequest to ChatMessageRequest for the service
-        // The message content will be set from the first message in the conversation
-        ChatMessageRequest messageRequest = new ChatMessageRequest();
-        messageRequest.setMessage(request.getReceiverId() != null ? "Starting conversation" : "");
-        messageRequest.setMessageType(MessageType.TEXT);
-
-        // For now, delegate to getConversations to list/retrieve conversation
-        // The actual conversation creation logic is handled by the service
-List<ChatConversationResponse> conversations = chatService.getConversations(authentication);
-
-        // If no conversations exist, return a default response
-        if (conversations.isEmpty()) {
-            Role receiverRole = Role.USER;
-            if (request.getReceiverRole() != null) {
-                try {
-                    receiverRole = Role.valueOf(request.getReceiverRole().trim().toUpperCase());
-                } catch (IllegalArgumentException e) {
-                    receiverRole = Role.USER;
-                }
-            }
-            return ChatConversationResponse.builder()
-                    .otherPartyId(request.getReceiverId())
-                    .otherPartyRole(receiverRole)
-                    .lastMessage("Starting new conversation...")
-                    .build();
-        }
-
-        return conversations.get(0);
-    }
-
-    /**
-     * POST /api/chats/{chatId}/messages
-     * Send a new message in an existing conversation.
-     * TEXT and IMAGE message types supported.
-     */
-    @PostMapping("/{chatId}/messages")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ChatMessageResponse sendMessage(
-            @PathVariable String chatId,
-            @RequestBody ChatMessageRequest request,
-            Authentication authentication) {
-
-        return chatService.sendMessage(authentication, request);
-    }
-
-    /**
-     * PUT /api/chats/{chatId}/read
-     * Mark all messages in a conversation as read for the authenticated user.
-     */
-    @PutMapping("/{chatId}/read")
-    @ResponseStatus(HttpStatus.OK)
-    public void markChatRead(@PathVariable String chatId, Authentication authentication) {
-        chatService.markConversationRead(
-                authentication.getName(),
-                chatId
-        );
+        List<ChatConversationResponse> conversations = chatService.getConversations(authentication);
+        return ResponseEntity.ok(ApiResponse.success("Conversations retrieved.", conversations));
     }
 
     /**
      * GET /api/chats/unread-count
      * Get total unread message count for the authenticated user.
+     * NOTE: Must be declared BEFORE /{chatId} to avoid path ambiguity.
      */
     @GetMapping("/unread-count")
-    @ResponseStatus(HttpStatus.OK)
-    public UnreadCountResponse getUnreadCount(Authentication authentication) {
-        return chatService.getUnreadCount(authentication);
+    public ResponseEntity<ApiResponse<UnreadCountResponse>> getUnreadCount(
+            Authentication authentication) {
+        UnreadCountResponse count = chatService.getUnreadCount(authentication);
+        return ResponseEntity.ok(ApiResponse.success("Unread count retrieved.", count));
+    }
+
+    /**
+     * GET /api/chats/{chatId}
+     * Get a single conversation by partner/chat ID.
+     * Returns 404 if user is not a participant.
+     */
+    @GetMapping("/{chatId}")
+    public ResponseEntity<ApiResponse<ChatConversationResponse>> getChat(
+            @PathVariable String chatId,
+            Authentication authentication) {
+        ChatConversationResponse conversation = chatService.getConversation(authentication, chatId);
+        return ResponseEntity.ok(ApiResponse.success("Conversation retrieved.", conversation));
+    }
+
+    /**
+     * POST /api/chats
+     * Start a new conversation.
+     * - USER can only start a conversation with VENDOR
+     * - VENDOR can only start a conversation with USER
+     * - ADMIN can start a conversation with anyone
+     */
+    @PostMapping
+    public ResponseEntity<ApiResponse<ChatConversationResponse>> startConversation(
+            @RequestBody @Valid ChatCreateRequest request,
+            Authentication authentication) {
+
+        Role callerRole = extractRole(authentication);
+        Role receiverRole;
+
+        try {
+            receiverRole = Role.valueOf(request.getReceiverRole().trim().toUpperCase());
+        } catch (IllegalArgumentException | NullPointerException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("Invalid receiverRole. Must be USER, VENDOR, or ADMIN."));
+        }
+
+        // ── Enforce messaging rules ───────────────────────────────────────────
+        if (callerRole == Role.USER && receiverRole != Role.VENDOR) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error("Users may only message vendors."));
+        }
+        if (callerRole == Role.VENDOR && receiverRole != Role.USER) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error("Vendors may only message users."));
+        }
+
+        ChatConversationResponse conversation =
+                chatService.startConversation(authentication, request.getReceiverId(), receiverRole);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Conversation started.", conversation));
+    }
+
+    /**
+     * POST /api/chats/{chatId}/messages
+     * Send a new message in an existing conversation.
+     */
+    @PostMapping("/{chatId}/messages")
+    public ResponseEntity<ApiResponse<ChatMessageResponse>> sendMessage(
+            @PathVariable String chatId,
+            @RequestBody @Valid ChatMessageRequest request,
+            Authentication authentication) {
+
+        ChatMessageResponse message = chatService.sendMessage(authentication, chatId, request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Message sent.", message));
+    }
+
+    /**
+     * PUT /api/chats/{chatId}/read
+     * Mark all messages in a conversation as read for the authenticated user.
+     * The chatId is the partner ID (the other participant's ID).
+     */
+    @PutMapping("/{chatId}/read")
+    public ResponseEntity<ApiResponse<Void>> markChatRead(
+            @PathVariable String chatId,
+            Authentication authentication) {
+        User user = resolveUser(authentication);
+        chatService.markConversationRead(user.getId(), chatId);
+        return ResponseEntity.ok(ApiResponse.success("Conversation marked as read."));
     }
 }

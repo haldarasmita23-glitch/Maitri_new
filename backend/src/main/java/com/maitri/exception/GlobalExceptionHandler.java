@@ -3,6 +3,7 @@ package com.maitri.exception;
 import com.maitri.dto.ApiResponse;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -55,6 +56,7 @@ import java.util.stream.Collectors;
  * ───────────────────────────────────────────────────────────────────────────
  */
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     /**
@@ -479,11 +481,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception ex) {
-        // Log the real error for server-side debugging
-        // In Phase 13, this will become: log.error("Unhandled exception", ex);
-        System.err.println("[MAITRI ERROR] Unhandled exception: "
-                + ex.getClass().getSimpleName() + ": " + ex.getMessage());
-
+        log.error("[Maitri] Unhandled exception: {}", ex.getMessage(), ex);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error(

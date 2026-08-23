@@ -7,6 +7,7 @@ import com.maitri.dto.chat.ChatConversationResponse;
 import com.maitri.dto.chat.UnreadCountResponse;
 import com.maitri.exception.ChatAccessDeniedException;
 import com.maitri.exception.ChatNotFoundException;
+import com.maitri.exception.UserNotFoundException;
 import com.maitri.model.Chat;
 import com.maitri.model.MessageType;
 import com.maitri.model.Role;
@@ -14,14 +15,14 @@ import com.maitri.model.User;
 import com.maitri.repository.ChatRepository;
 import com.maitri.repository.UserRepository;
 import com.maitri.repository.VendorRepository;
-import com.maitri.service.NotificationService;
 import com.maitri.model.NotificationType;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * ChatService — Business logic for the Chat / Contact Module (Phase 11).
+ *
+ * ─── PRINCIPAL RESOLUTION ────────────────────────────────────────────────────
+ *   We do NOT cast auth.getPrincipal() to User directly because
+ *   UserDetailsServiceImpl returns a plain Spring Security UserDetails, not our
+ *   custom User entity. Instead we use auth.getName() (the email address) and
+ *   look up the User entity from UserRepository when the full entity is needed.
+ *
+ * ─── MESSAGING RULES ─────────────────────────────────────────────────────────
+ *   Role enforcement is performed in ChatController before calling this service.
+ *   The service trusts that role-compatible pairs have already been validated.
+ */
 @Service
 @RequiredArgsConstructor
 public class ChatService {
@@ -37,129 +51,207 @@ public class ChatService {
 
     private final ChatRepository chatRepository;
     private final UserRepository userRepository;
-    private final VendorRepository vendorRepository;
     private final NotificationService notificationService;
 
+    // ─── Internal helpers ─────────────────────────────────────────────────────
+
     /**
-     * Sends a new message in an existing conversation or starts a new one.
-     * The authenticated user's identity is derived from the security context.
+     * Resolves the caller's User entity from the authentication context.
+     * Uses auth.getName() (email) — works regardless of principal type.
+     */
+    private User resolveUser(Authentication auth) {
+        String email = auth.getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Authenticated user not found: " + email));
+    }
+
+    /**
+     * Extracts the caller's Role from their granted authorities.
+     */
+    private Role resolveRole(Authentication auth) {
+        for (GrantedAuthority ga : auth.getAuthorities()) {
+            String a = ga.getAuthority();
+            if ("ROLE_ADMIN".equals(a))  return Role.ADMIN;
+            if ("ROLE_VENDOR".equals(a)) return Role.VENDOR;
+        }
+        return Role.USER;
+    }
+
+    // ─── Public service methods ───────────────────────────────────────────────
+
+    /**
+     * Starts a new conversation (or retrieves an existing one) between the
+     * authenticated user and the specified receiver.
      *
-     * @param auth        The authenticated user from security context
-     * @param request     The chat message request (message, messageType)
-     * @return The created chat message response
-     * @throws ChatAccessDeniedException if the receiver has the same role as the sender
-     * @throws ChatNotFoundException     if the receiver is not found
+     * @param auth       The authenticated caller
+     * @param receiverId The ID of the receiver
+     * @param receiverRole The role of the receiver
+     * @return A ChatConversationResponse for the conversation
      */
     @Transactional
-    public ChatMessageResponse sendMessage(Authentication auth, ChatMessageRequest request) {
-        User sender = (User) auth.getPrincipal();
-        String senderId = sender.getId();
-        Role senderRole = sender.getRole();
+    public ChatConversationResponse startConversation(
+            Authentication auth, String receiverId, Role receiverRole) {
 
-        // Determine receiver based on conversation context
-        // The receiver information should come from the conversation lookup
+        User sender    = resolveUser(auth);
+        Role senderRole = resolveRole(auth);
 
-        // Create the chat message
+        // Create the opening "conversation started" message
         Chat chat = Chat.builder()
-                .senderId(senderId)
+                .senderId(sender.getId())
                 .senderRole(senderRole)
+                .receiverId(receiverId)
+                .receiverRole(receiverRole)
+                .message("Conversation started")
+                .messageType(MessageType.TEXT)
+                .timestamp(LocalDateTime.now())
+                .read(false)
+                .build();
+
+        chat = chatRepository.save(chat);
+        log.info("[Chat] Conversation started: id={}, sender={}, receiver={}",
+                chat.getId(), sender.getId(), receiverId);
+
+        return ChatConversationResponse.builder()
+                .otherPartyId(receiverId)
+                .otherPartyRole(receiverRole)
+                .lastMessage(chat.getMessage())
+                .lastMessageType(chat.getMessageType())
+                .lastMessageTimestamp(chat.getTimestamp())
+                .build();
+    }
+
+    /**
+     * Sends a new message in an existing conversation identified by partnerId.
+     *
+     * @param auth      The authenticated caller
+     * @param partnerId The conversation partner's ID (acts as chatId in URL)
+     * @param request   The message content and type
+     * @return The created message response
+     */
+    @Transactional
+    public ChatMessageResponse sendMessage(
+            Authentication auth, String partnerId, ChatMessageRequest request) {
+
+        User sender     = resolveUser(auth);
+        Role senderRole = resolveRole(auth);
+
+        // Determine receiver role (opposite of sender's role; ADMIN defaults to USER receiver)
+        Role receiverRole = (senderRole == Role.USER) ? Role.VENDOR
+                          : (senderRole == Role.VENDOR) ? Role.USER
+                          : Role.USER;
+
+        Chat chat = Chat.builder()
+                .senderId(sender.getId())
+                .senderRole(senderRole)
+                .receiverId(partnerId)
+                .receiverRole(receiverRole)
                 .message(request.getMessage())
-                .messageType(request.getMessageType())
+                .messageType(request.getMessageType() != null ? request.getMessageType() : MessageType.TEXT)
                 .timestamp(LocalDateTime.now())
                 .read(false)
                 .build();
 
         chat = chatRepository.save(chat);
 
-        // FAIL-SAFE: Notify the receiver - notification failure must never break the chat operation
+        // Notify receiver — failure must never break the chat operation
         try {
-            log.info("[Chat] Message sent: id={}, sender={}", chat.getId(), senderId);
+            notificationService.notifyUser(
+                    partnerId,
+                    receiverRole,
+                    NotificationType.CHAT,
+                    "New message",
+                    "New message from " + sender.getName()
+            );
         } catch (Exception ex) {
-            log.warn("[Chat] Failed to send notification for message id={}", chat.getId(), ex.getMessage());
+            log.warn("[Chat] Failed to send notification for message id={}: {}",
+                    chat.getId(), ex.getMessage());
         }
+
+        log.info("[Chat] Message sent: id={}, sender={}, receiver={}",
+                chat.getId(), sender.getId(), partnerId);
 
         return convertToResponse(chat);
     }
 
     /**
-     * Lists all conversations for the authenticated user, with the latest message per partner,
-     * ordered by newest activity first.
+     * Lists all conversations for the authenticated user (latest message per partner).
      *
      * @param auth The authenticated user from security context
      * @return List of chat conversations
      */
     public List<ChatConversationResponse> getConversations(Authentication auth) {
-        User user = (User) auth.getPrincipal();
-        String userId = user.getId();
-
-        List<Chat> conversations = chatRepository.findLatestMessagesPerPartner(userId);
-
+        User user = resolveUser(auth);
+        List<Chat> conversations = chatRepository.findLatestMessagesPerPartner(user.getId());
         return conversations.stream()
                 .map(this::convertToConversationResponse)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Gets a specific conversation between the authenticated user and another party.
+     * Gets a specific conversation using the partner's ID as the lookup key.
      *
      * @param auth      The authenticated user from security context
-     * @param partnerId The ID of the other party in the conversation
-     * @return The conversation with messages
-     * @throws ChatNotFoundException if no conversation exists or user is not a participant
+     * @param partnerId The conversation partner's ID (the chatId in the URL)
+     * @return The conversation response
+     * @throws ChatNotFoundException if no conversation found or user not a participant
      */
     public ChatConversationResponse getConversation(Authentication auth, String partnerId) {
-        User user = (User) auth.getPrincipal();
+        User user   = resolveUser(auth);
         String userId = user.getId();
 
-        // Check if user is a participant in any conversation with this partner
-        Optional<Chat> optionalChat = chatRepository.findByIdAndParticipant(partnerId, userId);
-
+        // Find the most recent message between this user and the partner.
+        // Throws 404 if no conversation exists or the user is not a participant.
+        Optional<Chat> optionalChat = chatRepository.findFirstConversationBetween(userId, partnerId);
         if (optionalChat.isEmpty()) {
-            throw new ChatNotFoundException("No conversation found with this partner.");
+            throw new ChatNotFoundException("No conversation found with partner: " + partnerId);
         }
 
         Chat firstMessage = optionalChat.get();
-        // Determine the other party's ID based on who the user is
         String otherPartyId;
         Role otherPartyRole;
+
         if (firstMessage.getSenderId().equals(userId)) {
-            otherPartyId = firstMessage.getReceiverId();
+            otherPartyId   = firstMessage.getReceiverId();
             otherPartyRole = firstMessage.getReceiverRole();
         } else {
-            otherPartyId = firstMessage.getSenderId();
+            otherPartyId   = firstMessage.getSenderId();
             otherPartyRole = firstMessage.getSenderRole();
         }
 
-        // Get all messages between these two parties, newest first
-        Page<Chat> messagesPage = chatRepository.findConversation(userId, otherPartyId, null);
+        // Get all messages between these two parties
+        Page<Chat> messagesPage = chatRepository.findConversation(
+                userId, otherPartyId, PageRequest.of(0, 50));
         List<Chat> messages = messagesPage.getContent();
 
-        // Convert to response DTOs
-        List<ChatMessageResponse> messageResponses = messages.stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
-
-        // Mark all messages from this partner as read for the user
+        // Mark messages from the partner as read
         markConversationRead(userId, otherPartyId);
+
+        String lastMsg = messages.isEmpty() ? null
+                : convertToResponse(messages.get(0)).getMessage();
 
         return ChatConversationResponse.builder()
                 .otherPartyId(otherPartyId)
                 .otherPartyRole(otherPartyRole)
-                .lastMessage(convertToResponse(messages.isEmpty() ? null : messages.get(0)).getMessage() != null ?
-                        convertToResponse(messages.isEmpty() ? null : messages.get(0)).getMessage() : null)
+                .lastMessage(lastMsg)
                 .build();
     }
 
     /**
-     * Marks all unread messages from a specific sender to a receiver as read.
+     * Marks all unread messages from senderId to receiverId as read.
      *
-     * @param userId    The receiver's id
-     * @param senderId  The sender's id
+     * @param receiverId The user marking messages as read
+     * @param senderId   The sender whose messages will be marked read
      * @return Number of messages updated
      */
     @Transactional
-    public long markConversationRead(String userId, String senderId) {
-        return chatRepository.markMessagesAsRead(senderId, userId);
+    public long markConversationRead(String receiverId, String senderId) {
+        List<Chat> unread = chatRepository.findBySenderIdAndReceiverIdAndReadFalse(senderId, receiverId);
+        if (unread.isEmpty()) {
+            return 0L;
+        }
+        unread.forEach(c -> c.setRead(true));
+        chatRepository.saveAll(unread);
+        return unread.size();
     }
 
     /**
@@ -169,23 +261,16 @@ public class ChatService {
      * @return Unread count response
      */
     public UnreadCountResponse getUnreadCount(Authentication auth) {
-        User user = (User) auth.getPrincipal();
-        String userId = user.getId();
-
-        long count = chatRepository.countByReceiverIdAndReadFalse(userId);
-
-        return UnreadCountResponse.builder()
-                .count(count)
-                .build();
+        User user  = resolveUser(auth);
+        long count = chatRepository.countByReceiverIdAndReadFalse(user.getId());
+        return UnreadCountResponse.builder().count(count).build();
     }
 
-    /**
-     * Converts a Chat entity to a ChatMessageResponse DTO.
-     */
+    // ─── Private converters ───────────────────────────────────────────────────
+
+    /** Converts a Chat entity to a ChatMessageResponse DTO. */
     private ChatMessageResponse convertToResponse(Chat chat) {
-        if (chat == null) {
-            return null;
-        }
+        if (chat == null) return null;
         return ChatMessageResponse.builder()
                 .id(chat.getId())
                 .senderId(chat.getSenderId())
@@ -199,19 +284,16 @@ public class ChatService {
                 .build();
     }
 
-    /**
-     * Converts a Chat entity to a ChatConversationResponse DTO (for conversation listing).
-     */
+    /** Converts a Chat entity to a ChatConversationResponse DTO. */
     private ChatConversationResponse convertToConversationResponse(Chat chat) {
         String otherPartyId;
-        Role otherPartyRole;
+        Role   otherPartyRole;
 
-        // Determine the other party based on the receiver role
         if (Role.VENDOR.equals(chat.getReceiverRole())) {
-            otherPartyId = chat.getReceiverId();
+            otherPartyId   = chat.getReceiverId();
             otherPartyRole = Role.VENDOR;
         } else {
-            otherPartyId = chat.getReceiverId();
+            otherPartyId   = chat.getReceiverId();
             otherPartyRole = Role.USER;
         }
 
