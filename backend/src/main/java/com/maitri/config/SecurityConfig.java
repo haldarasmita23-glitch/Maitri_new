@@ -185,19 +185,29 @@ public class SecurityConfig {
      *   - http://127.0.0.1:5500 → VS Code Live Server (alternate)
      *   - http://localhost:8080  → Direct backend / Postman via browser
      *
-     * In production (Phase 15):
-     *   This will be updated to only allow the real production domain.
+     * In production:
+     *   Configured via CORS_ALLOWED_ORIGINS environment variable.
+     *   Comma-separated list of allowed origins.
+     *   Example: https://maitri.in,https://www.maitri.in
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // Allowed origins (where the frontend runs)
-        configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:5500",
-                "http://127.0.0.1:5500",
-                "http://localhost:8080"
-        ));
+        // In production, set via CORS_ALLOWED_ORIGINS environment variable
+        // Format: comma-separated list (e.g., "https://maitri.in,https://www.maitri.in")
+        String allowedOrigins = System.getenv("CORS_ALLOWED_ORIGINS");
+        if (allowedOrigins != null && !allowedOrigins.isBlank()) {
+            configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split("\\s*,\\s*")));
+        } else {
+            // Local development defaults
+            configuration.setAllowedOrigins(Arrays.asList(
+                    "http://localhost:5500",
+                    "http://127.0.0.1:5500",
+                    "http://localhost:8080"
+            ));
+        }
 
         // Allowed HTTP methods
         configuration.setAllowedMethods(Arrays.asList(

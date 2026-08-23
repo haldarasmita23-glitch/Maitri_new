@@ -4,8 +4,21 @@
  */
 
 const CONFIG = {
-  /** Backend API base URL. Change this when deploying to production. */
-  API_BASE_URL: 'http://localhost:8080/api',
+  /**
+   * Backend API base URL.
+   * In production, this can be overridden by setting window.MAITRI_API_BASE_URL
+   * before this script loads (e.g., via a meta tag or inline script in index.html).
+   * Local default: http://localhost:8080/api
+   * Production: https://<railway-domain>/api
+   */
+  get API_BASE_URL() {
+    // Allow override via global variable set before this script loads
+    if (typeof window !== 'undefined' && window.MAITRI_API_BASE_URL) {
+      return window.MAITRI_API_BASE_URL;
+    }
+    // Local development default
+    return 'http://localhost:8080/api';
+  },
 
   /** App name */
   APP_NAME: 'Maitri',

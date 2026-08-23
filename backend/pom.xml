@@ -173,6 +173,16 @@
         </dependency>
 
         <!--
+            spring-boot-starter-actuator
+            PURPOSE: Production monitoring endpoints (health, info, metrics).
+            Only /health endpoint is exposed by default.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!--
             Flapdoodle Embedded MongoDB (test scope only)
             PURPOSE: Provides an in-memory MongoDB instance during mvn test.
             WHY: Integration tests (AuthControllerTest) need a real MongoDB connection.
