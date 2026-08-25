@@ -7,15 +7,14 @@ const CONFIG = {
   /**
    * Backend API base URL.
    *
-   * Resolution Order:
-   *   1. Explicit override via window.MAITRI_API_BASE_URL
-   *   2. Local development fallback
-   *   3. Production Render backend
+   * Resolution order:
+   * 1. window.MAITRI_API_BASE_URL
+   * 2. localhost during local development
+   * 3. production backend URL
    */
   get API_BASE_URL() {
+
     // 1. Explicit override
-    // This allows the API URL to be changed from index.html
-    // or another deployment configuration without editing this file.
     if (
       typeof window !== 'undefined' &&
       window.MAITRI_API_BASE_URL
@@ -24,7 +23,6 @@ const CONFIG = {
     }
 
     // 2. Local development
-    // When running the frontend locally, use the local Spring Boot backend.
     if (
       typeof window !== 'undefined' &&
       (
@@ -36,20 +34,15 @@ const CONFIG = {
     }
 
     // 3. Production
-    // When deployed (for example, on Vercel), use the Render backend.
     return 'https://maitri-backend-ivv6.onrender.com/api';
   },
 
-  /** App name */
   APP_NAME: 'Maitri',
 
-  /** App version */
   VERSION: '1.0.0',
 
-  /** Location served */
   LOCATION: 'Peenya / Nagasandra, Bengaluru',
 
-  /** V1 categories */
   CATEGORIES: [
     'Street Food',
     'Tailors',
@@ -57,7 +50,6 @@ const CONFIG = {
     'Mobile/Laptop Repair'
   ],
 
-  /** Local storage keys */
   STORAGE_KEYS: {
     AUTH_TOKEN: 'maitri_auth_token',
     USER_DATA: 'maitri_user_data',
@@ -65,6 +57,5 @@ const CONFIG = {
   },
 };
 
-// Freeze configuration to prevent accidental mutations.
 Object.freeze(CONFIG);
 Object.freeze(CONFIG.STORAGE_KEYS);
