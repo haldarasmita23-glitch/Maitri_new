@@ -6,18 +6,38 @@
 const CONFIG = {
   /**
    * Backend API base URL.
-   * In production, this can be overridden by setting window.MAITRI_API_BASE_URL
-   * before this script loads (e.g., via a meta tag or inline script in index.html).
-   * Local default: http://localhost:8080/api
-   * Production: https://<railway-domain>/api
+   *
+   * Resolution Order:
+   *   1. Explicit override via window.MAITRI_API_BASE_URL
+   *   2. Local development fallback
+   *   3. Production Render backend
    */
   get API_BASE_URL() {
-    // Allow override via global variable set before this script loads
-    if (typeof window !== 'undefined' && window.MAITRI_API_BASE_URL) {
+    // 1. Explicit override
+    // This allows the API URL to be changed from index.html
+    // or another deployment configuration without editing this file.
+    if (
+      typeof window !== 'undefined' &&
+      window.MAITRI_API_BASE_URL
+    ) {
       return window.MAITRI_API_BASE_URL;
     }
-    // Local development default
-    return 'http://localhost:8080/api';
+
+    // 2. Local development
+    // When running the frontend locally, use the local Spring Boot backend.
+    if (
+      typeof window !== 'undefined' &&
+      (
+        window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1'
+      )
+    ) {
+      return 'http://localhost:8080/api';
+    }
+
+    // 3. Production
+    // When deployed (for example, on Vercel), use the Render backend.
+    return 'https://maitri-backend-ivv6.onrender.com/api';
   },
 
   /** App name */
@@ -30,16 +50,21 @@ const CONFIG = {
   LOCATION: 'Peenya / Nagasandra, Bengaluru',
 
   /** V1 categories */
-  CATEGORIES: ['Street Food', 'Tailors', 'Printing & Xerox', 'Mobile/Laptop Repair'],
+  CATEGORIES: [
+    'Street Food',
+    'Tailors',
+    'Printing & Xerox',
+    'Mobile/Laptop Repair'
+  ],
 
   /** Local storage keys */
   STORAGE_KEYS: {
-    AUTH_TOKEN:  'maitri_auth_token',
-    USER_DATA:   'maitri_user_data',
-    FAVOURITES:  'maitri_favourites',
+    AUTH_TOKEN: 'maitri_auth_token',
+    USER_DATA: 'maitri_user_data',
+    FAVOURITES: 'maitri_favourites',
   },
 };
 
-// Freeze to prevent accidental mutations
+// Freeze configuration to prevent accidental mutations.
 Object.freeze(CONFIG);
 Object.freeze(CONFIG.STORAGE_KEYS);
