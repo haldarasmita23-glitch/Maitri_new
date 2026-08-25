@@ -15,6 +15,9 @@ WORKDIR /app
 
 COPY --from=build /app/target/*.jar app.jar
 
+ENV PORT=8080
+ENV SPRING_PROFILES_ACTIVE=prod
+
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dserver.port=${PORT} -jar app.jar"]
