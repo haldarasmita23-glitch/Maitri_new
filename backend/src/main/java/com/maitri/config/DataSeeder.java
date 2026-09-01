@@ -96,9 +96,29 @@ public class DataSeeder implements CommandLineRunner {
         String normalizedEmail = email.toLowerCase().trim();
         var userOpt = userRepository.findByEmail(normalizedEmail);
 
-        String targetPassword = (adminPassword != null && !adminPassword.isBlank())
-                ? adminPassword
-                : "maitri@admin";
+        if (adminPassword == null || adminPassword.isBlank()) {
+            log.info("[DataSeeder] No initial admin password configured via environment. Ensuring role and active status for {}.", normalizedEmail);
+            if (userOpt.isPresent()) {
+                User existing = userOpt.get();
+                boolean updated = false;
+                if (existing.getRole() != Role.ADMIN) {
+                    existing.setRole(Role.ADMIN);
+                    updated = true;
+                    log.info("[DataSeeder] Existing account {} updated with ROLE_ADMIN.", normalizedEmail);
+                }
+                if (!existing.isActive()) {
+                    existing.setActive(true);
+                    updated = true;
+                }
+                if (updated) {
+                    existing.setUpdatedAt(LocalDateTime.now());
+                    userRepository.save(existing);
+                } else {
+                    log.info("[DataSeeder] Administrator account {} verified. Role: ADMIN.", normalizedEmail);
+                }
+            }
+            return;
+        }
 
         if (userOpt.isPresent()) {
             User existing = userOpt.get();
@@ -113,8 +133,8 @@ public class DataSeeder implements CommandLineRunner {
                 existing.setActive(true);
                 updated = true;
             }
-            if (!passwordEncoder.matches(targetPassword, existing.getPassword())) {
-                existing.setPassword(passwordEncoder.encode(targetPassword));
+            if (!passwordEncoder.matches(adminPassword, existing.getPassword())) {
+                existing.setPassword(passwordEncoder.encode(adminPassword));
                 updated = true;
                 log.info("[DataSeeder] Password for {} updated with secure BCrypt hash.", normalizedEmail);
             }
@@ -128,7 +148,7 @@ public class DataSeeder implements CommandLineRunner {
         }
 
         // Create new admin account with BCrypt-hashed password
-        String hashedPassword = passwordEncoder.encode(targetPassword);
+        String hashedPassword = passwordEncoder.encode(adminPassword);
         LocalDateTime now = LocalDateTime.now();
         User admin = User.builder()
                 .name(displayName != null && !displayName.isBlank() ? displayName : "Maitri Admin")
