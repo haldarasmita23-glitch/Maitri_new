@@ -73,6 +73,24 @@ public class UserService {
         return toResponse(saved);
     }
 
+    /**
+     * Updates the user's preferred app language code ("en", "hi", "kn").
+     *
+     * @param user     The resolved authenticated user
+     * @param language The new language code ("en", "hi", "kn")
+     * @return The updated User document
+     */
+    public User updateLanguagePreference(User user, String language) {
+        if (language == null || (!language.equals("en") && !language.equals("hi") && !language.equals("kn"))) {
+            throw new IllegalArgumentException("Invalid language code: " + language + ". Supported: en, hi, kn.");
+        }
+        user.setPreferredLanguage(language);
+        user.setUpdatedAt(LocalDateTime.now());
+        User saved = userRepository.save(user);
+        log.info("[User] Language preference updated: id={}, lang={}", saved.getId(), language);
+        return saved;
+    }
+
     /** Maps a User document to the safe API projection (never includes password). */
     private UserResponse toResponse(User user) {
         return UserResponse.builder()

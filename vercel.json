@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "cleanUrls": false,
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/$1"
+    }
+  ]
+}

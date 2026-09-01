@@ -26,6 +26,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -133,7 +134,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/reviews/vendor/**").permitAll()
 
                         // Public vendor ratings summary
-                        .requestMatchers(HttpMethod.GET, "/api/reviews/vendor/**/summary").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/vendor/*/summary").permitAll()
 
                         // Swagger/OpenAPI (development only)
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
@@ -177,45 +178,88 @@ public class SecurityConfig {
         return http.build();
     }
 
+    @org.springframework.beans.factory.annotation.Value("${cors.allowed.origins:${CORS_ALLOWED_ORIGINS:}}")
+    private String corsAllowedOrigins;
+
     /**
      * CORS Configuration — Defines which frontend origins can call our API.
      *
      * During local development:
-     *   - http://localhost:5500  → VS Code Live Server
-     *   - http://127.0.0.1:5500 → VS Code Live Server (alternate)
-     *   - http://localhost:8080  → Direct backend / Postman via browser
+     *   - http://localhost:*     → Local dev ports (3000, 5000, 5500, 8080)
+     *   - http://127.0.0.1:*     → Local dev loopback
+     *   - http://192.168.*:*     → Local LAN / network IP (e.g. http://192.168.1.67:3000)
+     *   - http://10.*:*          → Private network IP
+     *   - http://172.16.*:* to http://172.31.*:* → Private Docker / LAN IP ranges
      *
-     * In production:
-     *   Configured via CORS_ALLOWED_ORIGINS environment variable.
-     *   Comma-separated list of allowed origins.
-     *   Example: https://maitri.in,https://www.maitri.in
+     * In production / cloud:
+     *   - https://*.vercel.app   → All Vercel deployments (preview and production)
+     *   - https://*.onrender.com → Render hosted apps
+     *   - https://*.netlify.app  → Netlify hosted apps
+     *   - Configured via CORS_ALLOWED_ORIGINS environment variable or cors.allowed.origins property.
+     *     Comma/semicolon-separated list of allowed origins.
+     *     Example: https://maitri.in,https://www.maitri.in,http://192.168.1.67:3000
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Allowed origins (where the frontend runs)
-        // In production, set via CORS_ALLOWED_ORIGINS environment variable
-        // Format: comma-separated list (e.g., "https://maitri.in,https://www.maitri.in")
-        String allowedOrigins = System.getenv("CORS_ALLOWED_ORIGINS");
-        if (allowedOrigins != null && !allowedOrigins.isBlank()) {
-            configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split("\\s*,\\s*")));
-        } else {
-            // Local development defaults
-            configuration.setAllowedOrigins(Arrays.asList(
-                    "http://localhost:5500",
-                    "http://127.0.0.1:5500",
-                    "http://localhost:8080"
-            ));
+        // Allowed origin patterns (where the frontend runs)
+        // Supports all Vercel deployments (*.vercel.app), Render (*.onrender.com),
+        // local dev ports (localhost, 127.0.0.1), and local network IP addresses (192.168.*, 10.*, 172.*).
+        List<String> allowedOriginPatterns = new ArrayList<>(Arrays.asList(
+                "https://*.vercel.app",
+                "https://*.onrender.com",
+                "https://*.netlify.app",
+                "http://localhost:*",
+                "http://127.0.0.1:*",
+                "http://192.168.*:*",
+                "http://10.*:*",
+                "http://172.16.*:*",
+                "http://172.17.*:*",
+                "http://172.18.*:*",
+                "http://172.19.*:*",
+                "http://172.20.*:*",
+                "http://172.21.*:*",
+                "http://172.22.*:*",
+                "http://172.23.*:*",
+                "http://172.24.*:*",
+                "http://172.25.*:*",
+                "http://172.26.*:*",
+                "http://172.27.*:*",
+                "http://172.28.*:*",
+                "http://172.29.*:*",
+                "http://172.30.*:*",
+                "http://172.31.*:*"
+        ));
+
+        // Read custom origins from property / environment variable
+        String envOrigins = (corsAllowedOrigins != null && !corsAllowedOrigins.isBlank())
+                ? corsAllowedOrigins
+                : System.getenv("CORS_ALLOWED_ORIGINS");
+
+        if (envOrigins != null && !envOrigins.isBlank()) {
+            for (String raw : envOrigins.split("[,;]+")) {
+                String origin = raw.trim().replaceAll("/+$", "");
+                if (!origin.isBlank() && !allowedOriginPatterns.contains(origin)) {
+                    allowedOriginPatterns.add(origin);
+                }
+            }
         }
+
+        configuration.setAllowedOriginPatterns(allowedOriginPatterns);
 
         // Allowed HTTP methods
         configuration.setAllowedMethods(Arrays.asList(
                 "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
         ));
 
-        // Allow all headers (Authorization: Bearer <token> must pass through)
+        // Allow all headers (Authorization: Bearer <token>, Content-Type, etc.)
         configuration.setAllowedHeaders(List.of("*"));
+
+        // Exposed headers that the client JavaScript can read
+        configuration.setExposedHeaders(Arrays.asList(
+                "Authorization", "Content-Type", "X-Total-Count"
+        ));
 
         // Allow credentials (needed for Authorization header cross-origin)
         configuration.setAllowCredentials(true);
@@ -223,9 +267,9 @@ public class SecurityConfig {
         // Cache preflight response for 1 hour (reduces OPTIONS requests)
         configuration.setMaxAge(3600L);
 
-        // Apply this CORS config to all /api/** endpoints
+        // Apply this CORS config to all endpoints
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", configuration);
+        source.registerCorsConfiguration("/**", configuration);
 
         return source;
     }

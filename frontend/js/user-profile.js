@@ -11,18 +11,28 @@
 
 const LANGUAGES = {
   en: 'English',
-  hi: 'Hindi',
-  kn: 'Kannada',
+  hi: 'हिन्दी',
+  kn: 'ಕನ್ನಡ',
 };
 
-const ROLE_LABELS = {
-  USER: 'Member',
-  VENDOR: 'Vendor',
-  ADMIN: 'Admin',
-};
+function getRoleLabel(role) {
+  if (typeof I18n !== 'undefined') {
+    if (role === 'ADMIN') return I18n.t('profile.roleAdmin');
+    if (role === 'VENDOR') return I18n.t('profile.roleVendor');
+    return I18n.t('profile.roleMember');
+  }
+  return role === 'ADMIN' ? 'Admin' : (role === 'VENDOR' ? 'Vendor' : 'Member');
+}
+
+let _currentProfile = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   initUserProfile();
+  window.addEventListener('maitri:language-change', () => {
+    if (_currentProfile) {
+      renderProfile(_currentProfile);
+    }
+  });
 });
 
 async function initUserProfile() {
@@ -33,6 +43,18 @@ async function initUserProfile() {
   if (!token) {
     showProfileView(loginRequiredEl, contentEl);
     return;
+  }
+
+  // Role Guard: Vendors and Admins use their dedicated business/admin portals
+  if (typeof AuthSession !== 'undefined') {
+    if (AuthSession.isVendor()) {
+      window.location.href = 'vendor-dashboard.html';
+      return;
+    }
+    if (AuthSession.isAdmin()) {
+      window.location.href = 'admin.html';
+      return;
+    }
   }
 
   let profile = null;
@@ -59,6 +81,7 @@ async function initUserProfile() {
     }
   }
 
+  _currentProfile = profile;
   showProfileView(contentEl, loginRequiredEl);
   renderProfile(profile);
   bindProfileForm();
@@ -100,6 +123,7 @@ function readStoredUser() {
 }
 
 function renderProfile(user) {
+  const notSetLabel = typeof I18n !== 'undefined' ? I18n.t('profile.notSet') : 'Not set';
   const name = user.name || user.email || 'Maitri Member';
   const location = user.location || {};
   const lang = user.preferredLanguage || 'en';
@@ -108,18 +132,21 @@ function renderProfile(user) {
 
   document.getElementById('profile-summary-name').textContent = name;
   document.getElementById('profile-summary-email').textContent = user.email || '—';
-  document.getElementById('profile-summary-role').textContent = ROLE_LABELS[role] || role;
+  document.getElementById('profile-summary-role').textContent = getRoleLabel(role);
   document.getElementById('profile-summary-lang').textContent = `🌐 ${LANGUAGES[lang] || lang}`;
-  document.getElementById('profile-summary-phone').textContent = user.phone || 'Not set';
-  document.getElementById('profile-summary-area').textContent = location.area || 'Not set';
-  document.getElementById('profile-summary-city').textContent = location.city || 'Not set';
+  document.getElementById('profile-summary-phone').textContent = user.phone || notSetLabel;
+  document.getElementById('profile-summary-area').textContent = location.area || notSetLabel;
+  document.getElementById('profile-summary-city').textContent = location.city || notSetLabel;
 
   const joinedEl = document.getElementById('profile-summary-joined');
   if (user.createdAt) {
     try {
       const date = new Date(user.createdAt);
       if (!Number.isNaN(date.getTime())) {
-        joinedEl.textContent = `Joined ${date.toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}`;
+        const formattedDate = date.toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
+        joinedEl.textContent = typeof I18n !== 'undefined'
+          ? I18n.t('profile.joinedOn', { date: formattedDate })
+          : `Joined ${formattedDate}`;
       }
     } catch {
       joinedEl.textContent = '';
@@ -168,16 +195,29 @@ function bindProfileForm() {
     try {
       const result = await API.updateUserProfile(payload);
       if (!result.ok || !result.data?.success) {
-        Toast.error('Could not save changes', apiErrorMessage(result, 'Please review your details and try again.'));
+        Toast.error(
+          typeof I18n !== 'undefined' ? I18n.t('messages.profileUpdateFailed') : 'Could not save changes',
+          apiErrorMessage(result, typeof I18n !== 'undefined' ? I18n.t('messages.profileUpdateFailed') : 'Please review your details and try again.')
+        );
         return;
       }
 
       const updated = result.data.data;
+      _currentProfile = updated;
       AuthSession.save({ token: AuthSession.token(), user: updated });
+      if (typeof I18n !== 'undefined' && updated.preferredLanguage) {
+        I18n.setLanguage(updated.preferredLanguage, false);
+      }
       renderProfile(updated);
-      Toast.success('Profile updated!', 'Your changes have been saved.');
+      Toast.success(
+        typeof I18n !== 'undefined' ? I18n.t('messages.profileUpdated') : 'Profile updated!',
+        typeof I18n !== 'undefined' ? I18n.t('common.saveChanges') : 'Your changes have been saved.'
+      );
     } catch {
-      Toast.error('Unable to save changes', 'Please check your connection and try again.');
+      Toast.error(
+        typeof I18n !== 'undefined' ? I18n.t('messages.connectionError') : 'Unable to save changes',
+        typeof I18n !== 'undefined' ? I18n.t('messages.connectionError') : 'Please check your connection and try again.'
+      );
     } finally {
       setLoading(btn, false);
     }

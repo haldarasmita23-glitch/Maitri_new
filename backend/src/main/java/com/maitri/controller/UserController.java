@@ -2,6 +2,8 @@ package com.maitri.controller;
 
 import com.maitri.dto.ApiResponse;
 import com.maitri.dto.auth.UserResponse;
+import com.maitri.dto.user.LanguagePreferenceRequest;
+import com.maitri.dto.user.UserPreferenceResponse;
 import com.maitri.dto.user.UserUpdateRequest;
 import com.maitri.exception.UserNotFoundException;
 import com.maitri.model.User;
@@ -20,24 +22,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * User Controller — Phase 6.
+ * User Controller — Profile & User Preferences.
  *
  * ─── ENDPOINTS & ACCESS ──────────────────────────────────────────────────────
- *   GET /api/users/me   — USER & ADMIN: current user's profile
- *   PUT /api/users/me   — USER & ADMIN: update current user's profile
+ *   GET /api/users/me                    — USER & ADMIN: current user's profile
+ *   PUT /api/users/me                    — USER & ADMIN: update current user's profile
+ *   GET /api/users/preferences           — USER, ADMIN & VENDOR: user's preferences
+ *   PUT /api/users/preferences/language  — USER, ADMIN & VENDOR: update app language
  *
- * VENDOR accounts are deliberately DENIED (403): a vendor manages their
- * business listing via /api/vendors/*, not their (rarely used) user profile.
- * This matches the documented SECURITY.md access matrix.
- *
- * Role enforcement is split across two layers (defence in depth):
- *   - SecurityConfig  requires authentication at the HTTP layer (401 for anonymous)
- *   - @PreAuthorize   enforces the exact role at the method layer (403 for
- *                     the wrong role, e.g. a VENDOR calling /api/users/me)
- *
- * NOTE: /api/auth/me remains unchanged — it keeps serving the lightweight
- * authenticated identity for navbar state. /api/users/me is the richer,
- * editable profile endpoint.
+ * VENDOR accounts are denied on /api/users/me (manage business via /api/vendors/*),
+ * but are permitted on /api/users/preferences/* to set application language.
  */
 @RestController
 @RequestMapping("/api/users")
@@ -53,7 +47,7 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserResponse>> getMe(
             @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(
-                ApiResponse.success("User profile retrieved.",
+                ApiResponse.success("User profile retrieved.", "profile.retrieved",
                         userService.getMe(currentUser(userDetails)))
         );
     }
@@ -65,8 +59,35 @@ public class UserController {
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody UserUpdateRequest request) {
         return ResponseEntity.ok(
-                ApiResponse.success("User profile updated.",
+                ApiResponse.success("User profile updated.", "profile.updated",
                         userService.updateMe(currentUser(userDetails), request))
+        );
+    }
+
+    /** USER, ADMIN & VENDOR — returns current user's preferences (e.g. language). */
+    @GetMapping("/preferences")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'VENDOR')")
+    public ResponseEntity<ApiResponse<UserPreferenceResponse>> getPreferences(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = currentUser(userDetails);
+        String lang = user.getPreferredLanguage() != null ? user.getPreferredLanguage() : "en";
+        return ResponseEntity.ok(
+                ApiResponse.success("User preferences retrieved.", "preferences.retrieved",
+                        new UserPreferenceResponse(lang))
+        );
+    }
+
+    /** USER, ADMIN & VENDOR — updates user's preferred app language ("en", "hi", "kn"). */
+    @PutMapping("/preferences/language")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN', 'VENDOR')")
+    public ResponseEntity<ApiResponse<UserPreferenceResponse>> updateLanguage(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody LanguagePreferenceRequest request) {
+        User user = currentUser(userDetails);
+        User updated = userService.updateLanguagePreference(user, request.getLanguage());
+        return ResponseEntity.ok(
+                ApiResponse.success("Language preference updated.", "preferences.languageUpdated",
+                        new UserPreferenceResponse(updated.getPreferredLanguage()))
         );
     }
 

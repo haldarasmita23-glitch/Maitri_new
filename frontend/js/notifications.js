@@ -52,6 +52,10 @@ const Notifications = {
 
   _createBell() {
     const authAreas = document.querySelectorAll('.navbar__auth');
+    const titleText = typeof I18n !== 'undefined' ? I18n.t('notifications.title') : 'Notifications';
+    const markAllText = typeof I18n !== 'undefined' ? I18n.t('notifications.markAllRead') : 'Mark all read';
+    const viewAllText = typeof I18n !== 'undefined' ? I18n.t('notifications.viewAll') : 'View all notifications';
+
     authAreas.forEach(area => {
       // Check if bell already exists
       if (area.querySelector('.navbar__bell')) return;
@@ -60,7 +64,7 @@ const Notifications = {
       const bell = document.createElement('button');
       bell.type = 'button';
       bell.className = 'navbar__bell btn btn--ghost btn--icon';
-      bell.setAttribute('aria-label', 'Notifications');
+      bell.setAttribute('aria-label', titleText);
       bell.setAttribute('aria-expanded', 'false');
       bell.setAttribute('aria-haspopup', 'true');
       bell.innerHTML = `
@@ -76,12 +80,12 @@ const Notifications = {
       dropdown.setAttribute('role', 'menu');
       dropdown.innerHTML = `
         <div class="navbar__dropdown-header">
-          <span>Notifications</span>
-          <button type="button" class="navbar__mark-all" aria-label="Mark all as read">Mark all read</button>
+          <span>${escapeHtml(titleText)}</span>
+          <button type="button" class="navbar__mark-all" aria-label="${markAllText}">${escapeHtml(markAllText)}</button>
         </div>
         <div class="navbar__dropdown-list" role="listbox"></div>
         <div class="navbar__dropdown-footer">
-          <a href="pages/user-profile.html#notifications">View all notifications</a>
+          <a href="pages/user-profile.html#notifications">${escapeHtml(viewAllText)}</a>
         </div>
       `;
 

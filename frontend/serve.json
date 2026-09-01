@@ -1,0 +1,23 @@
+{
+  "cleanUrls": false,
+  "trailingSlash": false,
+  "directoryListing": false,
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "pages/vendor-detail", "destination": "pages/vendor-detail.html" },
+    { "source": "pages/vendors", "destination": "pages/vendors.html" },
+    { "source": "pages/about", "destination": "pages/about.html" },
+    { "source": "pages/chat", "destination": "pages/chat.html" },
+    { "source": "pages/chat-detail", "destination": "pages/chat-detail.html" },
+    { "source": "pages/login", "destination": "pages/login.html" },
+    { "source": "pages/register", "destination": "pages/register.html" },
+    { "source": "pages/vendor-register", "destination": "pages/vendor-register.html" },
+    { "source": "pages/user-profile", "destination": "pages/user-profile.html" },
+    { "source": "pages/nlp", "destination": "pages/nlp.html" },
+    { "source": "pages/vendor-dashboard", "destination": "pages/vendor-dashboard.html" },
+    { "source": "pages/admin", "destination": "pages/admin.html" },
+    { "source": "pages/admin-users", "destination": "pages/admin-users.html" },
+    { "source": "pages/admin-vendors", "destination": "pages/admin-vendors.html" },
+    { "source": "pages/admin-complaints", "destination": "pages/admin-complaints.html" }
+  ]
+}

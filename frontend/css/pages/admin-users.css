@@ -1,147 +1,135 @@
-/* Admin Page Styles */
+/* ─────────────────────────────────────────────────────────────────
+   Maitri — Admin Users Management Styles
+   ───────────────────────────────────────────────────────────────── */
+
+.admin-users-page {
+  padding: var(--space-8) 0 var(--space-20);
+  position: relative;
+  z-index: 1;
+}
 
 .page-header {
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-8);
 }
 
 .page-header h1 {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-extrabold);
   color: var(--color-text-primary);
+  margin-bottom: var(--space-2);
 }
 
-.table-wrapper {
-  overflow-x: auto;
-}
-
-.admin-users-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: var(--space-4);
-}
-
-.admin-users-table thead th {
-  background-color: var(--color-bg-card);
-  padding: var(--space-3) var(--space-4);
-  text-align: left;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-secondary);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.admin-users-table tbody td {
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--color-border);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-primary);
-}
-
-.admin-users-table tbody tr:hover {
-  background-color: var(--color-bg-50);
-}
-
-.admin-users-table tbody tr:hover td {
-  border-color: var(--color-border-light);
-}
-
-.empty-state {
-  text-align: center;
-  padding: var(--space-10) var(--space-8);
+.page-header p {
   color: var(--color-text-muted);
+  font-size: var(--font-size-base);
+  margin-bottom: 0;
 }
 
 .filters-bar {
-  background-color: var(--color-bg-card);
-  padding: var(--space-3) var(--space-4);
-  margin-bottom: var(--space-4);
-  border-radius: var(--radius-md);
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  padding: var(--space-5) var(--space-6);
+  margin-bottom: var(--space-6);
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
 }
 
 .filters-bar__row {
   display: flex;
   gap: var(--space-4);
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .filters-bar__group {
   display: flex;
   flex-direction: column;
-  min-width: 180px;
+  min-width: 200px;
 }
 
 .filters-bar__group label {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-secondary);
-  margin-bottom: var(--space-1);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-1-5);
 }
 
 .filters-bar__group select {
   width: 100%;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  padding: 0.6rem var(--space-4);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-family: var(--font-family);
   font-size: var(--font-size-sm);
-  background-color: var(--color-bg);
+  background-color: #FFFFFF;
   color: var(--color-text-primary);
   cursor: pointer;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .filters-bar__group select:focus {
-  outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px var(--color-primary-50);
+  box-shadow: 0 0 0 3px var(--color-primary-100);
 }
 
 .table-wrapper {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-card);
   overflow-x: auto;
 }
 
 .admin-users-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 600px;
+  min-width: 650px;
 }
 
 .admin-users-table thead th {
-  background-color: var(--color-bg-card);
-  padding: var(--space-3) var(--space-4);
+  background-color: var(--color-bg);
+  padding: var(--space-4) var(--space-6);
   text-align: left;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   border-bottom: 1px solid var(--color-border);
 }
 
 .admin-users-table tbody td {
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--color-border-light);
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);
+  vertical-align: middle;
 }
 
 .admin-users-table tbody tr:hover {
-  background-color: var(--color-bg-50);
+  background-color: var(--color-primary-50);
 }
 
-.admin-users-table tbody tr:hover td {
-  border-color: var(--color-border-light);
+.admin-users-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
-.empty-state {
-  text-align: center;
-  padding: var(--space-10) var(--space-8);
-  color: var(--color-text-muted);
+.admin-users-table .btn {
+  padding: 0.35rem var(--space-3);
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-md);
 }
 
 @media (max-width: 768px) {
   .admin-users-table thead th,
   .admin-users-table tbody td {
-    padding: var(--space-2) var(--space-3);
-  }
-
-  .filters-bar__group {
-    min-width: 120px;
+    padding: var(--space-3) var(--space-4);
   }
 }

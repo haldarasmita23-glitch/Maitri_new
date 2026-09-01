@@ -1,0 +1,323 @@
+/* ─────────────────────────────────────────────────────────────────
+   Maitri — Admin Console Styles (Professional SaaS Dashboard)
+   Modern layout, sidebar navigation with glowing active states,
+   KPI metric cards, and responsive data tables.
+   ───────────────────────────────────────────────────────────────── */
+
+/* ── Admin Master Layout ───────────────────────────────────────── */
+.admin-layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  min-height: calc(100vh - var(--navbar-height));
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 1024px) {
+  .admin-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Admin Sidebar ─────────────────────────────────────────────── */
+.admin-sidebar {
+  background: var(--color-primary-darker);
+  color: #FFFFFF;
+  padding: var(--space-6) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 1024px) {
+  .admin-sidebar {
+    display: none;
+  }
+}
+
+.admin-sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-3) var(--space-4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-sidebar__badge {
+  background: var(--gradient-primary);
+  color: #FFFFFF;
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-extrabold);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1-5);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-nav__heading {
+  font-size: var(--font-size-2xs);
+  font-weight: var(--font-weight-bold);
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: var(--space-2) var(--space-3);
+}
+
+.admin-nav__item a {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3-5);
+  border-radius: var(--radius-xl);
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--transition-fast);
+}
+
+.admin-nav__item a:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
+}
+
+.admin-nav__item.active a,
+.admin-nav__item a.active {
+  background: var(--gradient-primary);
+  color: #FFFFFF;
+  box-shadow: var(--shadow-primary-sm);
+}
+
+.admin-nav__icon {
+  font-size: 1.15rem;
+  width: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.admin-nav__counter {
+  margin-left: auto;
+  background: var(--color-accent);
+  color: #FFFFFF;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+}
+
+/* ── Admin Content Area ────────────────────────────────────────── */
+.admin-content {
+  background: var(--color-bg);
+  padding: var(--space-8) var(--space-10);
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .admin-content {
+    padding: var(--space-6) var(--space-4);
+  }
+}
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-8);
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.admin-header h1 {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-extrabold);
+  color: var(--color-text-primary);
+  margin-bottom: 2px;
+}
+
+.admin-header p {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin-bottom: 0;
+}
+
+.admin-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* ── KPI Metric Cards ─────────────────────────────────────────── */
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-5);
+  margin-bottom: var(--space-8);
+}
+
+.admin-stat-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-5) var(--space-6);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.admin-stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.admin-stat-card__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-stat-card__label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--space-1);
+}
+
+.admin-stat-card__val {
+  font-family: var(--font-family-display);
+  font-size: 2.1rem;
+  font-weight: var(--font-weight-extrabold);
+  color: var(--color-primary);
+  line-height: 1;
+}
+
+.admin-stat-card__icon {
+  width: 54px;
+  height: 54px;
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.85rem;
+  flex-shrink: 0;
+}
+
+.admin-stat-card__icon--primary {
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+}
+
+.admin-stat-card__icon--amber {
+  background: var(--color-warm-50);
+  color: var(--color-warm-dark);
+}
+
+.admin-stat-card__icon--green {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.admin-stat-card__icon--red {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+/* ── Admin Data Tables & Cards ─────────────────────────────────── */
+.admin-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  margin-bottom: var(--space-8);
+}
+
+.admin-card__header {
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--color-border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.admin-card__title {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.admin-table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: var(--font-size-sm);
+}
+
+.admin-table th {
+  background: var(--color-bg);
+  padding: var(--space-3-5) var(--space-6);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--color-border-light);
+  color: var(--color-text-primary);
+  vertical-align: middle;
+}
+
+.admin-table tbody tr:hover {
+  background: var(--color-primary-50);
+}
+
+.admin-table__actions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+/* ── Admin Toolbar & Filters ───────────────────────────────────── */
+.admin-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.admin-toolbar .search-box {
+  max-width: 320px;
+}

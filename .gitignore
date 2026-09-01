@@ -67,3 +67,10 @@ uploads/
 # ─── Compiled Frontend Assets (future) ───────
 dist/
 build/
+
+# ─── Temporary / Local Scratch Files ─────────
+scratch/
+login.json
+run_backend.bat
+Test.java
+Test.class

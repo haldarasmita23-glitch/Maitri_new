@@ -10,12 +10,6 @@
  * Reuses the existing Toast / Navbar / AuthSession / API patterns.
  */
 
-const ComplaintStatusLabels = {
-  PENDING: 'Pending',
-  IN_PROGRESS: 'In Progress',
-  RESOLVED: 'Resolved',
-};
-
 const ComplaintStatusBadge = {
   PENDING: 'badge--amber',
   IN_PROGRESS: 'badge--primary',
@@ -35,9 +29,14 @@ function getCurrentUser() {
 
 /** Renders a status badge for a complaint. */
 function complaintStatusBadge(status) {
-  const label = ComplaintStatusLabels[status] || status || 'Unknown';
+  let label = status || 'Unknown';
+  if (typeof I18n !== 'undefined') {
+    if (status === 'PENDING') label = I18n.t('status.pending');
+    else if (status === 'IN_PROGRESS') label = I18n.t('status.inProgress');
+    else if (status === 'RESOLVED') label = I18n.t('status.resolved');
+  }
   const cls = ComplaintStatusBadge[status] || 'badge--gray';
-  return `<span class="badge ${cls}">${label}</span>`;
+  return `<span class="badge ${cls}">${escapeHtml(label)}</span>`;
 }
 
 /** Formats a date string for display. */
@@ -61,12 +60,14 @@ async function renderMyComplaints(container) {
 
   const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
   if (!token) {
+    const loginText = typeof I18n !== 'undefined' ? I18n.t('profile.loginRequired') : 'Log in required';
+    const loginPrompt = typeof I18n !== 'undefined' ? I18n.t('profile.loginPrompt') : 'Please log in to view your complaints.';
     container.innerHTML = `
       <div class="alert alert--info" role="note">
         <span class="alert__icon">🔐</span>
         <div class="alert__text">
-          <strong>Log in required</strong><br>
-          Please <a href="login.html">log in</a> to view your complaints.
+          <strong>${escapeHtml(loginText)}</strong><br>
+          ${loginPrompt}
         </div>
       </div>
     `;
@@ -105,11 +106,13 @@ async function renderMyComplaints(container) {
 
     const complaints = result.data.data || [];
     if (complaints.length === 0) {
+      const emptyTitle = typeof I18n !== 'undefined' ? I18n.t('profile.noComplaintsTitle') : 'No complaints yet';
+      const emptyDesc = typeof I18n !== 'undefined' ? I18n.t('profile.noComplaintsDesc') : "You haven't raised any complaints. Visit a vendor page to raise one.";
       container.innerHTML = `
         <div class="empty-state">
           <div class="empty-state__icon">📋</div>
-          <h3>No complaints yet</h3>
-          <p>You haven't raised any complaints. Visit a vendor page to raise one.</p>
+          <h3>${escapeHtml(emptyTitle)}</h3>
+          <p>${escapeHtml(emptyDesc)}</p>
         </div>
       `;
       return;
@@ -193,36 +196,46 @@ function openComplaintEdit(complaint, container) {
     const type = card.querySelector(`#ce-type-${complaint.id}`).value.trim();
     const desc = card.querySelector(`#ce-desc-${complaint.id}`).value.trim();
     if (!type || !desc) {
-      Toast.warning('Missing fields', 'Complaint type and description are required.');
+      const msgTitle = typeof I18n !== 'undefined' ? I18n.t('validation.subjectRequired') : 'Missing fields';
+      const msgText = typeof I18n !== 'undefined' ? I18n.t('validation.descriptionRequired') : 'Complaint type and description are required.';
+      Toast.warning(msgTitle, msgText);
       return;
     }
     if (desc.length > 1000) {
-      Toast.warning('Description too long', 'Description cannot exceed 1000 characters.');
+      const lenTitle = typeof I18n !== 'undefined' ? I18n.t('validation.descriptionRequired') : 'Description too long';
+      Toast.warning(lenTitle, 'Description cannot exceed 1000 characters.');
       return;
     }
     const result = await API.updateComplaint(complaint.id, { complaintType: type, description: desc });
     if (result.ok && result.data?.success) {
-      Toast.success('Complaint updated!', 'Your complaint has been saved.');
+      Toast.success(
+        typeof I18n !== 'undefined' ? I18n.t('messages.complaintSubmitted') : 'Complaint updated!',
+        typeof I18n !== 'undefined' ? I18n.t('common.saveChanges') : 'Your complaint has been saved.'
+      );
       renderMyComplaints(container);
     } else {
-      Toast.error('Could not update complaint', result.data?.message || 'Please try again.');
+      Toast.error(typeof I18n !== 'undefined' ? I18n.t('messages.unknownError') : 'Could not update complaint', result.data?.message || 'Please try again.');
     }
   });
 }
 
 /** Deletes the current user's own PENDING complaint after confirmation. */
 async function deleteOwnComplaint(id, container) {
-  if (!window.confirm('Delete this complaint? This cannot be undone.')) return;
+  const confirmMsg = typeof I18n !== 'undefined' ? I18n.t('vendorDetail.confirmDeleteReview') : 'Delete this complaint? This cannot be undone.';
+  if (!window.confirm(confirmMsg)) return;
   try {
     const result = await API.deleteComplaint(id);
     if (result.ok && result.data?.success) {
-      Toast.success('Complaint deleted.', 'Your complaint has been removed.');
+      Toast.success(typeof I18n !== 'undefined' ? I18n.t('messages.reviewDeleted') : 'Complaint deleted.', '');
       renderMyComplaints(container);
     } else {
-      Toast.error('Could not delete complaint', result.data?.message || 'Please try again.');
+      Toast.error(typeof I18n !== 'undefined' ? I18n.t('messages.unknownError') : 'Could not delete complaint', result.data?.message || 'Please try again.');
     }
   } catch {
-    Toast.error('Network error', 'Please check your connection and try again.');
+    Toast.error(
+      typeof I18n !== 'undefined' ? I18n.t('messages.connectionError') : 'Network error',
+      typeof I18n !== 'undefined' ? I18n.t('messages.connectionError') : 'Please check your connection and try again.'
+    );
   }
 }
 
@@ -298,22 +311,27 @@ async function initComplaintForm(vendorId, container) {
     const description = document.getElementById('complaint-description').value.trim();
 
     if (!type) {
-      Toast.warning('Complaint type required', 'Please select a complaint type.');
+      const typeReqTitle = typeof I18n !== 'undefined' ? I18n.t('validation.subjectRequired') : 'Complaint type required';
+      const typeReqMsg = typeof I18n !== 'undefined' ? I18n.t('validation.subjectRequired') : 'Please select a complaint type.';
+      Toast.warning(typeReqTitle, typeReqMsg);
       return;
     }
     if (!description) {
-      Toast.warning('Description required', 'Please describe your complaint.');
+      const descReqTitle = typeof I18n !== 'undefined' ? I18n.t('validation.descriptionRequired') : 'Description required';
+      const descReqMsg = typeof I18n !== 'undefined' ? I18n.t('validation.descriptionRequired') : 'Please describe your complaint.';
+      Toast.warning(descReqTitle, descReqMsg);
       return;
     }
     if (description.length > 1000) {
-      Toast.warning('Description too long', 'Description cannot exceed 1000 characters.');
+      const lenTitle = typeof I18n !== 'undefined' ? I18n.t('validation.descriptionRequired') : 'Description too long';
+      Toast.warning(lenTitle, 'Description cannot exceed 1000 characters.');
       return;
     }
 
     const submitBtn = form.querySelector('button[type="submit"]');
     const originalText = submitBtn.textContent;
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Submitting…';
+    submitBtn.textContent = typeof I18n !== 'undefined' ? I18n.t('common.loading') : 'Submitting…';
 
     try {
       const result = await API.createComplaint({ vendorId, complaintType: type, description });
@@ -322,17 +340,23 @@ async function initComplaintForm(vendorId, container) {
           <div class="alert alert--success" role="status">
             <span class="alert__icon">✅</span>
             <div class="alert__text">
-              <strong>Complaint submitted!</strong><br>
-              The vendor has been notified. You can track its status from your profile.
+              <strong>${escapeHtml(typeof I18n !== 'undefined' ? I18n.t('messages.complaintSubmitted') : 'Complaint submitted!')}</strong><br>
+              ${escapeHtml(typeof I18n !== 'undefined' ? I18n.t('profile.complaintsDesc') : 'The vendor has been notified. You can track its status from your profile.')}
             </div>
           </div>
         `;
-        Toast.success('Complaint submitted!', 'The vendor has been notified.');
+        Toast.success(
+          typeof I18n !== 'undefined' ? I18n.t('messages.complaintSubmitted') : 'Complaint submitted!',
+          typeof I18n !== 'undefined' ? I18n.t('profile.complaintsDesc') : 'The vendor has been notified.'
+        );
       } else {
-        Toast.error('Submission failed', result.data?.message || 'Please try again.');
+        Toast.error(typeof I18n !== 'undefined' ? I18n.t('messages.unknownError') : 'Submission failed', result.data?.message || 'Please try again.');
       }
     } catch {
-      Toast.error('Network error', 'Please check your connection and try again.');
+      Toast.error(
+        typeof I18n !== 'undefined' ? I18n.t('messages.connectionError') : 'Network error',
+        typeof I18n !== 'undefined' ? I18n.t('messages.connectionError') : 'Please check your connection and try again.'
+      );
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = originalText;

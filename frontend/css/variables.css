@@ -1,127 +1,217 @@
 /* ─────────────────────────────────────────────────────────────────
    Maitri Design System — CSS Custom Properties (Design Tokens)
    
-   All colors, spacing, typography and effects live here.
-   Never hard-code values elsewhere — always reference a variable.
+   A modern, warm, friendly, trustworthy, premium, community-oriented
+   design system. Featuring a soft pastel gradient aesthetic:
+   soft cyan, sky blue, lavender, blush pink, warm peach, luminous
+   backgrounds, glassmorphic elevations, and generous rounded radii.
    ───────────────────────────────────────────────────────────────── */
 
 :root {
 
-  /* ── Brand Colors ─────────────────────────────────────────────── */
-  --color-primary:        #1A5C38;   /* Deep forest green — primary actions */
-  --color-primary-dark:   #0F3D25;   /* Darker green — hover states */
-  --color-primary-light:  #2D7A50;   /* Lighter green — secondary elements */
-  --color-primary-50:     #EAF4EE;   /* Very light green — tinted backgrounds */
-  --color-primary-100:    #C6E3D0;   /* Light green — subtle highlights */
+  /* ── Brand Primary: Iris / Violet (Modern, Friendly, Trustworthy) ── */
+  --color-primary:          #6C63FF;   /* Vibrant Iris Violet — primary brand */
+  --color-primary-dark:     #5548E0;   /* Deep Iris — hover & active states */
+  --color-primary-darker:   #3E32C4;   /* Ultra dark violet — headers, sidebars */
+  --color-primary-light:    #8E86FF;   /* Soft Iris — badges, accents */
+  --color-primary-lighter:  #B8A7FF;   /* Pastel Lavender — highlights, gradients */
+  --color-primary-50:       #F2F0FF;   /* Tinted light purple container background */
+  --color-primary-100:      #E4E0FF;   /* Soft lavender borders & active pills */
+  --color-primary-200:      #D0C9FF;   /* Subtle lavender accent fill */
+  --color-primary-rgb:      108, 99, 255;
 
-  --color-accent:         #E8A020;   /* Warm amber/gold — highlights, CTAs */
-  --color-accent-dark:    #C4851A;   /* Darker amber — hover on accent */
-  --color-accent-light:   #F5B942;   /* Lighter amber — tags, badges */
-  --color-accent-50:      #FEF3DC;   /* Very light amber — background tints */
+  /* ── Secondary: Coral / Blush Pink (Warmth, Community, Vitality) ─ */
+  --color-secondary:        #FF8A7A;   /* Soft Coral Pink */
+  --color-secondary-dark:   #F06A58;   /* Deep Coral */
+  --color-secondary-light:  #FFA89B;   /* Pastel Pink */
+  --color-secondary-lighter:#FFD4CD;   /* Soft blush */
+  --color-secondary-50:     #FFF5F3;   /* Light blush tinted canvas */
+  --color-secondary-rgb:    255, 138, 122;
 
-  /* ── Neutral / Surface Colors ─────────────────────────────────── */
-  --color-bg:             #F8F6F2;   /* Warm off-white page background */
-  --color-bg-card:        #FFFFFF;   /* Card/panel background */
-  --color-bg-overlay:     rgba(15, 61, 37, 0.55); /* Modal overlay */
+  /* ── Accent: Sky Blue / Soft Cyan (Clarity, Tech, Freshness) ──── */
+  --color-accent:           #5BC0EB;   /* Bright Sky Cyan */
+  --color-accent-dark:      #3AA8D6;   /* Deep Cyan */
+  --color-accent-light:     #8FE0FF;   /* Soft pastel cyan */
+  --color-accent-lighter:   #C8F1FF;   /* Ultra light cyan */
+  --color-accent-50:        #F0FAFF;   /* Soft sky tint */
+  --color-accent-rgb:       91, 192, 235;
 
-  --color-border:         #DDE5E0;   /* Standard border */
-  --color-border-light:   #EEF2EF;   /* Very subtle dividers */
-  --color-border-focus:   #1A5C38;   /* Input focus ring */
+  /* ── Warm Accent: Golden Apricot / Peach (Hospitality, Energy) ── */
+  --color-warm:             #FFB86B;   /* Warm Peach / Apricot */
+  --color-warm-dark:        #F29D44;   /* Deep Peach */
+  --color-warm-light:       #FFCE99;   /* Soft Pastel Peach */
+  --color-warm-50:          #FFF9F2;   /* Light peach tint */
+  --color-warm-rgb:         255, 184, 107;
 
-  /* ── Text Colors ──────────────────────────────────────────────── */
-  --color-text-primary:   #1A1A1A;   /* Main text */
-  --color-text-secondary: #4A5568;   /* Subtext, labels */
-  --color-text-muted:     #8A9BA8;   /* Placeholders, hints */
-  --color-text-inverse:   #FFFFFF;   /* Text on dark backgrounds */
-  --color-text-accent:    #E8A020;   /* Highlighted text */
-  --color-text-green:     #1A5C38;   /* Green text on light bg */
+  /* ── Lavender Tint ────────────────────────────────────────────── */
+  --color-lavender:         #B8A7FF;
+  --color-lavender-light:   #DFD7FF;
+  --color-lavender-50:      #F7F5FF;
 
-  /* ── Semantic Colors ──────────────────────────────────────────── */
-  --color-success:        #16A34A;
-  --color-success-bg:     #DCFCE7;
-  --color-error:          #DC2626;
-  --color-error-bg:       #FEE2E2;
-  --color-warning:        #D97706;
-  --color-warning-bg:     #FEF3C7;
-  --color-info:           #2563EB;
-  --color-info-bg:        #DBEAFE;
+  /* ── Surface / Background Canvas ──────────────────────────────── */
+  --color-bg:               #F8F9FF;   /* Luminous, clean pastel off-white canvas */
+  --color-bg-alt:           #F1F4FD;   /* Soft contrasted section canvas */
+  --color-bg-subtle:        #EAEEFB;   /* Subtle container fill */
+  --color-bg-card:          #FFFFFF;   /* Crisp white card surface */
+  --color-bg-card-hover:    #FFFFFF;   /* Interactive card hover */
+  --color-bg-glass:         rgba(255, 255, 255, 0.78); /* High-quality frosted glass */
+  --color-bg-glass-heavy:   rgba(255, 255, 255, 0.92); /* Opaque frosted glass */
+  --color-bg-glass-tint:    rgba(248, 249, 255, 0.85); /* Tinted frosted glass */
+  --color-bg-overlay:       rgba(23, 32, 51, 0.65);    /* Modern deep slate overlay */
 
-  /* ── Rating Stars ─────────────────────────────────────────────── */
-  --color-star-filled:    #F59E0B;
-  --color-star-empty:     #D1D5DB;
+  /* ── Borders & Dividers ───────────────────────────────────────── */
+  --color-border:           #EAEFF8;   /* Soft crisp border */
+  --color-border-light:     #F2F5FB;   /* Very subtle divider */
+  --color-border-subtle:    rgba(108, 99, 255, 0.08); /* Purple-tinted subtle border */
+  --color-border-glass:     rgba(255, 255, 255, 0.8);  /* Crisp glass border */
+  --color-border-focus:     #6C63FF;   /* High-contrast focus outline */
 
-  /* ── Typography ───────────────────────────────────────────────── */
-  --font-family:          'Inter', system-ui, -apple-system, sans-serif;
-  --font-family-mono:     'JetBrains Mono', 'Courier New', monospace;
+  /* ── Text / Content Colors (Strict High-Contrast Accessibility) ── */
+  --color-text-primary:     #172033;   /* Slate Navy 950 — deep, ultra readable */
+  --color-text-secondary:   #475467;   /* Slate 700 — readable secondary body */
+  --color-text-muted:       #667085;   /* Slate 500 — helper text, timestamps */
+  --color-text-light:       #98A2B3;   /* Slate 400 — placeholders, subtle hints */
+  --color-text-inverse:     #FFFFFF;   /* Pure white on dark / gradient surfaces */
+  --color-text-brand:       #6C63FF;   /* Purple brand text */
+  --color-text-accent:      #FF8A7A;   /* Coral accent text */
+  --color-text-green:       #279662;   /* Success green text */
 
-  --font-size-xs:         0.75rem;    /* 12px */
-  --font-size-sm:         0.875rem;   /* 14px */
-  --font-size-base:       1rem;       /* 16px */
-  --font-size-lg:         1.125rem;   /* 18px */
-  --font-size-xl:         1.25rem;    /* 20px */
-  --font-size-2xl:        1.5rem;     /* 24px */
-  --font-size-3xl:        1.875rem;   /* 30px */
-  --font-size-4xl:        2.25rem;    /* 36px */
-  --font-size-5xl:        3rem;       /* 48px */
+  /* ── Semantic Status Colors ───────────────────────────────────── */
+  --color-success:          #35B779;   /* Modern vibrant green */
+  --color-success-bg:       #E8F8F0;   /* Green 50 */
+  --color-success-border:   #A3E5C2;   /* Green 200 */
+  --color-success-dark:     #238656;
 
-  --font-weight-normal:   400;
-  --font-weight-medium:   500;
-  --font-weight-semibold: 600;
-  --font-weight-bold:     700;
-  --font-weight-extrabold:800;
+  --color-error:            #E85D75;   /* Soft modern berry red */
+  --color-error-bg:         #FDEDF0;   /* Red 50 */
+  --color-error-border:     #F8B8C4;   /* Red 200 */
+  --color-error-dark:       #C43A52;
 
-  --line-height-tight:    1.25;
-  --line-height-snug:     1.375;
-  --line-height-normal:   1.5;
-  --line-height-relaxed:  1.625;
+  --color-warning:          #FF9F43;   /* Warm amber / orange */
+  --color-warning-bg:       #FFF6EB;   /* Amber 50 */
+  --color-warning-border:   #FED7AA;   /* Amber 200 */
+  --color-warning-dark:     #DD781E;
+
+  --color-info:             #5BC0EB;   /* Sky cyan blue */
+  --color-info-bg:          #EBF8FD;   /* Info 50 */
+  --color-info-border:      #B2E6F9;   /* Info 200 */
+  --color-info-dark:        #2B8CB5;
+
+  /* ── Ratings & Sentiment ──────────────────────────────────────── */
+  --color-star-filled:      #FFB800;
+  --color-star-empty:       #E2E8F0;
+
+  --color-positive:         #35B779;
+  --color-negative:         #E85D75;
+  --color-neutral:          #667085;
+
+  /* ── Signature Modern Gradients ───────────────────────────────── */
+  --gradient-primary:       linear-gradient(135deg, #6C63FF 0%, #B8A7FF 100%);
+  --gradient-primary-rev:   linear-gradient(135deg, #B8A7FF 0%, #6C63FF 100%);
+  --gradient-secondary:     linear-gradient(135deg, #FF8A7A 0%, #FFB86B 100%);
+  --gradient-accent:        linear-gradient(135deg, #5BC0EB 0%, #6C63FF 100%);
+  --gradient-warm:          linear-gradient(135deg, #FFB86B 0%, #FF8A7A 100%);
+  --gradient-lavender-pink: linear-gradient(135deg, #B8A7FF 0%, #FF8A7A 100%);
+  --gradient-cyan-lavender: linear-gradient(135deg, #5BC0EB 0%, #B8A7FF 50%, #FF8A7A 100%);
+  --gradient-card-glass:    linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.65) 100%);
+  --gradient-hero-ambient:  radial-gradient(circle at 10% 20%, rgba(91, 192, 235, 0.28) 0%, transparent 45%),
+                            radial-gradient(circle at 85% 15%, rgba(184, 167, 255, 0.32) 0%, transparent 45%),
+                            radial-gradient(circle at 70% 80%, rgba(255, 138, 122, 0.25) 0%, transparent 45%),
+                            radial-gradient(circle at 20% 85%, rgba(255, 184, 107, 0.22) 0%, transparent 45%);
+
+  /* ── Typography Scale & Weights ───────────────────────────────── */
+  --font-family:            'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family-display:    'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-family-mono:       'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+
+  --font-size-2xs:          0.6875rem; /* 11px */
+  --font-size-xs:           0.75rem;   /* 12px */
+  --font-size-sm:           0.875rem;  /* 14px */
+  --font-size-base:         1rem;      /* 16px */
+  --font-size-lg:           1.125rem;  /* 18px */
+  --font-size-xl:           1.25rem;   /* 20px */
+  --font-size-2xl:          1.5rem;    /* 24px */
+  --font-size-3xl:          1.875rem;  /* 30px */
+  --font-size-4xl:          2.25rem;   /* 36px */
+  --font-size-5xl:          3rem;      /* 48px */
+  --font-size-6xl:          3.75rem;   /* 60px */
+
+  --font-weight-normal:     400;
+  --font-weight-medium:     500;
+  --font-weight-semibold:   600;
+  --font-weight-bold:       700;
+  --font-weight-extrabold:  800;
+
+  --line-height-tight:      1.18;
+  --line-height-snug:       1.35;
+  --line-height-normal:     1.52;
+  --line-height-relaxed:    1.68;
 
   /* ── Spacing Scale ────────────────────────────────────────────── */
-  --space-1:   0.25rem;   /*  4px */
-  --space-2:   0.5rem;    /*  8px */
-  --space-3:   0.75rem;   /* 12px */
-  --space-4:   1rem;      /* 16px */
-  --space-5:   1.25rem;   /* 20px */
-  --space-6:   1.5rem;    /* 24px */
-  --space-8:   2rem;      /* 32px */
-  --space-10:  2.5rem;    /* 40px */
-  --space-12:  3rem;      /* 48px */
-  --space-16:  4rem;      /* 64px */
-  --space-20:  5rem;      /* 80px */
-  --space-24:  6rem;      /* 96px */
+  --space-0-5: 0.125rem; /*  2px */
+  --space-1:   0.25rem;  /*  4px */
+  --space-1-5: 0.375rem; /*  6px */
+  --space-2:   0.5rem;   /*  8px */
+  --space-2-5: 0.625rem; /* 10px */
+  --space-3:   0.75rem;  /* 12px */
+  --space-3-5: 0.875rem; /* 14px */
+  --space-4:   1rem;     /* 16px */
+  --space-5:   1.25rem;  /* 20px */
+  --space-6:   1.5rem;   /* 24px */
+  --space-7:   1.75rem;  /* 28px */
+  --space-8:   2rem;     /* 32px */
+  --space-10:  2.5rem;   /* 40px */
+  --space-12:  3rem;     /* 48px */
+  --space-16:  4rem;     /* 64px */
+  --space-20:  5rem;     /* 80px */
+  --space-24:  6rem;     /* 96px */
 
-  /* ── Border Radius ────────────────────────────────────────────── */
-  --radius-sm:   4px;
-  --radius-md:   8px;
-  --radius-lg:   12px;
-  --radius-xl:   16px;
+  /* ── Border Radius (Modern 16px–28px hierarchy) ───────────────── */
+  --radius-xs:   6px;
+  --radius-sm:   8px;
+  --radius-md:   12px;
+  --radius-lg:   16px;
+  --radius-xl:   20px;
   --radius-2xl:  24px;
+  --radius-3xl:  28px;
   --radius-full: 9999px;
 
-  /* ── Shadows ──────────────────────────────────────────────────── */
-  --shadow-xs:  0 1px 2px rgba(0,0,0,0.05);
-  --shadow-sm:  0 2px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md:  0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
-  --shadow-lg:  0 8px 24px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.06);
-  --shadow-xl:  0 16px 40px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08);
-  --shadow-green: 0 4px 16px rgba(26, 92, 56, 0.18);
-  --shadow-amber: 0 4px 16px rgba(232, 160, 32, 0.25);
+  /* ── Multi-Layer Soft Elevation Shadows ────────────────────────── */
+  --shadow-xs:   0 1px 3px rgba(23, 32, 51, 0.04);
+  --shadow-sm:   0 2px 8px -1px rgba(23, 32, 51, 0.05), 0 1px 3px rgba(108, 99, 255, 0.04);
+  --shadow-md:   0 6px 18px -2px rgba(23, 32, 51, 0.06), 0 3px 8px -1px rgba(108, 99, 255, 0.05);
+  --shadow-lg:   0 14px 32px -4px rgba(23, 32, 51, 0.07), 0 6px 14px -2px rgba(108, 99, 255, 0.06);
+  --shadow-xl:   0 22px 48px -6px rgba(23, 32, 51, 0.09), 0 10px 22px -3px rgba(108, 99, 255, 0.08);
+  --shadow-2xl:  0 30px 60px -12px rgba(23, 32, 51, 0.14), 0 14px 28px -4px rgba(108, 99, 255, 0.12);
+  
+  --shadow-primary:     0 8px 24px -3px rgba(108, 99, 255, 0.35);
+  --shadow-primary-sm:  0 4px 14px -2px rgba(108, 99, 255, 0.28);
+  --shadow-secondary:   0 8px 24px -3px rgba(255, 138, 122, 0.38);
+  --shadow-secondary-sm:0 4px 14px -2px rgba(255, 138, 122, 0.26);
+  --shadow-accent:      0 8px 24px -3px rgba(91, 192, 235, 0.35);
+  --shadow-warm:        0 8px 24px -3px rgba(255, 184, 107, 0.35);
+  --shadow-card:        0 10px 30px -5px rgba(108, 99, 255, 0.07), 0 2px 8px rgba(0, 0, 0, 0.02);
+  --shadow-card-hover:  0 20px 42px -6px rgba(108, 99, 255, 0.14), 0 6px 14px rgba(0, 0, 0, 0.04);
+  --shadow-inner:       inset 0 2px 4px rgba(23, 32, 51, 0.04);
 
-  /* ── Transitions ──────────────────────────────────────────────── */
-  --transition-fast:    150ms ease;
-  --transition-base:    200ms ease;
-  --transition-slow:    300ms ease;
-  --transition-spring:  300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* ── Transitions & Animation Timing ───────────────────────────── */
+  --transition-instant: 75ms ease;
+  --transition-fast:    150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base:    240ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow:    380ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-spring:  400ms cubic-bezier(0.34, 1.4, 0.64, 1);
 
-  /* ── Layout ───────────────────────────────────────────────────── */
-  --container-max:     1200px;
-  --container-narrow:   800px;
-  --navbar-height:       64px;
-  --navbar-height-mobile: 56px;
+  /* ── Layout Dimensions ────────────────────────────────────────── */
+  --container-max:      1240px;
+  --container-narrow:   860px;
+  --navbar-height:      72px;
+  --navbar-height-mobile: 64px;
+  --sidebar-width:      270px;
 
   /* ── Z-Index Layers ───────────────────────────────────────────── */
   --z-base:     1;
-  --z-dropdown: 100;
-  --z-sticky:   200;
+  --z-sticky:   100;
+  --z-dropdown: 200;
   --z-navbar:   300;
   --z-modal:    400;
   --z-toast:    500;

@@ -300,6 +300,111 @@ class UserControllerTest {
         assertThat(saved.isActive()).isTrue();
     }
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Preferences: GET & PUT /api/users/preferences
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    @Test
+    @DisplayName("13. GET /api/users/preferences — USER: 200 with default language")
+    void getPreferences_returnsDefaultLanguage() throws Exception {
+        seedUser(USER_EMAIL, Role.USER);
+        String token = tokenFor(USER_EMAIL, Role.USER);
+
+        mockMvc.perform(get(USERS_URL + "/preferences")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.preferredLanguage").value("en"));
+    }
+
+    @Test
+    @DisplayName("14. GET /api/users/preferences — without JWT: 401 Unauthorized")
+    void getPreferences_withoutJwt_returns401() throws Exception {
+        mockMvc.perform(get(USERS_URL + "/preferences"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("15. PUT /api/users/preferences/language — USER updates language to Kannada (kn): 200")
+    void updateLanguage_validCodeKannada_returns200() throws Exception {
+        seedUser(USER_EMAIL, Role.USER);
+        String token = tokenFor(USER_EMAIL, Role.USER);
+
+        mockMvc.perform(put(USERS_URL + "/preferences/language")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"language\":\"kn\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.preferredLanguage").value("kn"));
+
+        User saved = userRepository.findByEmail(USER_EMAIL).orElseThrow();
+        assertThat(saved.getPreferredLanguage()).isEqualTo("kn");
+    }
+
+    @Test
+    @DisplayName("16. PUT /api/users/preferences/language — USER updates language to Hindi (hi): 200")
+    void updateLanguage_validCodeHindi_returns200() throws Exception {
+        seedUser(USER_EMAIL, Role.USER);
+        String token = tokenFor(USER_EMAIL, Role.USER);
+
+        mockMvc.perform(put(USERS_URL + "/preferences/language")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"language\":\"hi\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.preferredLanguage").value("hi"));
+
+        User saved = userRepository.findByEmail(USER_EMAIL).orElseThrow();
+        assertThat(saved.getPreferredLanguage()).isEqualTo("hi");
+    }
+
+    @Test
+    @DisplayName("17. PUT /api/users/preferences/language — invalid language code 'fr': 400 Bad Request")
+    void updateLanguage_invalidCode_returns400() throws Exception {
+        seedUser(USER_EMAIL, Role.USER);
+        String token = tokenFor(USER_EMAIL, Role.USER);
+
+        mockMvc.perform(put(USERS_URL + "/preferences/language")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"language\":\"fr\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
+    @Test
+    @DisplayName("18. PUT /api/users/preferences/language — VENDOR token: 200 allowed")
+    void updateLanguage_vendorRole_returns200() throws Exception {
+        seedUser(VENDOR_EMAIL, Role.VENDOR);
+        String token = tokenFor(VENDOR_EMAIL, Role.VENDOR);
+
+        mockMvc.perform(put(USERS_URL + "/preferences/language")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"language\":\"kn\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.preferredLanguage").value("kn"));
+    }
+
+    @Test
+    @DisplayName("19. PUT /api/users/me — invalid language code 'de': 400 Bad Request")
+    void updateMe_invalidLanguage_returns400() throws Exception {
+        seedUser(USER_EMAIL, Role.USER);
+        String token = tokenFor(USER_EMAIL, Role.USER);
+
+        UserUpdateRequest request = validUpdateRequest();
+        request.setPreferredLanguage("de");
+
+        mockMvc.perform(put(USERS_URL + "/me")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false));
+    }
+
     // ─── Private Helpers ───────────────────────────────────────────────────────
 
     /** A valid update request body for tests. */

@@ -50,10 +50,13 @@ const CONFIG = {
     'Mobile/Laptop Repair'
   ],
 
+  SUPPORTED_LANGUAGES: ['en', 'hi', 'kn'],
+
   STORAGE_KEYS: {
     AUTH_TOKEN: 'maitri_auth_token',
     USER_DATA: 'maitri_user_data',
     FAVOURITES: 'maitri_favourites',
+    LANGUAGE: 'maitri_language',
   },
 };
 

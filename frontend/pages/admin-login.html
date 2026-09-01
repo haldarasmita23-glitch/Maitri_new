@@ -1,0 +1,197 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Secure administrator authentication portal for the Maitri Hyperlocal Platform.">
+  <title data-i18n="adminLogin.pageTitle">Administrator Login — Maitri</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/pages/auth.css">
+</head>
+<body>
+
+  <!-- Ambient Background Blobs -->
+  <div class="ambient-blobs" aria-hidden="true">
+    <div class="ambient-blob ambient-blob--1" style="background: radial-gradient(circle, rgba(79, 70, 229, 0.2) 0%, transparent 70%);"></div>
+    <div class="ambient-blob ambient-blob--2" style="background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, transparent 70%);"></div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="main-navbar" role="navigation" aria-label="Main navigation">
+    <div class="container">
+      <div class="navbar__inner">
+        <a href="../index.html" class="navbar__logo" aria-label="Maitri Home">
+          <div class="navbar__logo-mark" aria-hidden="true" style="background: linear-gradient(135deg, #1E1B4B 0%, #4338CA 100%);">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L14.5 9.5H22L16 14L18.5 21.5L12 17L5.5 21.5L8 14L2 9.5H9.5L12 2Z" fill="white"/>
+            </svg>
+          </div>
+          <span class="navbar__logo-text">Maitr<span>i</span> <small style="font-size: 0.85rem; font-weight: 700; color: #4338CA;">Admin</small></span>
+        </a>
+
+        <!-- Language Selector -->
+        <div class="lang-selector" style="margin-left: auto; margin-right: var(--space-4);">
+          <select id="language-select" class="lang-select" aria-label="Select Language">
+            <option value="en">English</option>
+            <option value="kn">ಕನ್ನಡ</option>
+            <option value="hi">हिंदी</option>
+          </select>
+        </div>
+
+        <div class="navbar__auth">
+          <a href="login.html" class="btn btn--outline btn--sm" data-i18n="adminLogin.customerLoginLink">Customer Login</a>
+        </div>
+        <button class="navbar__hamburger" id="navbar-hamburger" aria-label="Open menu" data-i18n-aria-label="nav.openMenu" aria-expanded="false" aria-controls="navbar-mobile">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="navbar__mobile" id="navbar-mobile">
+    <a href="../index.html" class="navbar__mobile-link">🏠 <span data-i18n="nav.home">Home</span></a>
+    <a href="login.html" class="navbar__mobile-link">👤 <span data-i18n="adminLogin.customerLoginLink">Customer Login</span></a>
+    <a href="vendor-login.html" class="navbar__mobile-link">🏪 <span data-i18n="adminLogin.vendorLoginLink">Vendor Login</span></a>
+  </div>
+
+  <main class="auth-page" id="main-content">
+
+    <!-- Left Branding Panel (High Security Enterprise) -->
+    <div class="auth-panel auth-panel--admin" aria-hidden="true">
+      <div class="auth-panel__logo">
+        <div class="auth-panel__logo-mark" style="background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.25);">🛡️</div>
+        <span class="auth-panel__logo-text">Maitr<span>i</span> <small style="font-size: 0.9rem; font-weight: 600; opacity: 0.9;">Governance</small></span>
+      </div>
+      <h2 class="auth-panel__title" data-i18n-html="adminLogin.panelTitle">Secure Admin<br>Access</h2>
+      <p class="auth-panel__subtitle" data-i18n="adminLogin.panelSubtitle">
+        Authorized Maitri platform administrators only. Manage users, verify vendors, and monitor community health.
+      </p>
+
+      <div class="auth-panel__features">
+        <div class="auth-panel__feature">
+          <div class="auth-panel__feature-icon">🛡️</div>
+          <div class="auth-panel__feature-text">
+            <strong data-i18n="adminLogin.featGovTitle">Platform Governance</strong>
+            <span data-i18n="adminLogin.featGovDesc">Review and verify local vendor applications</span>
+          </div>
+        </div>
+        <div class="auth-panel__feature">
+          <div class="auth-panel__feature-icon">👥</div>
+          <div class="auth-panel__feature-text">
+            <strong data-i18n="adminLogin.featUsersTitle">User &amp; Role Management</strong>
+            <span data-i18n="adminLogin.featUsersDesc">Maintain platform safety and manage community accounts</span>
+          </div>
+        </div>
+        <div class="auth-panel__feature">
+          <div class="auth-panel__feature-icon">⚠️</div>
+          <div class="auth-panel__feature-text">
+            <strong data-i18n="adminLogin.featModTitle">Complaint Moderation</strong>
+            <span data-i18n="adminLogin.featModDesc">Resolve community issues and maintain quality standards</span>
+          </div>
+        </div>
+        <div class="auth-panel__feature">
+          <div class="auth-panel__feature-icon">✨</div>
+          <div class="auth-panel__feature-text">
+            <strong data-i18n="adminLogin.featNlpTitle">NLP AI Studio</strong>
+            <span data-i18n="adminLogin.featNlpDesc">Analyze customer sentiment and community feedback</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Form Panel -->
+    <div class="auth-form-panel">
+      <div class="auth-form-container">
+
+        <!-- Role Switcher -->
+        <div class="auth-role-switcher" role="navigation" aria-label="Select Login Role">
+          <a href="login.html" class="auth-role-switch-link">👤 Customer</a>
+          <a href="vendor-login.html" class="auth-role-switch-link">🏪 Vendor</a>
+          <a href="admin-login.html" class="auth-role-switch-link active">🛡️ Admin</a>
+        </div>
+
+        <div class="auth-form-header">
+          <div class="auth-badge auth-badge--admin" data-i18n="adminLogin.badge">🛡️ Restricted Access</div>
+          <h1 data-i18n="adminLogin.headerTitle">Administrator Login</h1>
+          <p data-i18n="adminLogin.headerSubtitle">Manage and monitor the Maitri platform</p>
+        </div>
+
+        <div class="auth-form-card">
+
+          <div class="auth-security-notice" role="note">
+            <span class="auth-security-notice__icon">🔒</span>
+            <div data-i18n="adminLogin.securityNotice">
+              Authorized personnel only. All access attempts and administrative actions are logged and audited.
+            </div>
+          </div>
+
+          <form id="admin-login-form" novalidate aria-label="Admin login form">
+
+            <div class="form-group">
+              <label class="form-label" for="admin-email">
+                <span data-i18n="auth.emailLabel">Administrator Email</span> <span class="required" aria-label="required">*</span>
+              </label>
+              <div class="input-icon-wrapper">
+                <span class="input-icon" aria-hidden="true">✉️</span>
+                <input type="email" id="admin-email" name="email" class="form-control"
+                       placeholder="admin@maitri.local"
+                       autocomplete="email" required
+                       aria-required="true">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="admin-password">
+                <span data-i18n="auth.passwordLabel">Password</span> <span class="required" aria-label="required">*</span>
+              </label>
+              <div class="input-icon-wrapper">
+                <span class="input-icon" aria-hidden="true">🔒</span>
+                <input type="password" id="admin-password" name="password" class="form-control"
+                       placeholder="Enter administrator password"
+                       autocomplete="current-password" required
+                       aria-required="true">
+                <button type="button" class="btn-toggle-password" aria-label="Show password" data-i18n-aria-label="auth.showPassword">👁️</button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn--admin btn--full btn--lg" data-i18n="adminLogin.loginBtn">
+              🛡️ Authenticate as Administrator
+            </button>
+
+          </form>
+        </div>
+
+        <div class="auth-switch">
+          <span data-i18n="adminLogin.isCustomer">Return to public site?</span>
+          <a href="login.html" data-i18n="adminLogin.customerLoginLink">Customer Login →</a>
+        </div>
+        <div class="auth-switch mt-3">
+          <span data-i18n="adminLogin.isVendor">Are you a business owner?</span>
+          <a href="vendor-login.html" data-i18n="adminLogin.vendorLoginLink" style="color: #E65100;">Vendor Login →</a>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/translations.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/mock-data.js"></script>
+  <script src="../js/components.js"></script>
+  <script src="../js/chat.js"></script>
+  <script src="../js/notifications.js"></script>
+  <script src="../js/auth.js"></script>
+</body>
+</html>

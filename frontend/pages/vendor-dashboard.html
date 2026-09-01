@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Manage your business on Maitri — view customer reviews, update business hours, handle complaints, and chat with local residents.">
+  <title>Vendor Business Dashboard — Maitri</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/pages/vendor-dashboard.css">
+</head>
+<body>
+
+  <!-- Ambient Background Blobs -->
+  <div class="ambient-blobs" aria-hidden="true">
+    <div class="ambient-blob ambient-blob--1"></div>
+    <div class="ambient-blob ambient-blob--2"></div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="main-navbar" role="navigation" aria-label="Main navigation">
+    <div class="container">
+      <div class="navbar__inner">
+        <a href="../index.html" class="navbar__logo" aria-label="Maitri Home">
+          <div class="navbar__logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L14.5 9.5H22L16 14L18.5 21.5L12 17L5.5 21.5L8 14L2 9.5H9.5L12 2Z" fill="white"/>
+            </svg>
+          </div>
+          <span class="navbar__logo-text">Maitr<span>i</span></span>
+        </a>
+        <nav class="navbar__nav" aria-label="Site links">
+          <a href="../index.html" class="navbar__link" data-i18n="nav.home">Home</a>
+          <a href="chat.html" class="navbar__link" data-auth-only="messages" style="display:none;">
+            <span data-i18n="nav.messages">Messages</span> <span class="unread-badge" style="display:none;"></span>
+          </a>
+          <a href="about.html" class="navbar__link" data-i18n="nav.about">About</a>
+        </nav>
+        <div class="navbar__auth">
+          <a href="vendor-login.html" class="btn btn--vendor btn--sm" data-i18n="nav.vendorDashboard">🏪 Business Dashboard</a>
+          <a href="login.html" class="btn btn--ghost btn--sm" data-i18n="common.login">Log In</a>
+        </div>
+        <button class="navbar__hamburger" id="navbar-hamburger" aria-label="Open menu" data-i18n-aria-label="nav.openMenu" aria-expanded="false" aria-controls="navbar-mobile">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="navbar__mobile" id="navbar-mobile" role="navigation" aria-label="Mobile navigation">
+    <a href="../index.html" class="navbar__mobile-link">🏠 <span data-i18n="nav.home">Home</span></a>
+    <a href="chat.html" class="navbar__mobile-link" data-auth-only="messages" style="display:none;">💬 <span data-i18n="nav.messages">Messages</span></a>
+    <a href="about.html" class="navbar__mobile-link">ℹ️ <span data-i18n="nav.about">About</span></a>
+    <div class="navbar__mobile-divider"></div>
+    <div class="navbar__mobile-auth">
+      <a href="vendor-login.html" class="btn btn--vendor btn--full" data-i18n="nav.vendorDashboard">🏪 Business Dashboard</a>
+      <a href="login.html" class="btn btn--outline btn--full" data-i18n="common.login">Log In</a>
+    </div>
+  </div>
+
+  <!-- Auth Required / Non-Vendor Warning (hidden when authorized) -->
+  <div id="vendor-gate-error" class="container section hidden" style="max-width: 600px; text-align: center; margin-top: var(--space-12);">
+    <div class="card p-8 text-center">
+      <div style="font-size: 3rem; margin-bottom: var(--space-4);">🔒</div>
+      <h2 id="gate-error-title" style="margin-bottom: var(--space-2);">Vendor Access Required</h2>
+      <p id="gate-error-desc" style="color: var(--color-text-secondary); margin-bottom: var(--space-6);">
+        You must be logged in with an authorized Vendor account to access this business dashboard.
+      </p>
+      <div class="flex gap-4 justify-center">
+        <a href="vendor-login.html" class="btn btn--vendor">Log In as Vendor</a>
+        <a href="vendor-register.html" class="btn btn--outline">Register Business</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Dashboard Layout -->
+  <div class="vendor-layout" id="vendor-dashboard-content">
+
+    <!-- Sidebar Navigation -->
+    <aside class="vendor-sidebar" aria-label="Vendor Dashboard Navigation">
+      <div class="vendor-sidebar__brand">
+        <div class="flex items-center gap-2">
+          <span style="font-size: 1.5rem;">🏪</span>
+          <span class="font-display" style="font-weight: var(--font-weight-bold); font-size: var(--font-size-md);">Business Portal</span>
+        </div>
+        <span class="vendor-sidebar__badge">Vendor</span>
+      </div>
+
+      <ul class="vendor-nav">
+        <li class="vendor-nav__heading">Management</li>
+        <li>
+          <button type="button" class="vendor-nav__btn active" data-tab="overview">
+            <div class="vendor-nav__btn-content">
+              <span>📊</span>
+              <span>Overview</span>
+            </div>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="vendor-nav__btn" data-tab="profile">
+            <div class="vendor-nav__btn-content">
+              <span>🏪</span>
+              <span>Store Profile</span>
+            </div>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="vendor-nav__btn" data-tab="reviews">
+            <div class="vendor-nav__btn-content">
+              <span>⭐</span>
+              <span>Customer Reviews</span>
+            </div>
+            <span class="badge badge--sm" id="nav-review-count">0</span>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="vendor-nav__btn" data-tab="complaints">
+            <div class="vendor-nav__btn-content">
+              <span>⚠️</span>
+              <span>Complaints</span>
+            </div>
+            <span class="badge badge--sm badge--warning" id="nav-complaint-count">0</span>
+          </button>
+        </li>
+
+        <li class="vendor-nav__heading" style="margin-top: var(--space-4);">Communication</li>
+        <li>
+          <button type="button" class="vendor-nav__btn" data-tab="messages">
+            <div class="vendor-nav__btn-content">
+              <span>💬</span>
+              <span>Customer Messages</span>
+            </div>
+          </button>
+        </li>
+        <li>
+          <button type="button" class="vendor-nav__btn" data-tab="settings">
+            <div class="vendor-nav__btn-content">
+              <span>⚙️</span>
+              <span>Account Settings</span>
+            </div>
+          </button>
+        </li>
+      </ul>
+
+      <div style="margin-top: auto; padding-top: var(--space-4); border-top: 1px solid var(--color-border);">
+        <a id="btn-view-public-sidebar" href="#" target="_blank" class="btn btn--outline btn--sm btn--full" style="display: flex; align-items: center; justify-content: center; gap: var(--space-2);">
+          <span>👁️</span> <span>View Public Page</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Mobile Horizontal Tabs -->
+    <div class="vendor-mobile-tabs">
+      <button type="button" class="vendor-mobile-tab-btn active" data-tab="overview">📊 Overview</button>
+      <button type="button" class="vendor-mobile-tab-btn" data-tab="profile">🏪 Store Profile</button>
+      <button type="button" class="vendor-mobile-tab-btn" data-tab="reviews">⭐ Reviews</button>
+      <button type="button" class="vendor-mobile-tab-btn" data-tab="complaints">⚠️ Complaints</button>
+      <button type="button" class="vendor-mobile-tab-btn" data-tab="messages">💬 Messages</button>
+      <button type="button" class="vendor-mobile-tab-btn" data-tab="settings">⚙️ Settings</button>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="vendor-main" id="vendor-main-pane">
+
+      <!-- Header Card / Store Info -->
+      <section class="vendor-header-card animate-on-scroll">
+        <div class="vendor-header__info">
+          <div class="vendor-header__avatar" id="vd-avatar">🏪</div>
+          <div class="vendor-header__details">
+            <div class="flex items-center gap-3 flex-wrap">
+              <h1 id="vd-shop-name">Loading Business...</h1>
+              <span id="vd-status-badge" class="status-pill status-pill--pending">⏳ Checking Status</span>
+            </div>
+            <div class="vendor-header__meta">
+              <span id="vd-category" class="badge">Category</span>
+              <span style="color: var(--color-text-muted);">•</span>
+              <span id="vd-area" style="font-size: var(--font-size-sm); color: var(--color-text-secondary);">Location</span>
+              <span style="color: var(--color-text-muted);">•</span>
+              <span id="vd-hours" style="font-size: var(--font-size-sm); color: var(--color-text-muted);">Hours</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="vendor-header__actions">
+          <a id="btn-view-public" href="#" target="_blank" class="btn btn--outline btn--sm">
+            <span>👁️</span> <span>Public Store Page</span>
+          </a>
+          <button type="button" class="btn btn--primary btn--sm" id="btn-quick-edit-profile">
+            <span>✏️</span> <span>Edit Listing</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ── TAB 1: OVERVIEW ────────────────────────────────────────── -->
+      <div class="vendor-tab-pane active" id="pane-overview">
+        <!-- KPI Cards -->
+        <div class="vendor-kpi-grid">
+          <div class="vendor-kpi-card">
+            <div class="vendor-kpi__icon-box vendor-kpi__icon-box--warning">⭐</div>
+            <div class="vendor-kpi__content">
+              <span class="vendor-kpi__value" id="kpi-avg-rating">0.0</span>
+              <span class="vendor-kpi__label">Average Rating</span>
+            </div>
+          </div>
+
+          <div class="vendor-kpi-card">
+            <div class="vendor-kpi__icon-box vendor-kpi__icon-box--primary">📝</div>
+            <div class="vendor-kpi__content">
+              <span class="vendor-kpi__value" id="kpi-total-reviews">0</span>
+              <span class="vendor-kpi__label">Total Reviews</span>
+            </div>
+          </div>
+
+          <div class="vendor-kpi-card">
+            <div class="vendor-kpi__icon-box vendor-kpi__icon-box--info">💬</div>
+            <div class="vendor-kpi__content">
+              <span class="vendor-kpi__value" id="kpi-conversations">0</span>
+              <span class="vendor-kpi__label">Customer Chats</span>
+            </div>
+          </div>
+
+          <div class="vendor-kpi-card">
+            <div class="vendor-kpi__icon-box vendor-kpi__icon-box--success">⚠️</div>
+            <div class="vendor-kpi__content">
+              <span class="vendor-kpi__value" id="kpi-active-complaints">0</span>
+              <span class="vendor-kpi__label">Open Complaints</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Verification Banner if Pending or Rejected -->
+        <div id="vendor-status-alert" class="alert alert--warning mb-6 hidden" role="note">
+          <span class="alert__icon">⏳</span>
+          <div class="alert__text">
+            <strong id="status-alert-title">Application In Review</strong><br>
+            <span id="status-alert-desc">Your business listing is currently being reviewed by administrators. Once approved, it will automatically appear on the public browse page.</span>
+          </div>
+        </div>
+
+        <!-- Quick Summary & Recent Activity -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-6);">
+          <!-- Recent Reviews Preview -->
+          <div class="dashboard-card">
+            <div class="dashboard-card__header">
+              <h2 class="dashboard-card__title"><span>⭐</span> <span>Recent Reviews</span></h2>
+              <button type="button" class="btn btn--ghost btn--xs" data-switch-tab="reviews">View All →</button>
+            </div>
+            <div id="overview-recent-reviews">
+              <p style="color: var(--color-text-muted); font-size: var(--font-size-sm); text-align: center; padding: var(--space-4);">Loading reviews...</p>
+            </div>
+          </div>
+
+          <!-- Recent Complaints Preview -->
+          <div class="dashboard-card">
+            <div class="dashboard-card__header">
+              <h2 class="dashboard-card__title"><span>⚠️</span> <span>Recent Complaints</span></h2>
+              <button type="button" class="btn btn--ghost btn--xs" data-switch-tab="complaints">View All →</button>
+            </div>
+            <div id="overview-recent-complaints">
+              <p style="color: var(--color-text-muted); font-size: var(--font-size-sm); text-align: center; padding: var(--space-4);">No active complaints.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB 2: STORE PROFILE (GET/PUT /api/vendors/me) ─────────── -->
+      <div class="vendor-tab-pane" id="pane-profile">
+        <div class="dashboard-card">
+          <div class="dashboard-card__header">
+            <h2 class="dashboard-card__title"><span>🏪</span> <span>Business Listing Information</span></h2>
+            <span style="font-size: var(--font-size-xs); color: var(--color-text-muted);">Syncs with Public Directory</span>
+          </div>
+
+          <form id="vendor-profile-form" novalidate>
+            <div class="grid grid-2 gap-4">
+              <div class="form-group">
+                <label class="form-label" for="vp-shop-name">Shop / Business Name <span class="required">*</span></label>
+                <input type="text" id="vp-shop-name" name="shopName" class="form-control" required minlength="2" maxlength="100">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="vp-owner-name">Owner / Manager Name <span class="required">*</span></label>
+                <input type="text" id="vp-owner-name" name="ownerName" class="form-control" required minlength="2" maxlength="100">
+              </div>
+            </div>
+
+            <div class="grid grid-2 gap-4 mt-4">
+              <div class="form-group">
+                <label class="form-label" for="vp-category">Business Category <span class="required">*</span></label>
+                <select id="vp-category" name="categoryId" class="form-control" required>
+                  <option value="">Select a category...</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="vp-phone">Business Contact Phone <span class="required">*</span></label>
+                <input type="tel" id="vp-phone" name="phone" class="form-control" placeholder="10-digit mobile number" required pattern="[6-9][0-9]{9}">
+              </div>
+            </div>
+
+            <div class="form-group mt-4">
+              <label class="form-label" for="vp-description">Business Description <span class="required">*</span></label>
+              <textarea id="vp-description" name="description" class="form-control" rows="3" required placeholder="Describe your products, services, and specialities..."></textarea>
+            </div>
+
+            <div class="grid grid-2 gap-4 mt-4">
+              <div class="form-group">
+                <label class="form-label" for="vp-area">Locality / Area <span class="required">*</span></label>
+                <select id="vp-area" name="area" class="form-control" required>
+                  <option value="Peenya">Peenya</option>
+                  <option value="Nagasandra">Nagasandra</option>
+                  <option value="Jalahalli">Jalahalli</option>
+                  <option value="Dasarahalli">Dasarahalli</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="vp-address">Detailed Shop Address <span class="required">*</span></label>
+                <input type="text" id="vp-address" name="address" class="form-control" required placeholder="#12, Main Road, Near Landmark">
+              </div>
+            </div>
+
+            <div class="grid grid-2 gap-4 mt-4">
+              <div class="form-group">
+                <label class="form-label" for="vp-open-time">Opening Time <span class="required">*</span></label>
+                <input type="time" id="vp-open-time" name="openingTime" class="form-control" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="vp-close-time">Closing Time <span class="required">*</span></label>
+                <input type="time" id="vp-close-time" name="closingTime" class="form-control" required>
+              </div>
+            </div>
+
+            <div class="form-group mt-4">
+              <label class="form-label" for="vp-images">Store Photo URLs (comma-separated)</label>
+              <input type="text" id="vp-images" name="images" class="form-control" placeholder="https://example.com/photo1.jpg, https://example.com/photo2.jpg">
+              <span style="font-size: var(--font-size-xs); color: var(--color-text-muted);">Enter public image URLs for your storefront gallery.</span>
+            </div>
+
+            <div class="mt-8 flex justify-end gap-3">
+              <button type="submit" class="btn btn--primary btn--lg" id="btn-save-vendor-profile">
+                💾 Save Business Profile
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- ── TAB 3: REVIEWS (GET /api/reviews/vendor/{id}) ──────────── -->
+      <div class="vendor-tab-pane" id="pane-reviews">
+        <!-- Rating Breakdown Card -->
+        <div class="dashboard-card">
+          <div class="dashboard-card__header">
+            <h2 class="dashboard-card__title"><span>📊</span> <span>Ratings & Review Summary</span></h2>
+          </div>
+          <div class="rating-breakdown-box">
+            <div class="rating-big-number">
+              <div class="rating-big-number__value" id="reviews-avg-display">0.0</div>
+              <div class="rating-big-number__stars" id="reviews-stars-display">⭐⭐⭐⭐⭐</div>
+              <div class="rating-big-number__count" id="reviews-total-display">Based on 0 reviews</div>
+            </div>
+            <div class="rating-bars" id="reviews-distribution-bars">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Reviews List -->
+        <div class="dashboard-card">
+          <div class="dashboard-card__header">
+            <h2 class="dashboard-card__title"><span>💬</span> <span>All Customer Reviews</span></h2>
+          </div>
+          <div id="vendor-reviews-container">
+            <p style="color: var(--color-text-muted); font-size: var(--font-size-sm); text-align: center; padding: var(--space-6);">Loading customer reviews...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB 4: COMPLAINTS (GET /api/complaints/vendor/me) ──────── -->
+      <div class="vendor-tab-pane" id="pane-complaints">
+        <div class="dashboard-card">
+          <div class="dashboard-card__header">
+            <h2 class="dashboard-card__title"><span>⚠️</span> <span>Customer Complaints</span></h2>
+            <span style="font-size: var(--font-size-xs); color: var(--color-text-muted);">Manage and resolve customer issues</span>
+          </div>
+
+          <div id="vendor-complaints-container">
+            <p style="color: var(--color-text-muted); font-size: var(--font-size-sm); text-align: center; padding: var(--space-6);">Loading complaints...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB 5: MESSAGES (GET /api/chats) ───────────────────────── -->
+      <div class="vendor-tab-pane" id="pane-messages">
+        <div class="dashboard-card">
+          <div class="dashboard-card__header">
+            <h2 class="dashboard-card__title"><span>💬</span> <span>Customer Conversations</span></h2>
+            <a href="chat.html" class="btn btn--primary btn--sm">Open Full Chat Room →</a>
+          </div>
+
+          <div id="vendor-chats-container">
+            <p style="color: var(--color-text-muted); font-size: var(--font-size-sm); text-align: center; padding: var(--space-6);">Loading conversations...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB 6: SETTINGS (GET/PUT /api/users/me) ─────────────────── -->
+      <div class="vendor-tab-pane" id="pane-settings">
+        <div class="dashboard-card">
+          <div class="dashboard-card__header">
+            <h2 class="dashboard-card__title"><span>⚙️</span> <span>Vendor Account Settings</span></h2>
+            <span style="font-size: var(--font-size-xs); color: var(--color-text-muted);">Personal login credentials & language</span>
+          </div>
+
+          <form id="vendor-account-form" novalidate>
+            <div class="grid grid-2 gap-4">
+              <div class="form-group">
+                <label class="form-label" for="va-name">Full Name <span class="required">*</span></label>
+                <input type="text" id="va-name" name="name" class="form-control" required minlength="2">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="va-email">Login Email</label>
+                <input type="email" id="va-email" name="email" class="form-control" disabled style="background: var(--color-bg);">
+              </div>
+            </div>
+
+            <div class="grid grid-2 gap-4 mt-4">
+              <div class="form-group">
+                <label class="form-label" for="va-language">Preferred App Language</label>
+                <select id="va-language" name="preferredLanguage" class="form-control">
+                  <option value="en">English</option>
+                  <option value="kn">ಕನ್ನಡ (Kannada)</option>
+                  <option value="hi">हिन्दी (Hindi)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="va-photo">Profile Photo URL</label>
+                <input type="url" id="va-photo" name="profilePhoto" class="form-control" placeholder="https://example.com/avatar.jpg">
+              </div>
+            </div>
+
+            <div class="mt-8 flex justify-end gap-3">
+              <button type="submit" class="btn btn--primary btn--lg" id="btn-save-vendor-account">
+                💾 Save Account Settings
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Core Scripts -->
+  <script src="../js/config.js"></script>
+  <script src="../js/translations.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/categories.js"></script>
+  <script src="../js/components.js"></script>
+  <script src="../js/chat.js"></script>
+  <script src="../js/notifications.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/vendor-dashboard.js"></script>
+</body>
+</html>

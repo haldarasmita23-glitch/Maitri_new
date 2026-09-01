@@ -11,7 +11,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
   if (!token) {
-    window.location.href = 'index.html';
+    window.location.href = 'admin-login.html';
     return;
   }
 
@@ -21,12 +21,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const user = result.data.data;
       const greeting = document.getElementById('admin-user-greeting');
       if (greeting) {
-        greeting.textContent = `Hello, ${user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN' ? 'User' : 'Admin'}`;
+        greeting.textContent = `Hello, ${user.name || 'Admin'}`;
       }
-      if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
-        setTimeout(() => window.location.href = 'index.html', 2000);
+      const role = typeof AuthSession !== 'undefined' ? AuthSession.normalizeRole(user.role) : String(user.role).replace(/^ROLE_/, '');
+      if (role !== 'ADMIN') {
+        if (typeof Toast !== 'undefined') {
+          Toast.error('Access Denied', 'Administrator privileges required.');
+        }
+        setTimeout(() => window.location.href = 'admin-login.html', 1000);
       }
     }
+  }).catch(() => {
+    window.location.href = 'admin-login.html';
   });
 
   // Initialize users table

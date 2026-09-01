@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="../css/variables.css">
   <link rel="stylesheet" href="../css/reset.css">
@@ -20,188 +20,130 @@
 
 <body>
 
-  <!-- Navbar with admin visibility -->
+  <!-- Ambient Background Blobs -->
+  <div class="ambient-blobs" aria-hidden="true">
+    <div class="ambient-blob ambient-blob--1"></div>
+    <div class="ambient-blob ambient-blob--2"></div>
+  </div>
+
+  <!-- Navbar -->
   <nav class="navbar" id="main-navbar" role="navigation" aria-label="Main navigation">
     <div class="container">
       <div class="navbar__inner">
-        <a href="index.html" class="navbar__logo" aria-label="Maitri Home">
+        <a href="../index.html" class="navbar__logo" aria-label="Maitri Home">
           <div class="navbar__logo-mark" aria-hidden="true">
-            <svg viewBox="0 0 22 22" fill="none"><path d="M11 6l1.5 3.5H16l-2.75 2 1 3.5L11 13l-3.25 2 1-3.5L6 9.5h3.5L11 6z" fill="white"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L14.5 9.5H22L16 14L18.5 21.5L12 17L5.5 21.5L8 14L2 9.5H9.5L12 2Z" fill="white"/>
+            </svg>
           </div>
           <span class="navbar__logo-text">Maitr<span>i</span></span>
         </a>
 
-        <!-- Admin-only auth area (hidden by Navbar.renderAuthState for non-admins) -->
         <div class="navbar__auth" style="margin-left: auto;">
-          <!-- Admin tabs will be rendered by JavaScript -->
+          <span id="admin-user-greeting" style="font-weight: var(--font-weight-semibold); color: var(--color-text-primary);">Hello, Admin</span>
+          <button id="admin-user-logout" class="btn btn--outline btn--sm">Log Out</button>
         </div>
+        <button class="navbar__hamburger" id="navbar-hamburger" aria-label="Open menu" data-i18n-aria-label="nav.openMenu" aria-expanded="false" aria-controls="navbar-mobile">
+          <span></span><span></span><span></span>
+        </button>
       </div>
     </div>
   </nav>
 
   <div class="navbar__mobile" id="navbar-mobile">
-    <a href="index.html" class="navbar__mobile-link">🏠 Home</a>
-    <a href="vendors.html" class="navbar__mobile-link">🏪 Browse Vendors</a>
+    <a href="../index.html" class="navbar__mobile-link">🏠 Home</a>
+    <a href="admin.html" class="navbar__mobile-link active">🛡️ Admin Dashboard</a>
+    <a href="admin-users.html" class="navbar__mobile-link">👥 Users</a>
+    <a href="admin-vendors.html" class="navbar__mobile-link">🏪 Pending Vendors</a>
     <div class="navbar__mobile-divider"></div>
   </div>
 
-  <main class="dashboard-page">
+  <main class="page-main" id="main-content" style="padding: var(--space-8) 0 var(--space-16);">
+    <div class="container">
 
-    <!-- Topbar -->
-    <header class="topbar">
-      <div class="container">
-        <div class="topbar__brand">
-          <svg width="32" height="32" viewBox="0 0 22 22" fill="var(--color-primary)" aria-hidden="true">
-            <path d="M11 6l1.5 3.5H16l-2.75 2 1 3.5L11 13l-3.25 2 1-3.5L6 9.5h3.5L11 6z"/>
-          </svg>
-          <span>Maitri Admin</span>
+      <!-- Header -->
+      <div class="admin-header">
+        <div>
+          <h1 data-i18n="admin.dashboard">Admin Console</h1>
+          <p data-i18n="admin.welcomeSubtitle">Overview and management tools for Maitri</p>
         </div>
-
-        <div class="topbar__user">
-          <span id="admin-user-greeting">Hello, Admin</span>
-          <button id="admin-user-logout" class="btn btn--outline btn--sm">Log Out</button>
-        </div>
-      </div>
-    </header>
-
-    <!-- Dashboard Stats -->
-    <section class="stats-grid">
-      <div class="stats-card stats-card--primary">
-        <div class="stats-card__icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <circle cx="8.5" cy="8.5" r="2.5"/>
-            <polyline points="22 12 18 12 15 15"/>
-          </svg>
-        </div>
-        <div class="stats-card__content">
-          <div class="stats-card__number" id="stats-pending-vendors">0</div>
-          <div class="stats-card__label">Pending Vendors</div>
+        <div class="admin-header__actions">
+          <a href="nlp.html" class="btn btn--secondary btn--sm">✨ NLP AI Studio</a>
         </div>
       </div>
 
-      <div class="stats-card stats-card--success">
-        <div class="stats-card__icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <circle cx="8.5" cy="8.5" r="2.5"/>
-            <polyline points="22 12 18 12 15 15"/>
-          </svg>
-        </div>
-        <div class="stats-card__content">
-          <div class="stats-card__number" id="stats-total-users">0</div>
-          <div class="stats-card__label">Total Users</div>
-        </div>
-      </div>
-
-      <div class="stats-card stats-card--info">
-        <div class="stats-card__icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <circle cx="8.5" cy="8.5" r="2.5"/>
-            <polyline points="22 12 18 12 15 15"/>
-          </svg>
-        </div>
-        <div class="stats-card__content">
-          <div class="stats-card__number" id="stats-active-complaints">0</div>
-          <div class="stats-card__label">Active Complaints</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Actions Section -->
-    <section class="actions-section">
-      <div class="container">
-        <div class="section-header">
-          <h2>Quick Actions</h2>
-          <p>Select an action to manage the platform.</p>
-        </div>
-
-        <div class="actions-grid">
-          <!-- User Management Card -->
-          <div class="action-card" onclick="window.location.href='admin-users.html'">
-            <div class="action-card__icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                <circle cx="8.5" cy="8.5" r="2.5"/>
-                <polyline points="22 12 18 12 15 15"/>
-              </svg>
-            </div>
-            <div class="action-card__content">
-              <div class="action-card__title">User Management</div>
-              <div class="action-card__subtitle">View and manage all user accounts</div>
-            </div>
-            <svg class="action-card__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="5 12 15 12 22 5"/>
-            </svg>
+      <!-- KPI Metric Cards -->
+      <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+          <div class="admin-stat-card__info">
+            <span class="admin-stat-card__label" data-i18n="admin.pendingVendors">Pending Vendors</span>
+            <span class="admin-stat-card__val" id="stats-pending-vendors">0</span>
           </div>
+          <div class="admin-stat-card__icon admin-stat-card__icon--amber">⏳</div>
+        </div>
 
-          <!-- Vendor Management Card -->
-          <div class="action-card" onclick="window.location.href='admin-vendors.html'">
-            <div class="action-card__icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                <circle cx="8.5" cy="8.5" r="2.5"/>
-                <polyline points="22 12 18 12 15 15"/>
-              </svg>
-            </div>
-            <div class="action-card__content">
-              <div class="action-card__title">Vendor Management</div>
-              <div class="action-card__subtitle">Review and approve/reject vendor applications</div>
-            </div>
-            <svg class="action-card__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="5 12 15 12 22 5"/>
-            </svg>
+        <div class="admin-stat-card">
+          <div class="admin-stat-card__info">
+            <span class="admin-stat-card__label" data-i18n="admin.totalUsers">Total Users</span>
+            <span class="admin-stat-card__val" id="stats-total-users">0</span>
           </div>
+          <div class="admin-stat-card__icon admin-stat-card__icon--primary">👥</div>
+        </div>
 
-          <!-- Complaint Management Card -->
-          <div class="action-card" onclick="window.location.href='admin-complaints.html'">
-            <div class="action-card__icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                <circle cx="8.5" cy="8.5" r="2.5"/>
-                <polyline points="22 12 18 12 15 15"/>
-              </svg>
-            </div>
-            <div class="action-card__content">
-              <div class="action-card__title">Complaint Management</div>
-              <div class="action-card__subtitle">View and moderate complaints</div>
-            </div>
-            <svg class="action-card__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="5 12 15 12 22 5"/>
-            </svg>
+        <div class="admin-stat-card">
+          <div class="admin-stat-card__info">
+            <span class="admin-stat-card__label" data-i18n="admin.activeComplaints">Active Complaints</span>
+            <span class="admin-stat-card__val" id="stats-active-complaints">0</span>
           </div>
+          <div class="admin-stat-card__icon admin-stat-card__icon--red">⚠️</div>
         </div>
       </div>
-    </section>
 
-    <!-- Recent Activity / Pending Vendors -->
-    <section class="activity-section">
-      <div class="container">
-        <div class="section-header">
-          <h2>Pending Vendors</h2>
-          <p>V awaiting admin review</p>
+      <!-- Quick Actions Section -->
+      <div class="section-header" style="text-align: left; margin-bottom: var(--space-4);">
+        <h2 data-i18n="admin.quickActions" style="font-size: var(--font-size-xl);">Quick Actions</h2>
+        <p data-i18n="admin.quickActionsDesc" class="section-subtitle" style="text-align: left; margin: 0;">Select a management module below</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-5); margin-bottom: var(--space-8);">
+        <div class="admin-card card--hover" style="padding: var(--space-6); cursor: pointer;" onclick="window.location.href='admin-users.html'">
+          <div style="font-size: 2rem; margin-bottom: var(--space-2);">👥</div>
+          <h3 style="font-size: var(--font-size-base); font-weight: var(--font-weight-bold); color: var(--color-text-primary); margin-bottom: var(--space-1);" data-i18n="admin.userManagement">User Management</h3>
+          <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin: 0;" data-i18n="admin.userManagementDesc">View and manage all user accounts</p>
         </div>
 
-        <div class="pending-vendors-list" id="pending-vendors-list">
-          <!-- Vendors will be populated by JavaScript -->
-          <div class="empty-state" id="pending-vendors-empty">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-border)" stroke-width="1.5">
-              <circle cx="11" cy="11" r="10"/>
-              <line x1="8" y1="14" x2="21" y2="14"/>
-              <line x1="8" y1="10" x2="21" y2="10"/>
-            </svg>
-            <p>No pending vendors</p>
-          </div>
+        <div class="admin-card card--hover" style="padding: var(--space-6); cursor: pointer;" onclick="window.location.href='admin-vendors.html'">
+          <div style="font-size: 2rem; margin-bottom: var(--space-2);">🏪</div>
+          <h3 style="font-size: var(--font-size-base); font-weight: var(--font-weight-bold); color: var(--color-text-primary); margin-bottom: var(--space-1);" data-i18n="admin.vendorManagement">Vendor Management</h3>
+          <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin: 0;" data-i18n="admin.vendorManagementDesc">Review and approve/reject vendor applications</p>
+        </div>
+
+        <div class="admin-card card--hover" style="padding: var(--space-6); cursor: pointer;" onclick="window.location.href='nlp.html'">
+          <div style="font-size: 2rem; margin-bottom: var(--space-2);">✨</div>
+          <h3 style="font-size: var(--font-size-base); font-weight: var(--font-weight-bold); color: var(--color-text-primary); margin-bottom: var(--space-1);">NLP Analysis Studio</h3>
+          <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin: 0;">Analyze customer sentiment and extract key aspects</p>
         </div>
       </div>
-    </section>
 
+      <!-- Pending Vendors Section -->
+      <div class="admin-card">
+        <div class="admin-card__header">
+          <h3 class="admin-card__title" data-i18n="admin.pendingVendors">Pending Vendor Applications</h3>
+          <a href="admin-vendors.html" class="btn btn--outline btn--sm">View All Pending →</a>
+        </div>
+        <div class="p-6" id="pending-vendors-list">
+          <div class="spinner" aria-label="Loading pending vendors"></div>
+        </div>
+      </div>
+
+    </div>
   </main>
 
   <footer class="footer">
     <div class="container">
-      <p>Maitri — Community Platform &copy; 2026</p>
+      <div class="footer__bottom" style="border-top: none; padding-top: 0;">
+        <span class="footer__copyright" data-i18n="footer.copyright">© 2026 Maitri. Made with ❤️ for Peenya &amp; Nagasandra.</span>
+      </div>
     </div>
   </footer>
 
@@ -209,25 +151,28 @@
   <div class="modal-backdrop" id="logout-modal" role="dialog" aria-modal="true" aria-labelledby="modal-logout-title">
     <div class="modal" role="document">
       <div class="modal__header">
-        <h2 id="modal-logout-title">Log Out</h2>
+        <h2 id="modal-logout-title" data-i18n="common.logout">Log Out</h2>
         <button class="modal__close" aria-label="Close modal" data-modal-close>&times;</button>
       </div>
       <div class="modal__body">
-        <p>Are you sure you want to log out?</p>
+        <p data-i18n="admin.logoutConfirm">Are you sure you want to log out?</p>
       </div>
       <div class="modal__footer">
-        <button class="btn btn--outline btn--sm" data-modal-close>Cancel</button>
-        <button class="btn btn--primary btn--sm" id="modal-logout-confirm">Log Out</button>
+        <button class="btn btn--outline btn--sm" data-modal-close data-i18n="common.cancel">Cancel</button>
+        <button class="btn btn--primary btn--sm" id="modal-logout-confirm" data-i18n="common.logout">Log Out</button>
       </div>
     </div>
   </div>
 
   <script src="../js/config.js"></script>
+  <script src="../js/translations.js"></script>
+  <script src="../js/i18n.js"></script>
   <script src="../js/api.js"></script>
+  <script src="../js/mock-data.js"></script>
   <script src="../js/components.js"></script>
-  <script src="../js/admin.js"></script>
   <script src="../js/chat.js"></script>
   <script src="../js/notifications.js"></script>
   <script src="../js/auth.js"></script>
+  <script src="../js/admin.js"></script>
 </body>
 </html>

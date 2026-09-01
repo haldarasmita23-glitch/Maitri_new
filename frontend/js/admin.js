@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Check authentication state
   const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
   if (!token) {
-    // No token → redirect to login
-    window.location.href = window.location.pathname.includes('/pages/') ? '../index.html' : 'index.html';
+    // No token → redirect to admin login
+    window.location.href = window.location.pathname.includes('/pages/') ? 'admin-login.html' : 'pages/admin-login.html';
     return;
   }
 
@@ -24,26 +24,27 @@ document.addEventListener('DOMContentLoaded', () => {
       const user = result.data.data;
       const greeting = document.getElementById('admin-user-greeting');
       if (greeting) {
-        // Show role-appropriate greeting
-        greeting.textContent = `Hello, ${user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN' ? 'User' : 'Admin'}`;
+        greeting.textContent = `Hello, ${user.name || 'Admin'}`;
       }
 
-      // Hide admin UI for non-admins
-      if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
-        // Hide admin-specific elements
+      // Block non-admins
+      const role = typeof AuthSession !== 'undefined' ? AuthSession.normalizeRole(user.role) : String(user.role).replace(/^ROLE_/, '');
+      if (role !== 'ADMIN') {
         const adminOnly = document.querySelectorAll('[data-admin-only]');
         adminOnly.forEach(el => el.style.display = 'none');
-        // Redirect non-admins
+        if (typeof Toast !== 'undefined') {
+          Toast.error('Access Denied', 'Administrator privileges required.');
+        }
         setTimeout(() => {
-          window.location.href = 'index.html';
-        }, 2000);
+          window.location.href = window.location.pathname.includes('/pages/') ? 'admin-login.html' : 'pages/admin-login.html';
+        }, 1000);
       }
     }
   }).catch(() => {
-    // Auth failed — clear tokens and redirect
+    // Auth failed — clear tokens and redirect to admin login
     localStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
     localStorage.removeItem(CONFIG.STORAGE_KEYS.USER_DATA);
-    window.location.href = window.location.pathname.includes('/pages/') ? '../index.html' : 'index.html';
+    window.location.href = window.location.pathname.includes('/pages/') ? 'admin-login.html' : 'pages/admin-login.html';
   });
 
   // Initialize Pending Vendors section

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Vendor and Business login for Maitri — Manage your shop, respond to customer inquiries, and grow your local presence.">
+  <title data-i18n="vendorLogin.pageTitle">Vendor / Business Login — Maitri</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/pages/auth.css">
+</head>
+<body>
+
+  <!-- Ambient Background Blobs -->
+  <div class="ambient-blobs" aria-hidden="true">
+    <div class="ambient-blob ambient-blob--1" style="background: radial-gradient(circle, rgba(255, 112, 67, 0.25) 0%, transparent 70%);"></div>
+    <div class="ambient-blob ambient-blob--2" style="background: radial-gradient(circle, rgba(255, 167, 38, 0.2) 0%, transparent 70%);"></div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="main-navbar" role="navigation" aria-label="Main navigation">
+    <div class="container">
+      <div class="navbar__inner">
+        <a href="../index.html" class="navbar__logo" aria-label="Maitri Home">
+          <div class="navbar__logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L14.5 9.5H22L16 14L18.5 21.5L12 17L5.5 21.5L8 14L2 9.5H9.5L12 2Z" fill="white"/>
+            </svg>
+          </div>
+          <span class="navbar__logo-text">Maitr<span>i</span></span>
+        </a>
+
+        <!-- Language Selector -->
+        <div class="lang-selector" style="margin-left: auto; margin-right: var(--space-4);">
+          <select id="language-select" class="lang-select" aria-label="Select Language">
+            <option value="en">English</option>
+            <option value="kn">ಕನ್ನಡ</option>
+            <option value="hi">हिंदी</option>
+          </select>
+        </div>
+
+        <div class="navbar__auth">
+          <span style="font-size: var(--font-size-sm); color: var(--color-text-muted);" data-i18n="vendorLogin.noAccount">Don't have a business account?</span>
+          <a href="vendor-register.html" class="btn btn--vendor btn--sm" data-i18n="vendorLogin.registerLink">Register Your Business</a>
+        </div>
+        <button class="navbar__hamburger" id="navbar-hamburger" aria-label="Open menu" data-i18n-aria-label="nav.openMenu" aria-expanded="false" aria-controls="navbar-mobile">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="navbar__mobile" id="navbar-mobile">
+    <a href="../index.html" class="navbar__mobile-link">🏠 <span data-i18n="nav.home">Home</span></a>
+    <a href="login.html" class="navbar__mobile-link">👤 <span data-i18n="vendorLogin.customerLoginLink">Customer Login</span></a>
+    <div class="navbar__mobile-divider"></div>
+    <a href="vendor-register.html" class="btn btn--vendor btn--full" data-i18n="vendorLogin.registerLink">Register Business</a>
+  </div>
+
+  <main class="auth-page" id="main-content">
+
+    <!-- Left Branding Panel (Business Portal) -->
+    <div class="auth-panel auth-panel--vendor" aria-hidden="true">
+      <div class="auth-panel__logo">
+        <div class="auth-panel__logo-mark" style="background: rgba(255, 255, 255, 0.25);">🏪</div>
+        <span class="auth-panel__logo-text">Maitr<span>i</span> <small style="font-size: 0.9rem; font-weight: 600; opacity: 0.9;">Business</small></span>
+      </div>
+      <h2 class="auth-panel__title" data-i18n-html="vendorLogin.panelTitle">Manage Your<br>Local Business</h2>
+      <p class="auth-panel__subtitle" data-i18n="vendorLogin.panelSubtitle">
+        Connect with local customers, manage your shop, respond to messages, and build your reputation.
+      </p>
+
+      <div class="auth-panel__features">
+        <div class="auth-panel__feature">
+          <div class="auth-panel__feature-icon">🏪</div>
+          <div class="auth-panel__feature-text">
+            <strong data-i18n="vendorLogin.featStoreTitle">Storefront Management</strong>
+            <span data-i18n="vendorLogin.featStoreDesc">Update business hours, address, and service offerings</span>
+          </div>
+        </div>
+        <div class="auth-panel__feature">
+          <div class="auth-panel__feature-icon">💬</div>
+          <div class="auth-panel__feature-text">
+            <strong data-i18n="vendorLogin.featMsgTitle">Customer Messages</strong>
+            <span data-i18n="vendorLogin.featMsgDesc">Chat directly with local residents with live translation</span>
+          </div>
+        </div>
+        <div class="auth-panel__feature">
+          <div class="auth-panel__feature-icon">⭐</div>
+          <div class="auth-panel__feature-text">
+            <strong data-i18n="vendorLogin.featRepTitle">Reviews &amp; Reputation</strong>
+            <span data-i18n="vendorLogin.featRepDesc">Collect genuine reviews and build community trust</span>
+          </div>
+        </div>
+        <div class="auth-panel__feature">
+          <div class="auth-panel__feature-icon">📈</div>
+          <div class="auth-panel__feature-text">
+            <strong data-i18n="vendorLogin.featInsightsTitle">Business Growth</strong>
+            <span data-i18n="vendorLogin.featInsightsDesc">Get discovered by hundreds of local customers</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Form Panel -->
+    <div class="auth-form-panel">
+      <div class="auth-form-container">
+
+        <!-- Role Switcher -->
+        <div class="auth-role-switcher" role="navigation" aria-label="Select Login Role">
+          <a href="login.html" class="auth-role-switch-link">👤 Customer</a>
+          <a href="vendor-login.html" class="auth-role-switch-link active">🏪 Vendor</a>
+          <a href="admin-login.html" class="auth-role-switch-link">🛡️ Admin</a>
+        </div>
+
+        <div class="auth-form-header">
+          <div class="auth-badge auth-badge--vendor" data-i18n="vendorLogin.badge">🏪 Business Portal</div>
+          <h1 data-i18n="vendorLogin.headerTitle">Vendor / Business Login</h1>
+          <p data-i18n="vendorLogin.headerSubtitle">Manage your business with Maitri</p>
+        </div>
+
+        <div class="auth-form-card">
+          <form id="vendor-login-form" novalidate aria-label="Vendor login form">
+
+            <div class="form-group">
+              <label class="form-label" for="vendor-email">
+                <span data-i18n="auth.emailLabel">Business Email Address</span> <span class="required" aria-label="required">*</span>
+              </label>
+              <div class="input-icon-wrapper">
+                <span class="input-icon" aria-hidden="true">✉️</span>
+                <input type="email" id="vendor-email" name="email" class="form-control"
+                       placeholder="owner@yourshop.com"
+                       autocomplete="email" required
+                       aria-required="true">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="vendor-password">
+                <span data-i18n="auth.passwordLabel">Password</span> <span class="required" aria-label="required">*</span>
+                <a href="#" style="float:right; font-size: var(--font-size-xs); font-weight: 500; color: #E65100;" data-i18n="auth.forgotPassword">Forgot password?</a>
+              </label>
+              <div class="input-icon-wrapper">
+                <span class="input-icon" aria-hidden="true">🔒</span>
+                <input type="password" id="vendor-password" name="password" class="form-control"
+                       placeholder="Your password"
+                       autocomplete="current-password" required
+                       aria-required="true">
+                <button type="button" class="btn-toggle-password" aria-label="Show password" data-i18n-aria-label="auth.showPassword">👁️</button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn--vendor btn--full btn--lg" data-i18n="vendorLogin.loginBtn">
+              Sign In as Vendor
+            </button>
+
+          </form>
+        </div>
+
+        <div class="auth-switch">
+          <span data-i18n="vendorLogin.noAccount">Don't have a business account?</span>
+          <a href="vendor-register.html" data-i18n="vendorLogin.registerLink" style="color: #E65100;">Register your business →</a>
+        </div>
+        <div class="auth-switch mt-3">
+          <span data-i18n="vendorLogin.isCustomer">Looking for local services?</span>
+          <a href="login.html" data-i18n="vendorLogin.customerLoginLink">Customer Login →</a>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/translations.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/mock-data.js"></script>
+  <script src="../js/components.js"></script>
+  <script src="../js/chat.js"></script>
+  <script src="../js/notifications.js"></script>
+  <script src="../js/auth.js"></script>
+</body>
+</html>

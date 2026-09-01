@@ -450,7 +450,7 @@ const Favourites = {
   /** Whether backend favourite operations are permitted for this session. */
   canUseBackend() {
     const u = this.currentUser();
-    if (!u || u.role === 'VENDOR') return false;
+    if (!u || u.role === 'VENDOR' || u.role === 'ADMIN') return false;
     return !!localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
   },
 
@@ -466,8 +466,8 @@ const Favourites = {
 
     const u = this.currentUser();
 
-    // Vendors never have favourites.
-    if (u && u.role === 'VENDOR') {
+    // Vendors and Admins never have favourites.
+    if (u && (u.role === 'VENDOR' || u.role === 'ADMIN')) {
       this._ids.clear();
       return;
     }
@@ -553,10 +553,16 @@ const Favourites = {
         this._ids.delete(vendorId); // vendor no longer available → not favourited
         return false;
       }
-      Toast.error('Could not save favourite', (res.data && res.data.message) || 'Please try again.');
+      Toast.error(
+        typeof I18n !== 'undefined' ? I18n.t('messages.unknownError') : 'Could not save favourite',
+        (res.data && res.data.message) || (typeof I18n !== 'undefined' ? I18n.t('messages.unknownError') : 'Please try again.')
+      );
       return false;
     } catch {
-      Toast.error('Network error', 'Please check your connection and try again.');
+      Toast.error(
+        typeof I18n !== 'undefined' ? I18n.t('messages.connectionError') : 'Network error',
+        typeof I18n !== 'undefined' ? I18n.t('messages.connectionError') : 'Please check your connection and try again.'
+      );
       return false;
     }
   },
@@ -581,10 +587,16 @@ const Favourites = {
         this._ids.delete(vendorId); // already not favourited
         return false;
       }
-      Toast.error('Could not remove favourite', (res.data && res.data.message) || 'Please try again.');
+      Toast.error(
+        typeof I18n !== 'undefined' ? I18n.t('messages.unknownError') : 'Could not remove favourite',
+        (res.data && res.data.message) || (typeof I18n !== 'undefined' ? I18n.t('messages.unknownError') : 'Please try again.')
+      );
       return false;
     } catch {
-      Toast.error('Network error', 'Please check your connection and try again.');
+      Toast.error(
+        typeof I18n !== 'undefined' ? I18n.t('messages.connectionError') : 'Network error',
+        typeof I18n !== 'undefined' ? I18n.t('messages.connectionError') : 'Please check your connection and try again.'
+      );
       return false;
     }
   },
@@ -600,15 +612,21 @@ const Favourites = {
 
   promptBlocked() {
     const u = this.currentUser();
-    if (u && u.role === 'VENDOR') {
-      Toast.warning('Not available for business accounts', 'Vendor accounts cannot save favourites.');
+    if (u && (u.role === 'VENDOR' || u.role === 'ADMIN')) {
+      Toast.warning(
+        typeof I18n !== 'undefined' ? I18n.t('vendorDetail.vendorComplaintBlocked') : 'Not available for this account',
+        'Business and Administrator accounts cannot save favourites.'
+      );
       return;
     }
     this.promptLogin();
   },
 
   promptLogin() {
-    Toast.warning('Log in required', 'Please log in to save your favourite vendors.');
+    Toast.warning(
+      typeof I18n !== 'undefined' ? I18n.t('profile.loginRequired') : 'Log in required',
+      typeof I18n !== 'undefined' ? I18n.t('profile.loginPrompt') : 'Please log in to save your favourite vendors.'
+    );
     const onSubPage = window.location.pathname.includes('/pages/');
     setTimeout(() => {
       window.location.href = onSubPage ? 'login.html' : 'pages/login.html';

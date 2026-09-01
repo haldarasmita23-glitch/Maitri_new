@@ -16,6 +16,8 @@ import com.maitri.repository.UserRepository;
 import com.maitri.service.ChatService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -128,19 +130,73 @@ public class ChatController {
         }
 
         // ── Enforce messaging rules ───────────────────────────────────────────
+        if (callerRole == Role.VENDOR) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error("Vendors cannot initiate conversations. Only customers may send conversation requests."));
+        }
         if (callerRole == Role.USER && receiverRole != Role.VENDOR) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ApiResponse.error("Users may only message vendors."));
-        }
-        if (callerRole == Role.VENDOR && receiverRole != Role.USER) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.error("Vendors may only message users."));
         }
 
         ChatConversationResponse conversation =
                 chatService.startConversation(authentication, request.getReceiverId(), receiverRole);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Conversation started.", conversation));
+    }
+
+    /**
+     * PUT /api/chats/{chatId}/accept
+     * Accept a pending conversation request from a customer.
+     * Accessible by VENDOR and ADMIN.
+     */
+    @PutMapping("/{chatId}/accept")
+    public ResponseEntity<ApiResponse<ChatConversationResponse>> acceptConversation(
+            @PathVariable String chatId,
+            Authentication authentication) {
+        Role callerRole = extractRole(authentication);
+        if (callerRole != Role.VENDOR && callerRole != Role.ADMIN) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error("Only vendors and administrators may accept conversation requests."));
+        }
+        ChatConversationResponse conversation = chatService.acceptConversation(authentication, chatId);
+        return ResponseEntity.ok(ApiResponse.success("Conversation request accepted.", conversation));
+    }
+
+    /**
+     * POST /api/chats/{chatId}/accept
+     * Alias for accept conversation.
+     */
+    @PostMapping("/{chatId}/accept")
+    public ResponseEntity<ApiResponse<ChatConversationResponse>> acceptConversationPost(
+            @PathVariable String chatId,
+            Authentication authentication) {
+        return acceptConversation(chatId, authentication);
+    }
+
+    /**
+     * GET /api/chats/{chatId}/messages?page=0&size=30
+     * Retrieve the full message thread between the authenticated user and the partner.
+     *
+     * Messages are returned newest-first (DB order). The frontend should reverse
+     * the list so oldest messages appear at the top of the chat window.
+     *
+     * @param chatId         Partner's account ID (used as conversationId)
+     * @param page           Zero-based page number (default: 0)
+     * @param size           Page size, capped at 50 (default: 30)
+     * @param authentication The authenticated caller
+     */
+    @GetMapping("/{chatId}/messages")
+    public ResponseEntity<ApiResponse<Page<ChatMessageResponse>>> getMessages(
+            @PathVariable String chatId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "30") int size,
+            Authentication authentication) {
+
+        int cappedSize = Math.min(size, 50);
+        PageRequest pageable = PageRequest.of(page, cappedSize);
+        Page<ChatMessageResponse> messages = chatService.getMessages(authentication, chatId, pageable);
+        return ResponseEntity.ok(ApiResponse.success("Messages retrieved.", messages));
     }
 
     /**

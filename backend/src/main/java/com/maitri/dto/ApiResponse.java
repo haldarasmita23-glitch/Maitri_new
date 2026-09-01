@@ -59,6 +59,9 @@ public class ApiResponse<T> {
     /** Human-readable message describing what happened. */
     private String message;
 
+    /** Optional localization message key (e.g. "auth.invalidCredentials"). */
+    private String messageKey;
+
     /** The actual response data (null on errors). */
     private T data;
 
@@ -79,6 +82,19 @@ public class ApiResponse<T> {
         return ApiResponse.<T>builder()
                 .success(true)
                 .message(message)
+                .data(data)
+                .timestamp(currentTimestamp())
+                .build();
+    }
+
+    /**
+     * Creates a successful response with messageKey and data.
+     */
+    public static <T> ApiResponse<T> success(String message, String messageKey, T data) {
+        return ApiResponse.<T>builder()
+                .success(true)
+                .message(message)
+                .messageKey(messageKey)
                 .data(data)
                 .timestamp(currentTimestamp())
                 .build();
@@ -109,6 +125,18 @@ public class ApiResponse<T> {
     }
 
     /**
+     * Creates an error response with message and messageKey.
+     */
+    public static <T> ApiResponse<T> error(String message, String messageKey) {
+        return ApiResponse.<T>builder()
+                .success(false)
+                .message(message)
+                .messageKey(messageKey)
+                .timestamp(currentTimestamp())
+                .build();
+    }
+
+    /**
      * Creates an error response with multiple validation error details.
      * Example: ApiResponse.error("Validation failed.", List.of("Email is required", "Name too short"))
      */
@@ -116,6 +144,19 @@ public class ApiResponse<T> {
         return ApiResponse.<T>builder()
                 .success(false)
                 .message(message)
+                .errors(errors)
+                .timestamp(currentTimestamp())
+                .build();
+    }
+
+    /**
+     * Creates an error response with messageKey and multiple validation error details.
+     */
+    public static <T> ApiResponse<T> error(String message, String messageKey, List<String> errors) {
+        return ApiResponse.<T>builder()
+                .success(false)
+                .message(message)
+                .messageKey(messageKey)
                 .errors(errors)
                 .timestamp(currentTimestamp())
                 .build();

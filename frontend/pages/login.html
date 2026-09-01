@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="../css/variables.css">
   <link rel="stylesheet" href="../css/reset.css">
@@ -19,20 +19,28 @@
 </head>
 <body>
 
+  <!-- Ambient Background Blobs -->
+  <div class="ambient-blobs" aria-hidden="true">
+    <div class="ambient-blob ambient-blob--1"></div>
+    <div class="ambient-blob ambient-blob--2"></div>
+  </div>
+
   <nav class="navbar" id="main-navbar" role="navigation" aria-label="Main navigation">
     <div class="container">
       <div class="navbar__inner">
         <a href="../index.html" class="navbar__logo" aria-label="Maitri Home">
           <div class="navbar__logo-mark" aria-hidden="true">
-            <svg viewBox="0 0 22 22" fill="none"><path d="M11 6l1.5 3.5H16l-2.75 2 1 3.5L11 13l-3.25 2 1-3.5L6 9.5h3.5L11 6z" fill="white"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L14.5 9.5H22L16 14L18.5 21.5L12 17L5.5 21.5L8 14L2 9.5H9.5L12 2Z" fill="white"/>
+            </svg>
           </div>
           <span class="navbar__logo-text">Maitr<span>i</span></span>
         </a>
         <div class="navbar__auth" style="margin-left: auto;">
-          <span style="font-size: var(--font-size-sm); color: var(--color-text-muted);">New to Maitri?</span>
-          <a href="register.html" class="btn btn--primary btn--sm">Sign Up Free</a>
+          <span style="font-size: var(--font-size-sm); color: var(--color-text-muted);" data-i18n="auth.newToMaitri">New to Maitri?</span>
+          <a href="register.html" class="btn btn--primary btn--sm" data-i18n="common.signupFree">Sign Up Free</a>
         </div>
-        <button class="navbar__hamburger" id="navbar-hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navbar-mobile">
+        <button class="navbar__hamburger" id="navbar-hamburger" aria-label="Open menu" data-i18n-aria-label="nav.openMenu" aria-expanded="false" aria-controls="navbar-mobile">
           <span></span><span></span><span></span>
         </button>
       </div>
@@ -40,10 +48,10 @@
   </nav>
 
   <div class="navbar__mobile" id="navbar-mobile">
-    <a href="../index.html" class="navbar__mobile-link">🏠 Home</a>
-    <a href="vendors.html" class="navbar__mobile-link">🏪 Browse Vendors</a>
+    <a href="../index.html" class="navbar__mobile-link">🏠 <span data-i18n="nav.home">Home</span></a>
+    <a href="vendors.html" class="navbar__mobile-link">🏪 <span data-i18n="nav.browseVendors">Browse Vendors</span></a>
     <div class="navbar__mobile-divider"></div>
-    <a href="register.html" class="btn btn--primary btn--full">Sign Up Free</a>
+    <a href="register.html" class="btn btn--primary btn--full" data-i18n="common.signupFree">Sign Up Free</a>
   </div>
 
   <main class="auth-page" id="main-content">
@@ -51,26 +59,33 @@
     <!-- Left panel -->
     <div class="auth-panel" aria-hidden="true">
       <div class="auth-panel__logo">
-        <div class="auth-panel__logo-mark">🌿</div>
+        <div class="auth-panel__logo-mark">✨</div>
         <span class="auth-panel__logo-text">Maitr<span>i</span></span>
       </div>
-      <h2 class="auth-panel__title">Welcome<br>Back!</h2>
-      <p class="auth-panel__subtitle">
+      <h2 class="auth-panel__title" data-i18n-html="auth.welcomeBackTitle">Welcome<br>Back!</h2>
+      <p class="auth-panel__subtitle" data-i18n="auth.welcomeBackSubtitle">
         Log in to access your favourites, reviews, and stay connected with your local community in Peenya &amp; Nagasandra.
       </p>
       <div class="auth-panel__features">
         <div class="auth-panel__feature">
           <div class="auth-panel__feature-icon">❤️</div>
           <div class="auth-panel__feature-text">
-            <strong>Your Favourites</strong>
-            Quickly access vendors you've saved
+            <strong data-i18n="auth.favTitle">Your Favourites</strong>
+            <span data-i18n="auth.favDesc">Quickly access vendors you've saved</span>
           </div>
         </div>
         <div class="auth-panel__feature">
           <div class="auth-panel__feature-icon">⭐</div>
           <div class="auth-panel__feature-text">
-            <strong>Your Reviews</strong>
-            Manage reviews you've submitted
+            <strong data-i18n="auth.revTitle">Your Reviews</strong>
+            <span data-i18n="auth.revDesc">Manage reviews you've submitted</span>
+          </div>
+        </div>
+        <div class="auth-panel__feature">
+          <div class="auth-panel__feature-icon">🌐</div>
+          <div class="auth-panel__feature-text">
+            <strong>Multilingual Chat</strong>
+            <span>Communicate seamlessly in Kannada, Hindi, or English</span>
           </div>
         </div>
       </div>
@@ -82,26 +97,26 @@
 
         <!-- Mobile logo -->
         <div class="auth-mobile-logo">
-          <div class="auth-mobile-logo__mark" aria-hidden="true">🌿</div>
+          <div class="auth-mobile-logo__mark" aria-hidden="true">✨</div>
           <span class="auth-mobile-logo__text">Maitr<span>i</span></span>
         </div>
 
         <div class="auth-form-header">
-          <h1>Log In</h1>
-          <p>Welcome back to your community platform</p>
+          <h1 data-i18n="auth.loginTitle">Log In</h1>
+          <p data-i18n="auth.loginSubtitle">Welcome back to your community platform</p>
         </div>
 
-        <!-- Role tabs -->
-        <div class="auth-role-tabs" role="tablist" aria-label="Account type (your role is confirmed after login)">
-          <button class="auth-role-tab active" role="tab" aria-selected="true" id="tab-user">👤 User</button>
-          <button class="auth-role-tab" role="tab" aria-selected="false" id="tab-vendor">🏪 Vendor</button>
-          <button class="auth-role-tab" role="tab" aria-selected="false" id="tab-admin">🛡️ Admin</button>
+        <!-- Role Switcher -->
+        <div class="auth-role-switcher" role="navigation" aria-label="Select Login Role">
+          <a href="login.html" class="auth-role-switch-link active">👤 Customer</a>
+          <a href="vendor-login.html" class="auth-role-switch-link">🏪 Vendor</a>
+          <a href="admin-login.html" class="auth-role-switch-link">🛡️ Admin</a>
         </div>
 
         <div class="auth-form-card">
           <div class="alert alert--info mb-4" role="note">
             <span class="alert__icon">ℹ️</span>
-            <div class="alert__text">
+            <div class="alert__text" data-i18n="auth.roleNotice">
               Your account role is confirmed securely after you log in.
             </div>
           </div>
@@ -109,30 +124,34 @@
           <form id="login-form" novalidate aria-label="Login form">
 
             <div class="form-group">
-              <label class="form-label" for="login-email">Email Address <span class="required" aria-label="required">*</span></label>
+              <label class="form-label" for="login-email"><span data-i18n="auth.emailLabel">Email Address</span> <span class="required" aria-label="required">*</span></label>
               <div class="input-icon-wrapper">
                 <span class="input-icon" aria-hidden="true">✉️</span>
                 <input type="email" id="login-email" name="email" class="form-control"
-                       placeholder="you@example.com" autocomplete="email" required
+                       placeholder="you@example.com"
+                       data-i18n-placeholder="auth.emailPlaceholder"
+                       autocomplete="email" required
                        aria-required="true">
               </div>
             </div>
 
             <div class="form-group">
               <label class="form-label" for="login-password">
-                Password <span class="required" aria-label="required">*</span>
-                <a href="#" style="float:right; font-size: var(--font-size-xs); font-weight: 400; color: var(--color-primary);">Forgot password?</a>
+                <span data-i18n="auth.passwordLabel">Password</span> <span class="required" aria-label="required">*</span>
+                <a href="#" style="float:right; font-size: var(--font-size-xs); font-weight: 500; color: var(--color-primary);" data-i18n="auth.forgotPassword">Forgot password?</a>
               </label>
               <div class="input-icon-wrapper">
                 <span class="input-icon" aria-hidden="true">🔒</span>
                 <input type="password" id="login-password" name="password" class="form-control"
-                       placeholder="Your password" autocomplete="current-password" required
+                       placeholder="Your password"
+                       data-i18n-placeholder="auth.passwordPlaceholder"
+                       autocomplete="current-password" required
                        aria-required="true">
-                <button type="button" class="btn-toggle-password" aria-label="Show password">👁️</button>
+                <button type="button" class="btn-toggle-password" aria-label="Show password" data-i18n-aria-label="auth.showPassword">👁️</button>
               </div>
             </div>
 
-            <button type="submit" class="btn btn--primary btn--full btn--lg">
+            <button type="submit" class="btn btn--primary btn--full btn--lg" data-i18n="auth.loginBtn">
               Log In
             </button>
 
@@ -140,10 +159,13 @@
         </div>
 
         <div class="auth-switch">
-          Don't have an account? <a href="register.html">Sign up free →</a>
+          <span data-i18n="auth.noAccount">Don't have an account?</span> <a href="register.html" data-i18n="auth.signupFreeLink">Sign up free →</a>
         </div>
-        <div class="auth-switch mt-4">
-          Are you a vendor? <a href="vendor-register.html">Register your business →</a>
+        <div class="auth-switch mt-3">
+          <span>Are you a business owner?</span> <a href="vendor-login.html" style="color: #E65100; font-weight: 600;">Vendor Login →</a>
+        </div>
+        <div class="auth-switch mt-2">
+          <span>Platform administrator?</span> <a href="admin-login.html" style="color: var(--color-text-secondary); font-size: var(--font-size-xs);">Admin Login →</a>
         </div>
 
       </div>
@@ -152,6 +174,8 @@
   </main>
 
 <script src="../js/config.js"></script>
+<script src="../js/translations.js"></script>
+<script src="../js/i18n.js"></script>
 <script src="../js/api.js"></script>
 <script src="../js/mock-data.js"></script>
 <script src="../js/components.js"></script>

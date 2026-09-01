@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="../css/variables.css">
   <link rel="stylesheet" href="../css/reset.css">
@@ -19,6 +19,12 @@
 </head>
 <body>
 
+<!-- Ambient Background Blobs -->
+<div class="ambient-blobs" aria-hidden="true">
+  <div class="ambient-blob ambient-blob--1"></div>
+  <div class="ambient-blob ambient-blob--2"></div>
+</div>
+
 <div class="page-wrapper">
 
   <!-- Navbar -->
@@ -27,20 +33,25 @@
       <div class="navbar__inner">
         <a href="../index.html" class="navbar__logo" aria-label="Maitri Home">
           <div class="navbar__logo-mark" aria-hidden="true">
-            <svg viewBox="0 0 22 22" fill="none"><path d="M11 6l1.5 3.5H16l-2.75 2 1 3.5L11 13l-3.25 2 1-3.5L6 9.5h3.5L11 6z" fill="white"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L14.5 9.5H22L16 14L18.5 21.5L12 17L5.5 21.5L8 14L2 9.5H9.5L12 2Z" fill="white"/>
+            </svg>
           </div>
           <span class="navbar__logo-text">Maitr<span>i</span></span>
         </a>
         <nav class="navbar__nav" aria-label="Site links">
-          <a href="../index.html" class="navbar__link">Home</a>
-          <a href="vendors.html" class="navbar__link">Browse Vendors</a>
-          <a href="about.html" class="navbar__link">About</a>
+          <a href="../index.html" class="navbar__link" data-i18n="nav.home">Home</a>
+          <a href="vendors.html" class="navbar__link" data-i18n="nav.browseVendors">Browse Vendors</a>
+          <a href="about.html" class="navbar__link" data-i18n="nav.about">About</a>
+          <a href="chat.html" class="navbar__link" data-auth-only="messages" style="display:none;">
+            <span data-i18n="nav.messages">Messages</span> <span class="unread-badge" style="display:none;"></span>
+          </a>
         </nav>
         <div class="navbar__auth">
-          <a href="login.html" class="btn btn--ghost btn--sm">Log In</a>
-          <a href="register.html" class="btn btn--primary btn--sm">Sign Up</a>
+          <a href="login.html" class="btn btn--ghost btn--sm" data-i18n="common.login">Log In</a>
+          <a href="register.html" class="btn btn--primary btn--sm" data-i18n="common.signup">Sign Up</a>
         </div>
-        <button class="navbar__hamburger" id="navbar-hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="navbar-mobile">
+        <button class="navbar__hamburger" id="navbar-hamburger" aria-label="Open menu" data-i18n-aria-label="nav.openMenu" aria-expanded="false" aria-controls="navbar-mobile">
           <span></span><span></span><span></span>
         </button>
       </div>
@@ -48,13 +59,14 @@
   </nav>
 
   <div class="navbar__mobile" id="navbar-mobile" role="navigation" aria-label="Mobile navigation">
-    <a href="../index.html" class="navbar__mobile-link">🏠 Home</a>
-    <a href="vendors.html" class="navbar__mobile-link">🏪 Browse Vendors</a>
-    <a href="about.html" class="navbar__mobile-link">ℹ️ About</a>
+    <a href="../index.html" class="navbar__mobile-link">🏠 <span data-i18n="nav.home">Home</span></a>
+    <a href="vendors.html" class="navbar__mobile-link">🏪 <span data-i18n="nav.browseVendors">Browse Vendors</span></a>
+    <a href="about.html" class="navbar__mobile-link">ℹ️ <span data-i18n="nav.about">About</span></a>
+    <a href="chat.html" class="navbar__mobile-link" data-auth-only="messages" style="display:none;">💬 <span data-i18n="nav.messages">Messages</span></a>
     <div class="navbar__mobile-divider"></div>
     <div class="navbar__mobile-auth">
-      <a href="login.html" class="btn btn--outline btn--full">Log In</a>
-      <a href="register.html" class="btn btn--primary btn--full">Sign Up Free</a>
+      <a href="login.html" class="btn btn--outline btn--full" data-i18n="common.login">Log In</a>
+      <a href="register.html" class="btn btn--primary btn--full" data-i18n="common.signupFree">Sign Up Free</a>
     </div>
   </div>
 
@@ -69,10 +81,10 @@
       <div class="container">
 
         <!-- Breadcrumb -->
-        <nav class="breadcrumb" aria-label="Breadcrumb">
-          <a href="../index.html">Home</a>
+        <nav class="breadcrumb breadcrumb--light" aria-label="Breadcrumb">
+          <a href="../index.html" data-i18n="common.home">Home</a>
           <span class="breadcrumb__sep" aria-hidden="true">›</span>
-          <a href="vendors.html">Browse Vendors</a>
+          <a href="vendors.html" data-i18n="vendors.breadcrumb">Browse Vendors</a>
           <span class="breadcrumb__sep" aria-hidden="true">›</span>
           <span class="breadcrumb__current" id="vendor-breadcrumb-name">Vendor</span>
         </nav>
@@ -86,7 +98,7 @@
             <div class="vendor-detail-header">
               <div class="vendor-detail-header__top">
                 <div>
-                  <h1 class="vendor-detail-name" id="vendor-name">Loading…</h1>
+                  <h1 class="vendor-detail-name" id="vendor-name" data-i18n="common.loading">Loading…</h1>
                   <div class="vendor-detail-meta">
                     <div id="vendor-category-badge"></div>
                     <div id="vendor-rating"></div>
@@ -94,7 +106,10 @@
                 </div>
                 <div class="vendor-detail-actions">
                   <button id="fav-btn" class="btn btn--outline">
-                    🤍 Save
+                    🤍 <span data-i18n="vendorDetail.addFav">Save</span>
+                  </button>
+                  <button id="message-vendor-btn" class="btn btn--primary" style="display:none;">
+                    💬 <span data-i18n="vendorDetail.message">Message Vendor</span>
                   </button>
                 </div>
               </div>
@@ -106,36 +121,36 @@
             <!-- Tabs -->
             <div class="detail-tabs" role="tablist" aria-label="Vendor information tabs">
               <button class="detail-tab active" data-tab="tab-about" role="tab" aria-selected="true" aria-controls="tab-about" id="tab-btn-about">
-                📋 About
+                📋 <span data-i18n="vendorDetail.overviewTab">About</span>
               </button>
               <button class="detail-tab" data-tab="tab-reviews" role="tab" aria-selected="false" aria-controls="tab-reviews" id="tab-btn-reviews">
-                ⭐ Reviews
+                ⭐ <span data-i18n="vendorDetail.reviewsTab">Reviews</span>
               </button>
               <button class="detail-tab" data-tab="tab-complaints" role="tab" aria-selected="false" aria-controls="tab-complaints" id="tab-btn-complaints">
-                📋 Complaints
+                ⚠️ <span data-i18n="vendorDetail.complaintTab">Complaints</span>
               </button>
             </div>
 
             <!-- About Tab -->
             <div id="tab-about" class="tab-panel active" role="tabpanel" aria-labelledby="tab-btn-about">
-              <p class="vendor-description" id="vendor-description">Loading…</p>
+              <p class="vendor-description" id="vendor-description" data-i18n="common.loading">Loading…</p>
 
               <div class="vendor-info-grid">
                 <!-- Location & Hours -->
                 <div class="vendor-info-card">
-                  <div class="vendor-info-card__title">Location &amp; Hours</div>
+                  <div class="vendor-info-card__title" data-i18n="vendorDetail.addressHeading">Location &amp; Hours</div>
                   <div class="vendor-info-card__body">
                     <div class="info-item">
                       <div class="info-item__icon" aria-hidden="true">📍</div>
                       <div class="info-item__content">
-                        <div class="info-item__label">Address</div>
+                        <div class="info-item__label" data-i18n="common.address">Address</div>
                         <div class="info-item__value" id="vendor-address">—</div>
                       </div>
                     </div>
                     <div class="info-item">
                       <div class="info-item__icon" aria-hidden="true">🕐</div>
                       <div class="info-item__content">
-                        <div class="info-item__label">Opening Hours</div>
+                        <div class="info-item__label" data-i18n="vendorDetail.hoursHeading">Opening Hours</div>
                         <div class="info-item__value" id="vendor-hours">—</div>
                       </div>
                     </div>
@@ -144,19 +159,19 @@
 
                 <!-- Contact -->
                 <div class="vendor-info-card">
-                  <div class="vendor-info-card__title">Contact</div>
+                  <div class="vendor-info-card__title" data-i18n="vendorDetail.phoneHeading">Contact</div>
                   <div class="vendor-info-card__body">
                     <div class="info-item">
                       <div class="info-item__icon" aria-hidden="true">📞</div>
                       <div class="info-item__content">
-                        <div class="info-item__label">Phone</div>
+                        <div class="info-item__label" data-i18n="common.phone">Phone</div>
                         <div class="info-item__value" id="vendor-phone">—</div>
                       </div>
                     </div>
                     <div class="info-item">
                       <div class="info-item__icon" aria-hidden="true">👤</div>
                       <div class="info-item__content">
-                        <div class="info-item__label">Owner / Manager</div>
+                        <div class="info-item__label" data-i18n="vendorDetail.ownerHeading">Owner / Manager</div>
                         <div class="info-item__value" id="vendor-owner">—</div>
                       </div>
                     </div>
@@ -182,10 +197,10 @@
 
               <!-- Write a Review -->
               <div class="write-review">
-                <h4 id="write-review-title">Write a Review</h4>
+                <h4 id="write-review-title" data-i18n="vendorDetail.writeReviewTitle">Write a Review</h4>
                 <form id="review-form" novalidate aria-label="Submit a review">
                   <div class="form-group">
-                    <label class="form-label">Your Rating <span class="required" aria-label="required">*</span></label>
+                    <label class="form-label"><span data-i18n="vendorDetail.yourRating">Your Rating</span> <span class="required" aria-label="required">*</span></label>
                     <div class="rating-input" role="group" aria-label="Select star rating">
                       <button type="button" class="rating-input__star" data-value="1" aria-label="1 star">★</button>
                       <button type="button" class="rating-input__star" data-value="2" aria-label="2 stars">★</button>
@@ -196,12 +211,14 @@
                     <input type="hidden" id="rating-value" name="rating">
                   </div>
                   <div class="form-group">
-                    <label class="form-label" for="review-text">Your Review</label>
+                    <label class="form-label" for="review-text" data-i18n="vendorDetail.reviewTextLabel">Your Review</label>
                     <textarea id="review-text" name="review" class="form-control" rows="3"
-                              placeholder="Share your experience with this vendor…" aria-describedby="review-text-hint"></textarea>
-                    <span class="form-hint" id="review-text-hint">Optional — at least 10 characters if you add text.</span>
+                              placeholder="Share your experience with this vendor…"
+                              data-i18n-placeholder="vendorDetail.reviewTextPlaceholder"
+                              aria-describedby="review-text-hint"></textarea>
+                    <span class="form-hint" id="review-text-hint"></span>
                   </div>
-                  <button type="submit" class="btn btn--primary">Submit Review</button>
+                  <button type="submit" class="btn btn--primary" id="submit-review-btn" data-i18n="vendorDetail.submitReview">Submit Review</button>
                 </form>
               </div>
 
@@ -215,8 +232,8 @@
             <!-- Complaints Tab (Phase 9) -->
             <div id="tab-complaints" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-complaints">
               <div class="write-review">
-                <h4>Raise a Complaint</h4>
-                <p class="form-hint" style="margin-bottom: var(--space-4);">
+                <h4 data-i18n="vendorDetail.raiseComplaintTitle">Raise a Complaint</h4>
+                <p class="form-hint" style="margin-bottom: var(--space-4);" data-i18n="vendorDetail.complaintSubtitle">
                   Found an issue with this vendor? Let us know and we'll help resolve it.
                 </p>
                 <div id="complaint-form-container"></div>
@@ -228,18 +245,21 @@
           <!-- ── Sidebar ──────────────────────────────────────── -->
           <aside>
             <div class="sidebar-card">
-              <h2 class="modal__title" id="sidebar-vendor-name" style="font-size: 1.1rem; margin-bottom: var(--space-4);">—</h2>
+              <h2 class="modal__title" id="sidebar-vendor-name" style="font-size: 1.15rem; margin-bottom: var(--space-4);">—</h2>
 
               <!-- Open/Closed status -->
               <div class="sidebar-status" aria-live="polite">
-                <span class="sidebar-status__label">Status</span>
+                <span class="sidebar-status__label" data-i18n="common.status">Status</span>
                 <span id="vendor-status" class="flex gap-2 items-center"></span>
               </div>
 
               <!-- Contact CTA -->
               <a href="tel:" id="sidebar-phone-link" class="btn btn--primary sidebar-contact-btn" onclick="handlePhoneClick(event)">
-                📞 Call Vendor
+                📞 <span data-i18n="vendorDetail.call">Call Vendor</span>
               </a>
+              <button id="sidebar-message-vendor-btn" class="btn btn--secondary sidebar-contact-btn" style="display:none;">
+                💬 <span data-i18n="vendorDetail.message">Message Vendor</span>
+              </button>
               <button id="fav-btn-sidebar" class="btn btn--outline sidebar-contact-btn" style="display:none"></button>
 
               <!-- Quick Info -->
@@ -247,22 +267,17 @@
                 <div class="info-item">
                   <div class="info-item__icon" aria-hidden="true">📍</div>
                   <div class="info-item__content">
-                    <div class="info-item__label">Location</div>
+                    <div class="info-item__label" data-i18n="common.area">Location</div>
                     <div class="info-item__value" id="sidebar-address" style="font-size: var(--font-size-sm);">—</div>
                   </div>
                 </div>
                 <div class="info-item">
                   <div class="info-item__icon" aria-hidden="true">🕐</div>
                   <div class="info-item__content">
-                    <div class="info-item__label">Hours</div>
+                    <div class="info-item__label" data-i18n="vendorDetail.hoursHeading">Hours</div>
                     <div class="info-item__value" id="sidebar-hours" style="font-size: var(--font-size-sm);">—</div>
                   </div>
                 </div>
-              </div>
-
-              <div class="alert alert--warning mt-4" role="note" style="font-size: var(--font-size-xs);">
-                <span class="alert__icon">⚠️</span>
-                <div class="alert__text">Chat &amp; messaging will be available in a later phase.</div>
               </div>
             </div>
           </aside>
@@ -277,10 +292,10 @@
   <footer class="footer" role="contentinfo">
     <div class="container">
       <div class="footer__bottom" style="border-top: none; padding-top: 0;">
-        <span class="footer__copyright">© 2026 Maitri. Made with ❤️ for Peenya &amp; Nagasandra.</span>
+        <span class="footer__copyright" data-i18n="footer.copyright">© 2026 Maitri. Made with ❤️ for Peenya &amp; Nagasandra.</span>
         <div class="footer__backend-status" aria-live="polite">
           <span class="status-dot status-dot--amber js-health-dot" aria-hidden="true"></span>
-          <span class="js-health-text">Checking backend…</span>
+          <span class="js-health-text" data-i18n="footer.backendChecking">Checking backend…</span>
         </div>
       </div>
     </div>
@@ -289,6 +304,8 @@
 </div>
 
 <script src="../js/config.js"></script>
+<script src="../js/translations.js"></script>
+<script src="../js/i18n.js"></script>
 <script src="../js/api.js"></script>
 <script src="../js/mock-data.js"></script>
 <script src="../js/categories.js"></script>
@@ -301,8 +318,9 @@
 
 <script>
 function handlePhoneClick(e) {
-  const v = getVendorById(new URLSearchParams(location.search).get('id'));
-  if (v) e.currentTarget.href = 'tel:' + v.phone.replace(/\s/g, '');
+  if (typeof _cachedVendor !== 'undefined' && _cachedVendor && _cachedVendor.phone) {
+    e.currentTarget.href = 'tel:' + _cachedVendor.phone.replace(/\s/g, '');
+  }
 }
 
 // Sync sidebar address/hours after detail render
@@ -312,9 +330,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const hrs  = document.getElementById('vendor-hours')?.textContent;
     const sAddr = document.getElementById('sidebar-address');
     const sHrs  = document.getElementById('sidebar-hours');
-    if (sAddr && addr) sAddr.textContent = addr;
-    if (sHrs  && hrs)  sHrs.textContent = hrs;
-  }, 100);
+    if (sAddr && addr && addr !== '—') sAddr.textContent = addr;
+    if (sHrs  && hrs && hrs !== '—')   sHrs.textContent = hrs;
+  }, 200);
 });
 </script>
 

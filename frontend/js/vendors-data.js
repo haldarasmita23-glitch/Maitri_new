@@ -25,11 +25,12 @@ const Vendors = {
     try {
       const response = await API.getVendors();
       const items = response && response.success ? response.data : null;
-      if (Array.isArray(items)) {
+      if (Array.isArray(items) && items.length > 0) {
         this.fromApi = true;
         this.cache = items.map(normalizeVendor);
         return this.cache;
       }
+      // API returned empty array — fall through to mock data
     } catch {
       // Backend unreachable — fall through to mock data
     }
@@ -44,16 +45,32 @@ const Vendors = {
    * to the loaded cache (mock data) when the backend is unreachable.
    */
   async getById(id) {
+    console.log('[Vendors.getById] Called with id:', id);
     try {
       const response = await API.getVendor(id);
+      console.log('[Vendors.getById] API.getVendor response:', JSON.stringify(response));
       if (response && response.success && response.data) {
-        return normalizeVendor(response.data);
+        const normalized = normalizeVendor(response.data);
+        console.log('[Vendors.getById] Normalized vendor id:', normalized.id);
+        return normalized;
       }
-    } catch {
-      // Backend unreachable — fall through to cache
+      console.warn('[Vendors.getById] API response not successful or no data:', response);
+    } catch (err) {
+      console.error('[Vendors.getById] API call threw:', err);
     }
     const all = await this.load();
-    return all.find(v => v.id === id) || null;
+    console.log('[Vendors.getById] Searching cache for id:', id, '| cache size:', all.length);
+    const found = all.find(v => v.id === id);
+    if (found) return found;
+
+    // Graceful fallback for mock IDs (e.g. v001-v012) when backend is active
+    if (typeof MOCK_VENDORS !== 'undefined' && Array.isArray(MOCK_VENDORS)) {
+      const mockFound = MOCK_VENDORS.find(v => v.id === id);
+      if (mockFound) return { ...mockFound };
+    }
+
+    console.error('[Vendors.getById] Vendor not found for id:', id);
+    return null;
   },
 
   /**
@@ -74,7 +91,8 @@ const Vendors = {
 /** Maps an API VendorResponse to the frontend vendor card/detail shape. */
 function normalizeVendor(v) {
   return {
-    id: v.id,
+    id: v.id || v._id,
+    userId: v.userId || (v.id ? 'user-' + v.id : ''),               // owner's user account id (for chat)
     shopName: v.shopName,
     ownerName: v.ownerName,
     categoryId: v.categorySlug,     // frontend identity is the slug

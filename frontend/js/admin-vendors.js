@@ -8,7 +8,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
   if (!token) {
-    window.location.href = 'index.html';
+    window.location.href = 'admin-login.html';
     return;
   }
 
@@ -18,12 +18,20 @@ document.addEventListener('DOMContentLoaded', () => {
       const user = result.data.data;
       const greeting = document.getElementById('admin-user-greeting');
       if (greeting) {
-        greeting.textContent = `Hello, ${user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN' ? 'User' : 'Admin'}`;
+        greeting.textContent = `Hello, ${user.name || 'Admin'}`;
       }
-      if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
-        setTimeout(() => window.location.href = 'index.html', 2000);
+      const role = typeof AuthSession !== 'undefined' ? AuthSession.normalizeRole(user.role) : String(user.role).replace(/^ROLE_/, '');
+      if (role !== 'ADMIN') {
+        if (typeof Toast !== 'undefined') {
+          Toast.error('Access Denied', 'Administrator privileges required.');
+        }
+        setTimeout(() => { window.location.href = 'admin-login.html'; }, 1000);
       }
+    } else {
+      window.location.href = 'admin-login.html';
     }
+  }).catch(() => {
+    window.location.href = 'admin-login.html';
   });
 
   // Initialize pending vendors
@@ -61,7 +69,7 @@ async function initPendingVendors() {
     if (list) list.style.display = 'block';
     if (empty) empty.style.display = 'none';
 
-    const container = list.querySelector('.pending-vendors-container');
+    let container = list.querySelector('.pending-vendors-container');
     if (!container) {
       // Build list HTML
       const html = pendingVendors.map(vendor => {
@@ -70,7 +78,7 @@ async function initPendingVendors() {
         return `
           <div class="pending-vendor-card">
             <div class="pending-vendor-card__info">
-              <div class="pending-vendor-card__shop">${shopName}</div>
+              <div class="pending-vendor-card__shop">${escapeHtml(shopName)}</div>
               <div class="pending-vendor-card__status status--pending">PENDING</div>
             </div>
             <div class="pending-vendor-card__actions">
@@ -132,6 +140,7 @@ async function initPendingVendors() {
   } catch (err) {
     showToast('error', 'Failed to load pending vendors');
   }
+}
 
 /**
  * Initialize Logout
@@ -144,7 +153,7 @@ function initLogout() {
   if (logoutBtn) {
     logoutBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      modal.classList.add('active');
+      if (modal) modal.classList.add('active');
     });
   }
 
@@ -163,6 +172,7 @@ function initLogout() {
       }
     });
   }
+}
 
 /**
  * Show toast notification

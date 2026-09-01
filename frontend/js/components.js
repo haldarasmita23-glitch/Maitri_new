@@ -112,28 +112,36 @@ const Modal = {
 // ── Navbar ────────────────────────────────────────────────────────
 
 const Navbar = {
+  _initialized: false,
+
   init() {
+    if (this._initialized) {
+      this.renderAuthState();
+      return;
+    }
+    this._initialized = true;
+
     const hamburger = document.getElementById('navbar-hamburger');
     const mobileMenu = document.getElementById('navbar-mobile');
     const navbar = document.getElementById('main-navbar');
 
-    if (!hamburger || !mobileMenu) return;
-
-    // Toggle
-    hamburger.addEventListener('click', () => {
-      const isOpen = hamburger.classList.toggle('open');
-      mobileMenu.classList.toggle('open', isOpen);
-      hamburger.setAttribute('aria-expanded', isOpen.toString());
-      hamburger.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
-    });
-
-    // Close on mobile link click
-    mobileMenu.querySelectorAll('.navbar__mobile-link').forEach(link => {
-      link.addEventListener('click', () => {
-        hamburger.classList.remove('open');
-        mobileMenu.classList.remove('open');
+    if (hamburger && mobileMenu) {
+      // Toggle
+      hamburger.addEventListener('click', () => {
+        const isOpen = hamburger.classList.toggle('open');
+        mobileMenu.classList.toggle('open', isOpen);
+        hamburger.setAttribute('aria-expanded', isOpen.toString());
+        hamburger.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
       });
-    });
+
+      // Close on mobile link click
+      mobileMenu.querySelectorAll('.navbar__mobile-link').forEach(link => {
+        link.addEventListener('click', () => {
+          hamburger.classList.remove('open');
+          mobileMenu.classList.remove('open');
+        });
+      });
+    }
 
     // Scroll shadow
     if (navbar) {
@@ -147,6 +155,10 @@ const Navbar = {
     this.cacheGuestState();
     this.renderAuthState();
     window.addEventListener('maitri:auth-change', event => this.renderAuthState(event.detail));
+    window.addEventListener('maitri:language-change', () => {
+      this.renderAuthState();
+      HealthStatus.update();
+    });
     this.restoreSession();
   },
 
@@ -158,18 +170,46 @@ const Navbar = {
 
   storedUser() {
     try {
-      return JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA));
+      if (typeof AuthSession !== 'undefined') {
+        const u = AuthSession.user();
+        if (u) return u;
+      }
+      const u = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA));
+      if (u && u.role && typeof AuthSession !== 'undefined') {
+        u.role = AuthSession.normalizeRole(u.role);
+      }
+      return u;
     } catch {
       return null;
     }
   },
 
+  normalizeRole(role) {
+    if (!role) return null;
+    if (typeof AuthSession !== 'undefined' && typeof AuthSession.normalizeRole === 'function') {
+      return AuthSession.normalizeRole(role);
+    }
+    const s = String(role).trim().toUpperCase();
+    if (s === 'ROLE_VENDOR' || s === 'VENDOR') return 'VENDOR';
+    if (s === 'ROLE_ADMIN' || s === 'ADMIN' || s === 'ROLE_SUPER_ADMIN' || s === 'SUPER_ADMIN') return 'ADMIN';
+    if (s === 'ROLE_USER' || s === 'USER' || s === 'MEMBER') return 'USER';
+    return s.replace(/^ROLE_/, '');
+  },
+
   renderAuthState(user = this.storedUser()) {
     const authAreas = document.querySelectorAll('.navbar__auth');
     const mobileMenus = document.querySelectorAll('#navbar-mobile');
+
+    // Show/hide auth-only nav links (e.g. Messages) based on login state
+    this.toggleAuthLinks(!!user);
+    this.toggleRoleNavLinks(user);
+
     if (!user) {
       authAreas.forEach(area => {
-        if (area.dataset.guestMarkup) area.innerHTML = area.dataset.guestMarkup;
+        if (area.dataset.guestMarkup) {
+          area.innerHTML = area.dataset.guestMarkup;
+          if (typeof I18n !== 'undefined') I18n.translatePage(area);
+        }
       });
       mobileMenus.forEach(menu => {
         menu.querySelector('[data-auth-logout]')?.remove();
@@ -178,44 +218,99 @@ const Navbar = {
       return;
     }
 
+    const role = this.normalizeRole(user.role);
+
     authAreas.forEach(area => {
       area.textContent = '';
       const greeting = document.createElement('span');
       greeting.style.cssText = 'font-size: var(--font-size-sm); color: var(--color-text-muted);';
-      greeting.textContent = `Hi, ${user.name || user.email}`;
+      greeting.textContent = typeof I18n !== 'undefined'
+        ? I18n.t('nav.greeting', { name: user.name || user.email })
+        : `Hi, ${user.name || user.email}`;
       const profile = document.createElement('a');
-      profile.href = this.profileHref();
-      profile.className = 'btn btn--ghost btn--sm';
-      profile.textContent = '👤 My Profile';
+      profile.href = this.profileHref(role);
+      profile.className = role === 'VENDOR' ? 'btn btn--vendor btn--sm' : (role === 'ADMIN' ? 'btn btn--admin btn--sm' : 'btn btn--ghost btn--sm');
+      profile.textContent = this.profileLabel(role);
       const logout = document.createElement('button');
       logout.type = 'button';
       logout.className = 'btn btn--outline btn--sm';
-      logout.textContent = 'Log Out';
+      logout.textContent = typeof I18n !== 'undefined' ? I18n.t('nav.logout') : 'Log Out';
       logout.addEventListener('click', () => this.logout());
       area.append(greeting, profile, logout);
     });
 
     mobileMenus.forEach(menu => {
-      const existing = menu.querySelector('[data-auth-logout]');
-      if (existing) return;
-      const profile = document.createElement('a');
-      profile.href = this.profileHref();
-      profile.className = 'btn btn--outline btn--full';
-      profile.dataset.authProfile = 'true';
-      profile.textContent = '👤 My Profile';
-      const logout = document.createElement('button');
-      logout.type = 'button';
-      logout.className = 'btn btn--outline btn--full';
-      logout.dataset.authLogout = 'true';
-      logout.textContent = 'Log Out';
-      logout.addEventListener('click', () => this.logout());
-      menu.append(profile, logout);
+      let profile = menu.querySelector('[data-auth-profile]');
+      let logout = menu.querySelector('[data-auth-logout]');
+
+      if (!profile) {
+        profile = document.createElement('a');
+        profile.className = 'btn btn--outline btn--full';
+        profile.dataset.authProfile = 'true';
+        menu.append(profile);
+      }
+      profile.href = this.profileHref(role);
+      profile.textContent = this.profileLabel(role);
+
+      if (!logout) {
+        logout = document.createElement('button');
+        logout.type = 'button';
+        logout.className = 'btn btn--outline btn--full';
+        logout.dataset.authLogout = 'true';
+        logout.addEventListener('click', () => this.logout());
+        menu.append(logout);
+      }
+      logout.textContent = typeof I18n !== 'undefined' ? I18n.t('nav.logout') : 'Log Out';
     });
   },
 
-  /** Relative href to the user profile page, valid from both /pages/ and the root. */
-  profileHref() {
-    return window.location.pathname.includes('/pages/') ? 'user-profile.html' : 'pages/user-profile.html';
+  /** Role-aware relative href to the dashboard/profile page. */
+  profileHref(role) {
+    const isPages = window.location.pathname.includes('/pages/');
+    const r = this.normalizeRole(role);
+    if (r === 'VENDOR') {
+      return isPages ? 'vendor-dashboard.html' : 'pages/vendor-dashboard.html';
+    }
+    if (r === 'ADMIN') {
+      return isPages ? 'admin.html' : 'pages/admin.html';
+    }
+    return isPages ? 'user-profile.html' : 'pages/user-profile.html';
+  },
+
+  /** Role-aware label for the profile/dashboard button. */
+  profileLabel(role) {
+    const r = this.normalizeRole(role);
+    if (r === 'VENDOR') {
+      return typeof I18n !== 'undefined' ? (I18n.t('nav.vendorDashboard') || '🏪 Business Dashboard') : '🏪 Business Dashboard';
+    }
+    if (r === 'ADMIN') {
+      return typeof I18n !== 'undefined' ? (I18n.t('nav.adminPanel') || '🛡️ Admin Panel') : '🛡️ Admin Panel';
+    }
+    return typeof I18n !== 'undefined' ? I18n.t('nav.myProfile') : '👤 My Profile';
+  },
+
+  /** Show or hide navigation links marked with data-auth-only. */
+  toggleAuthLinks(show) {
+    document.querySelectorAll('[data-auth-only]').forEach(link => {
+      link.style.display = show ? '' : 'none';
+    });
+  },
+
+  /** Conditionally show/hide navigation links based on user role. */
+  toggleRoleNavLinks(user) {
+    const role = this.normalizeRole(user ? user.role : (this.storedUser()?.role || null));
+    const isVendor = role === 'VENDOR';
+    const isAdmin = role === 'ADMIN';
+
+    // Hide Browse Vendors link in main nav and mobile drawer for vendors and admins
+    document.querySelectorAll('a[href*="vendors.html"]').forEach(link => {
+      if (link.getAttribute('href') && link.getAttribute('href').includes('admin-vendors.html')) {
+        return;
+      }
+      if (link.closest('.navbar__nav') || link.closest('#navbar-mobile') || link.classList.contains('navbar__link') || link.classList.contains('navbar__mobile-link')) {
+        link.style.display = (isVendor || isAdmin) ? 'none' : '';
+      }
+    });
   },
 
   async restoreSession() {
@@ -270,6 +365,8 @@ const Navbar = {
 // ── Backend Health Status ─────────────────────────────────────────
 
 const HealthStatus = {
+  _lastStatus: null,
+
   async init() {
     const dotEls    = document.querySelectorAll('.js-health-dot');
     const textEls   = document.querySelectorAll('.js-health-text');
@@ -278,20 +375,33 @@ const HealthStatus = {
 
     try {
       const result = await API.checkHealth();
-      dotEls.forEach(dot => {
-        dot.className = 'status-dot status-dot--pulse ' +
-          (result.ok ? 'status-dot--green' : 'status-dot--red');
-      });
-      textEls.forEach(el => {
-        el.textContent = result.ok ? 'Backend: Connected' : 'Backend: Offline';
-      });
+      this._lastStatus = result.ok;
+      this.render(result.ok);
     } catch {
-      dotEls.forEach(dot => {
-        dot.className = 'status-dot status-dot--red';
-      });
-      textEls.forEach(el => { el.textContent = 'Backend: Offline'; });
+      this._lastStatus = false;
+      this.render(false);
     }
   },
+
+  render(isOnline) {
+    const dotEls  = document.querySelectorAll('.js-health-dot');
+    const textEls = document.querySelectorAll('.js-health-text');
+    dotEls.forEach(dot => {
+      dot.className = 'status-dot status-dot--pulse ' +
+        (isOnline ? 'status-dot--green' : 'status-dot--red');
+    });
+    textEls.forEach(el => {
+      el.textContent = isOnline
+        ? (typeof I18n !== 'undefined' ? I18n.t('footer.backendConnected') : 'Backend: Connected')
+        : (typeof I18n !== 'undefined' ? I18n.t('footer.backendOffline') : 'Backend: Offline');
+    });
+  },
+
+  update() {
+    if (this._lastStatus !== null) {
+      this.render(this._lastStatus);
+    }
+  }
 };
 
 
@@ -312,18 +422,48 @@ function initSmoothScroll() {
 
 // ── Intersection Observer for fade-in animations ──────────────────
 
-function initScrollAnimations() {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.12 });
+let scrollAnimationObserver = null;
 
-  document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+function getScrollAnimationObserver() {
+  if (!scrollAnimationObserver && typeof IntersectionObserver !== 'undefined') {
+    scrollAnimationObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          scrollAnimationObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+  }
+  return scrollAnimationObserver;
 }
+
+/**
+ * Observe elements with .animate-on-scroll for fade-in animation.
+ * Can be called multiple times after dynamic content injection.
+ * @param {HTMLElement|Document} root - container to query from (default: document)
+ */
+function observeScrollAnimations(root = document) {
+  const observer = getScrollAnimationObserver();
+  const scope = (root && typeof root.querySelectorAll === 'function') ? root : document;
+  const elements = scope.querySelectorAll('.animate-on-scroll:not(.visible)');
+
+  if (!observer) {
+    // Fallback if IntersectionObserver is not supported
+    elements.forEach(el => el.classList.add('visible'));
+    return;
+  }
+
+  elements.forEach(el => observer.observe(el));
+}
+
+function initScrollAnimations() {
+  observeScrollAnimations(document);
+}
+
+// Expose globally for dynamic views
+window.observeScrollAnimations = observeScrollAnimations;
+window.observeAnimatedElements = observeScrollAnimations;
 
 
 // ── Global init ────────────────────────────────────────────────────

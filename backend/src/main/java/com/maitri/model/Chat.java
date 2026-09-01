@@ -84,8 +84,35 @@ public class Chat {
 
     /**
      * Message content (plain text or image URL).
+     * Kept for backward compatibility with legacy messages and clients.
      */
     private String message;
+
+    /**
+     * Original raw text message as typed by the sender.
+     * Preserved immutably once sent.
+     */
+    private String originalMessage;
+
+    /**
+     * Translated message content in the receiver's preferred language.
+     */
+    private String translatedMessage;
+
+    /**
+     * Detected or configured source language code ("en", "hi", "kn").
+     */
+    private String sourceLanguage;
+
+    /**
+     * Target language code ("en", "hi", "kn") corresponding to receiver's preferredLanguage.
+     */
+    private String targetLanguage;
+
+    /**
+     * Status of the message translation.
+     */
+    private TranslationStatus translationStatus;
 
     /**
      * Type of message content.
@@ -103,4 +130,10 @@ public class Chat {
      */
     @Builder.Default
     private boolean read = false;
+
+    /**
+     * Conversation status: PENDING, ACCEPTED, REJECTED.
+     */
+    @Builder.Default
+    private ConversationStatus status = ConversationStatus.PENDING;
 }

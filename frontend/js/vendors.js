@@ -7,6 +7,21 @@ let currentQuery    = '';
 let currentSort     = 'rating';
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Role Guard: Vendors and Admins do not have customer browsing behavior
+  if (typeof AuthSession !== 'undefined') {
+    if (AuthSession.isVendor()) {
+      window.location.href = 'vendor-dashboard.html';
+      return;
+    }
+    if (AuthSession.isAdmin()) {
+      window.location.href = 'admin.html';
+      return;
+    }
+  }
+
+  // ── Initialise Navbar (auth links, mobile menu, active links)
+  Navbar.init();
+
   // Read URL params
   const params = new URLSearchParams(window.location.search);
   currentCategory = params.get('category') || null;
@@ -34,6 +49,12 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   renderVendors();
+
+  // Language change listener
+  window.addEventListener('maitri:language-change', () => {
+    buildCategoryFilters();
+    renderVendors();
+  });
 });
 
 
@@ -42,22 +63,26 @@ async function buildCategoryFilters() {
   if (!bar) return;
 
   const categories = await Categories.load();
+  const allLabel = typeof I18n !== 'undefined' ? I18n.t('common.allVendors') : 'All Vendors';
 
   const allChip = `
     <button class="filter-chip ${!currentCategory ? 'active' : ''}"
             data-cat="all"
             onclick="selectCategory(null, this)">
-      All Vendors
+      ${allLabel}
     </button>
   `;
 
-  const chips = categories.map(cat => `
+  const chips = categories.map(cat => {
+    const localizedName = typeof I18n !== 'undefined' ? I18n.translateCategory(cat.name) : cat.name;
+    return `
     <button class="filter-chip ${currentCategory === cat.id ? 'active' : ''}"
             data-cat="${cat.id}"
             onclick="selectCategory('${cat.id}', this)">
-      ${cat.icon} ${escapeHtml(cat.name)}
+      ${cat.icon} ${escapeHtml(localizedName)}
     </button>
-  `).join('');
+  `;
+  }).join('');
 
   bar.innerHTML = allChip + chips;
 }
@@ -99,17 +124,26 @@ async function renderVendors() {
 
   // Update count
   if (countEl) {
-    countEl.textContent = `${vendors.length} vendor${vendors.length !== 1 ? 's' : ''} found`;
+    if (typeof I18n !== 'undefined') {
+      countEl.textContent = vendors.length === 1
+        ? I18n.t('vendors.foundCount_one', { count: 1 })
+        : I18n.t('vendors.foundCount_other', { count: vendors.length });
+    } else {
+      countEl.textContent = `${vendors.length} vendor${vendors.length !== 1 ? 's' : ''} found`;
+    }
   }
 
   // Render
   if (vendors.length === 0) {
+    const emptyTitle = typeof I18n !== 'undefined' ? I18n.t('vendors.emptyTitle') : 'No vendors found';
+    const emptyDesc = typeof I18n !== 'undefined' ? I18n.t('vendors.emptyDesc') : 'Try a different search term or browse all categories.';
+    const clearBtn = typeof I18n !== 'undefined' ? I18n.t('vendors.clearSearchBtn') : 'Clear Search';
     grid.innerHTML = `
       <div class="no-results">
         <span class="no-results__emoji">🔍</span>
-        <h3>No vendors found</h3>
-        <p>Try a different search term or browse all categories.</p>
-        <button class="btn btn--outline" onclick="clearSearch()">Clear Search</button>
+        <h3>${escapeHtml(emptyTitle)}</h3>
+        <p>${escapeHtml(emptyDesc)}</p>
+        <button class="btn btn--outline" onclick="clearSearch()">${escapeHtml(clearBtn)}</button>
       </div>
     `;
     return;
@@ -152,27 +186,39 @@ function filterVendors(vendors, query, categoryId) {
 
 // Shared vendor card builder (same as home.js — both loaded on vendors page)
 function buildVendorCard(v) {
+  const vendorId = v.id || v._id;
+  // DIAGNOSTIC LOGGING (temporary)
+  console.log('[VendorCard] shopName:', v.shopName, '| v.id:', v.id, '| v._id:', v._id, '| vendorId:', vendorId);
   const open = isVendorOpen(v.openingTime, v.closingTime);
-  const isFav = Favourites.has(v.id);
+  const isFav = Favourites.has(vendorId);
+  const localizedCat = typeof I18n !== 'undefined' ? I18n.translateCategory(v.categoryName) : v.categoryName;
+  const localizedArea = typeof I18n !== 'undefined' ? I18n.translateArea(v.area) : v.area;
+  const statusLabel = open
+    ? (typeof I18n !== 'undefined' ? I18n.t('common.openNow') : 'Open')
+    : (typeof I18n !== 'undefined' ? I18n.t('common.closed') : 'Closed');
+  const favLabel = isFav
+    ? (typeof I18n !== 'undefined' ? I18n.t('vendors.removeFav') : 'Remove from favourites')
+    : (typeof I18n !== 'undefined' ? I18n.t('vendors.addFav') : 'Add to favourites');
+
   return `
-    <a href="vendor-detail.html?id=${v.id}" class="vendor-card" aria-label="${v.shopName}">
+    <a href="vendor-detail.html?id=${encodeURIComponent(vendorId)}" class="vendor-card" data-vendor-id="${vendorId}" aria-label="${escapeHtml(v.shopName)}">
       <div class="vendor-card__image-wrapper">
         <div class="vendor-card__image-placeholder" aria-hidden="true">${v.emoji}</div>
         <span class="vendor-card__badge">
-          <span class="badge badge--primary">${v.categoryName}</span>
+          <span class="badge badge--primary">${escapeHtml(localizedCat)}</span>
         </span>
         <button class="vendor-card__fav ${isFav ? 'active' : ''}"
-                aria-label="${isFav ? 'Remove from favourites' : 'Add to favourites'}"
-                data-vendor-id="${v.id}"
-                onclick="event.preventDefault(); toggleFav(this, '${v.id}')">
+                aria-label="${favLabel}"
+                data-vendor-id="${vendorId}"
+                onclick="event.preventDefault(); toggleFav(this, '${vendorId}')">
           ${isFav ? '❤️' : '🤍'}
         </button>
       </div>
       <div class="vendor-card__body">
-        <div class="vendor-card__name">${v.shopName}</div>
+        <div class="vendor-card__name">${escapeHtml(v.shopName)}</div>
         <div class="vendor-card__address">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          ${v.area}
+          ${escapeHtml(localizedArea)}
         </div>
         <div class="vendor-card__footer">
           <span class="rating">
@@ -182,7 +228,7 @@ function buildVendorCard(v) {
           </span>
           <span class="vendor-card__hours">
             <span class="status-dot ${open ? 'status-dot--green' : 'status-dot--red'}"></span>
-            ${open ? 'Open' : 'Closed'}
+            ${statusLabel}
           </span>
         </div>
       </div>
@@ -196,10 +242,17 @@ async function toggleFav(btn, vendorId) {
   if (added === null) return; // login / blocked prompt already shown
   btn.innerHTML = added ? '❤️' : '🤍';
   btn.classList.toggle('active', added);
+  const favLabel = added
+    ? (typeof I18n !== 'undefined' ? I18n.t('vendors.removeFav') : 'Remove from favourites')
+    : (typeof I18n !== 'undefined' ? I18n.t('vendors.addFav') : 'Add to favourites');
+  btn.setAttribute('aria-label', favLabel);
   const vendors = await Vendors.load();
   const v = vendors.find(x => x.id === vendorId);
+  const title = added
+    ? (typeof I18n !== 'undefined' ? I18n.t('messages.favAdded') : 'Added to favourites')
+    : (typeof I18n !== 'undefined' ? I18n.t('messages.favRemoved') : 'Removed from favourites');
   Toast[added ? 'success' : 'info'](
-    added ? 'Added to favourites' : 'Removed from favourites',
+    title,
     v ? v.shopName : ''
   );
 }

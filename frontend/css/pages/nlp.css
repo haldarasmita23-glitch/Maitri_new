@@ -1,0 +1,250 @@
+/* ─────────────────────────────────────────────────────────────────
+   Maitri — NLP Review Text Analysis Page Styles (AI Studio Layout)
+   Luminous AI Studio cards, sample chips, sentiment banner,
+   keywords cloud, and aspect breakdown cards.
+   ───────────────────────────────────────────────────────────────── */
+
+.nlp-section {
+  padding: var(--space-8) 0 var(--space-20);
+  position: relative;
+  z-index: 1;
+}
+
+.nlp-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-8);
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .nlp-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Input Card ────────────────────────────────────────────────── */
+.nlp-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-card);
+}
+
+.nlp-card__header {
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.nlp-card__title {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-extrabold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.nlp-card__desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-bottom: 0;
+}
+
+.nlp-sample-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+
+.nlp-sample-chip {
+  font-size: var(--font-size-xs);
+  padding: var(--space-1-5) var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.nlp-sample-chip:hover {
+  background: var(--color-primary-50);
+  border-color: var(--color-primary-200);
+  color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.nlp-textarea {
+  min-height: 160px;
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  border: 1.5px solid var(--color-border);
+  outline: none;
+  resize: vertical;
+  width: 100%;
+  margin-bottom: var(--space-4);
+  background: #FFFFFF;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.nlp-textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-100);
+}
+
+.nlp-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* ── Results Output Card ───────────────────────────────────────── */
+.nlp-results-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-card);
+  min-height: 380px;
+}
+
+.nlp-results-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 300px;
+  color: var(--color-text-muted);
+}
+
+.nlp-results-empty__icon {
+  font-size: 3.5rem;
+  margin-bottom: var(--space-3);
+  opacity: 0.8;
+}
+
+/* Overall Sentiment Header */
+.sentiment-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-5) var(--space-6);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-6);
+  border: 1.5px solid transparent;
+}
+
+.sentiment-banner--positive {
+  background: var(--color-success-bg);
+  border-color: var(--color-success-border);
+  color: var(--color-success);
+}
+
+.sentiment-banner--negative {
+  background: var(--color-error-bg);
+  border-color: var(--color-error-border);
+  color: var(--color-error);
+}
+
+.sentiment-banner--neutral {
+  background: var(--color-warning-bg);
+  border-color: var(--color-warning-border);
+  color: var(--color-warning);
+}
+
+.sentiment-banner__left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.sentiment-banner__emoji {
+  font-size: 2rem;
+}
+
+.sentiment-banner__label {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-extrabold);
+  text-transform: capitalize;
+}
+
+.sentiment-banner__confidence {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Keywords Cloud */
+.nlp-keywords-section {
+  margin-bottom: var(--space-6);
+}
+
+.nlp-keywords-section h4 {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-3);
+}
+
+.nlp-keywords-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.nlp-keyword-tag {
+  padding: var(--space-1-5) var(--space-3-5);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+  border: 1px solid var(--color-primary-100);
+  box-shadow: var(--shadow-xs);
+}
+
+/* Aspect Sentiments Breakdown */
+.nlp-aspects-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+@media (max-width: 540px) {
+  .nlp-aspects-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.nlp-aspect-card {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-3-5) var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-xs);
+}
+
+.nlp-aspect-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}

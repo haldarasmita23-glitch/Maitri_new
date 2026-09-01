@@ -191,8 +191,8 @@ class ChatControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/chats starts a new conversation (VENDOR→USER)")
-    void startConversation_vendorToUser_createsMessage() throws Exception {
+    @DisplayName("POST /api/chats is forbidden for VENDOR (only customers can initiate)")
+    void startConversation_vendorToUser_isForbidden() throws Exception {
         UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
                 .username(TEST_VENDOR_EMAIL)
                 .password(TEST_PASSWORD)
@@ -209,8 +209,45 @@ class ChatControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .header("Authorization", "Bearer " + token))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.success").value(true));
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value(containsString("Vendors cannot initiate conversations")));
+    }
+
+    @Test
+    @DisplayName("PUT /api/chats/{chatId}/accept allows VENDOR to accept a customer request")
+    void acceptConversation_vendorAcceptsCustomerRequest() throws Exception {
+        ChatCreateRequest request = new ChatCreateRequest();
+        request.setReceiverId(testVendor.getId());
+        request.setReceiverRole("VENDOR");
+
+        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+                .username(TEST_USER_EMAIL)
+                .password(TEST_PASSWORD)
+                .authorities(List.of(new SimpleGrantedAuthority("ROLE_USER")))
+                .build();
+
+        String userToken = jwtService.generateToken(userDetails);
+
+        mockMvc.perform(post(CHAT_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("Authorization", "Bearer " + userToken))
+                .andExpect(status().isCreated());
+
+        UserDetails vendorDetails = org.springframework.security.core.userdetails.User.builder()
+                .username(TEST_VENDOR_EMAIL)
+                .password(TEST_PASSWORD)
+                .authorities(List.of(new SimpleGrantedAuthority("ROLE_VENDOR")))
+                .build();
+
+        String vendorToken = jwtService.generateToken(vendorDetails);
+
+        mockMvc.perform(put("/api/chats/{chatId}/accept", testUser.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + vendorToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.status").value("ACCEPTED"));
     }
 
     @Test
@@ -535,7 +572,7 @@ class ChatControllerTest {
                         .content(objectMapper.writeValueAsString(request))
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.message").value(containsString("Vendors may only message users")));
+                .andExpect(jsonPath("$.message").value(containsString("Vendors cannot initiate conversations")));
     }
 
     @Test

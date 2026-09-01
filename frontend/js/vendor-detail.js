@@ -2,36 +2,85 @@
  * Maitri — Vendor Detail Page JavaScript (Phase 7: Reviews Integration)
  */
 
+let _cachedVendor = null;
+
 document.addEventListener('DOMContentLoaded', async () => {
+  // ── DIAGNOSTIC LOGGING (temporary) ──────────────────────────────
+  console.log('[VendorDetail] URL:', window.location.href);
+  console.log('[VendorDetail] search:', window.location.search);
+  console.log('[VendorDetail] hash:', window.location.hash);
+  // ────────────────────────────────────────────────────────────────
+
   const params = new URLSearchParams(window.location.search);
-  const vendorId = params.get('id');
+  let vendorId = params.get('id') || params.get('vendorId') || params.get('v');
+
+  console.log('[VendorDetail] vendorId from params:', vendorId);
+
+  // Fallback: Check hash if query string was placed after hash or as hash anchor
+  if (!vendorId && window.location.hash) {
+    const hash = window.location.hash.replace(/^#\/?/, '');
+    if (hash.includes('=')) {
+      const hashParams = new URLSearchParams(hash.includes('?') ? hash.split('?')[1] : hash);
+      vendorId = hashParams.get('id') || hashParams.get('vendorId') || hashParams.get('v');
+    } else if (hash && !hash.includes('/')) {
+      vendorId = hash;
+    }
+    console.log('[VendorDetail] vendorId from hash fallback:', vendorId);
+  }
 
   if (!vendorId) {
-    showError('No vendor ID specified.');
+    console.error('[VendorDetail] ERROR: No vendor ID in URL. Full URL was:', window.location.href);
+    showError(typeof I18n !== 'undefined' ? I18n.t('vendorDetail.noIdSpecified') : 'No vendor ID specified.');
     return;
   }
 
   const vendor = await Vendors.getById(vendorId);
+  console.log('[VendorDetail] Vendors.getById result:', vendor ? 'FOUND: ' + vendor.shopName : 'NULL (not found)');
   if (!vendor) {
-    showError('Vendor not found.');
+    showError(typeof I18n !== 'undefined' ? I18n.t('vendorDetail.notFound') : 'Vendor not found.');
     return;
   }
 
-  renderVendorDetail(vendor);
-  initTabs();
-  initRatingInput();
-  await Favourites.load();
-  initFavButton(vendor.id);
+  _cachedVendor = vendor;
 
-  const currentUser = getCurrentUser();
-  const myReview = await renderReviews(vendor.id, currentUser);
-  await initReviewForm(vendor.id, currentUser, myReview);
-
-  // Phase 9 — Raise a Complaint (USER-only functionality)
-  const complaintContainer = document.getElementById('complaint-form-container');
-  if (complaintContainer) {
-    await initComplaintForm(vendor.id, complaintContainer);
+  try {
+    console.log('[VendorDetail] Calling renderVendorDetail...');
+    renderVendorDetail(vendor);
+    console.log('[VendorDetail] renderVendorDetail completed OK');
+  } catch (err) {
+    console.error('[VendorDetail] renderVendorDetail THREW:', err);
+    showError('Rendering error: ' + err.message);
+    return;
   }
+
+  try {
+    initTabs();
+    initRatingInput();
+    await Favourites.load();
+    initFavButton(vendor.id);
+    initMessageVendorButton(vendor);
+
+    const currentUser = getCurrentUser();
+    const myReview = await renderReviews(vendor.id, currentUser);
+    await initReviewForm(vendor.id, currentUser, myReview);
+
+    // Phase 9 — Raise a Complaint (USER-only functionality)
+    const complaintContainer = document.getElementById('complaint-form-container');
+    if (complaintContainer) {
+      await initComplaintForm(vendor.id, complaintContainer);
+    }
+  } catch (err) {
+    console.error('[VendorDetail] Post-render init THREW:', err);
+  }
+
+  window.addEventListener('maitri:language-change', async () => {
+    if (_cachedVendor) {
+      renderVendorDetail(_cachedVendor);
+      initFavButton(_cachedVendor.id);
+      initMessageVendorButton(_cachedVendor);
+      await renderReviews(_cachedVendor.id, getCurrentUser());
+    }
+  });
 });
 
 
@@ -59,17 +108,19 @@ function renderVendorDetail(v) {
   // Category badge
   const catEl = document.getElementById('vendor-category-badge');
   if (catEl) {
-    catEl.innerHTML = `<span class="badge badge--primary">${v.emoji} ${v.categoryName}</span>`;
+    const localizedCat = typeof I18n !== 'undefined' ? I18n.translateCategory(v.categoryName) : v.categoryName;
+    catEl.innerHTML = `<span class="badge badge--primary">${v.emoji} ${escapeHtml(localizedCat)}</span>`;
   }
 
   // Rating
   const ratingEl = document.getElementById('vendor-rating');
   if (ratingEl) {
+    const reviewWord = typeof I18n !== 'undefined' ? I18n.t('common.reviews') : 'reviews';
     ratingEl.innerHTML = `
       <span class="rating">
         ${renderStars(v.averageRating, 'lg')}
         <span class="rating__value font-bold">${v.averageRating}</span>
-        <span class="rating__count">(${v.reviewCount} reviews)</span>
+        <span class="rating__count">(${v.reviewCount} ${reviewWord})</span>
       </span>
     `;
   }
@@ -78,9 +129,12 @@ function renderVendorDetail(v) {
   const statusEl = document.getElementById('vendor-status');
   if (statusEl) {
     const open = isVendorOpen(v.openingTime, v.closingTime);
+    const openText = open
+      ? (typeof I18n !== 'undefined' ? I18n.t('common.openNow') : 'Open Now')
+      : (typeof I18n !== 'undefined' ? I18n.t('common.closed') : 'Closed');
     statusEl.innerHTML = `
       <span class="status-dot ${open ? 'status-dot--green status-dot--pulse' : 'status-dot--red'}"></span>
-      <span class="sidebar-status__value ${open ? 'open' : 'closed'}">${open ? 'Open Now' : 'Closed'}</span>
+      <span class="sidebar-status__value ${open ? 'open' : 'closed'}">${openText}</span>
     `;
   }
 
@@ -108,7 +162,7 @@ function renderVendorDetail(v) {
   const tagsEl = document.getElementById('vendor-tags');
   if (tagsEl) {
     tagsEl.innerHTML = v.tags.map(t =>
-      `<span class="badge badge--gray">${t}</span>`
+      `<span class="badge badge--gray">${escapeHtml(t)}</span>`
     ).join('');
   }
 
@@ -342,20 +396,24 @@ function openReviewEdit(review) {
 
 /** Deletes the current user's own review after confirmation, then refreshes. */
 async function deleteOwnReview(review, vendorId) {
-  if (!window.confirm('Delete your review? This cannot be undone.')) return;
+  const confirmMsg = typeof I18n !== 'undefined' ? I18n.t('vendorDetail.confirmDeleteReview') : 'Delete your review? This cannot be undone.';
+  if (!window.confirm(confirmMsg)) return;
 
   try {
     const result = await API.deleteReview(review.id);
     if (result.success) {
-      Toast.success('Review deleted.', 'Your review has been removed.');
+      Toast.success(typeof I18n !== 'undefined' ? I18n.t('messages.reviewDeleted') : 'Review deleted.', '');
       setReviewFormMode('create');
       const currentUser = getCurrentUser();
       await renderReviews(vendorId, currentUser);
     } else {
-      Toast.error('Could not delete review', result.message || 'Please try again.');
+      Toast.error(typeof I18n !== 'undefined' ? I18n.t('messages.unknownError') : 'Could not delete review', result.message || 'Please try again.');
     }
   } catch {
-    Toast.error('Network error', 'Please check your connection and try again.');
+    Toast.error(
+      typeof I18n !== 'undefined' ? I18n.t('messages.connectionError') : 'Network error',
+      typeof I18n !== 'undefined' ? I18n.t('messages.connectionError') : 'Please check your connection and try again.'
+    );
   }
 }
 
@@ -369,13 +427,16 @@ async function initReviewForm(vendorId, currentUser, myReview) {
   if (!token || !currentUser) {
     const writeReviewEl = document.querySelector('.write-review');
     if (writeReviewEl) {
+      const title = typeof I18n !== 'undefined' ? I18n.t('vendorDetail.writeReviewTitle') : 'Write a Review';
+      const logReq = typeof I18n !== 'undefined' ? I18n.t('profile.loginRequired') : 'Log in required';
+      const logPrompt = typeof I18n !== 'undefined' ? I18n.t('vendorDetail.loginToReview', { loginUrl: 'login.html' }) : 'Please <a href="login.html">log in</a> to write a review for this vendor.';
       writeReviewEl.innerHTML = `
-        <h4>Write a Review</h4>
+        <h4>${escapeHtml(title)}</h4>
         <div class="alert alert--info" role="note">
           <span class="alert__icon">🔐</span>
           <div class="alert__text">
-            <strong>Log in required</strong><br>
-            Please <a href="login.html">log in</a> to write a review for this vendor.
+            <strong>${escapeHtml(logReq)}</strong><br>
+            ${logPrompt}
           </div>
         </div>
       `;
@@ -387,13 +448,15 @@ async function initReviewForm(vendorId, currentUser, myReview) {
   if (currentUser.role === 'VENDOR') {
     const writeReviewEl = document.querySelector('.write-review');
     if (writeReviewEl) {
+      const title = typeof I18n !== 'undefined' ? I18n.t('vendorDetail.writeReviewTitle') : 'Write a Review';
+      const blocked = typeof I18n !== 'undefined' ? I18n.t('vendorDetail.vendorComplaintBlocked') : 'Business accounts cannot write reviews';
       writeReviewEl.innerHTML = `
-        <h4>Write a Review</h4>
+        <h4>${escapeHtml(title)}</h4>
         <div class="alert alert--warning" role="note">
           <span class="alert__icon">⚠️</span>
           <div class="alert__text">
-            <strong>Business accounts cannot write reviews</strong><br>
-            Vendor accounts are not allowed to submit reviews to maintain authenticity.
+            <strong>${escapeHtml(blocked)}</strong><br>
+            ${escapeHtml(blocked)}
           </div>
         </div>
       `;
@@ -412,18 +475,24 @@ async function initReviewForm(vendorId, currentUser, myReview) {
     const submitBtn = form.querySelector('button[type="submit"]');
     const originalText = submitBtn.textContent;
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Saving...';
+    submitBtn.textContent = typeof I18n !== 'undefined' ? I18n.t('common.loading') : 'Saving...';
 
     try {
       const rating = parseInt(document.getElementById('rating-value')?.value || '0', 10);
       const reviewText = document.getElementById('review-text')?.value.trim();
 
       if (!rating) {
-        Toast.warning('Rating required', 'Please select a star rating.');
+        Toast.warning(
+          typeof I18n !== 'undefined' ? I18n.t('validation.ratingRequired') : 'Rating required',
+          typeof I18n !== 'undefined' ? I18n.t('validation.ratingRequired') : 'Please select a star rating.'
+        );
         return;
       }
       if (reviewText && reviewText.length < 10) {
-        Toast.warning('Review too short', 'Please write at least 10 characters, or leave it empty.');
+        Toast.warning(
+          typeof I18n !== 'undefined' ? I18n.t('validation.reviewTextRequired') : 'Review too short',
+          typeof I18n !== 'undefined' ? I18n.t('validation.reviewTextRequired') : 'Please write at least 10 characters, or leave it empty.'
+        );
         return;
       }
 
@@ -435,8 +504,12 @@ async function initReviewForm(vendorId, currentUser, myReview) {
       }
 
       if (result.success) {
-        Toast.success(reviewFormState.mode === 'edit' ? 'Review updated!' : 'Review submitted!',
-          'Thank you for your feedback.');
+        Toast.success(
+          reviewFormState.mode === 'edit'
+            ? (typeof I18n !== 'undefined' ? I18n.t('messages.reviewUpdated') : 'Review updated!')
+            : (typeof I18n !== 'undefined' ? I18n.t('messages.reviewSubmitted') : 'Review submitted!'),
+          typeof I18n !== 'undefined' ? I18n.t('common.save') : 'Thank you for your feedback.'
+        );
 
         // Refresh the list + summary, then keep the form in edit mode with the saved values
         const updated = result.data?.data || null;
@@ -444,16 +517,22 @@ async function initReviewForm(vendorId, currentUser, myReview) {
         setReviewFormMode('edit', updated || refreshed || null);
       } else {
         if (result.message && result.message.includes('already reviewed')) {
-          Toast.warning('Already reviewed', 'You have already reviewed this vendor. You can edit your existing review instead.');
+          Toast.warning(
+            typeof I18n !== 'undefined' ? I18n.t('messages.unknownError') : 'Already reviewed',
+            result.message
+          );
           const refreshed = await renderReviews(vendorId, getCurrentUser());
           if (refreshed) setReviewFormMode('edit', refreshed);
         } else {
-          Toast.error('Submission failed', result.message || 'Please try again.');
+          Toast.error(typeof I18n !== 'undefined' ? I18n.t('messages.unknownError') : 'Submission failed', result.message || 'Please try again.');
         }
       }
     } catch (error) {
       console.error('Failed to submit review:', error);
-      Toast.error('Network error', 'Please check your connection and try again.');
+      Toast.error(
+        typeof I18n !== 'undefined' ? I18n.t('messages.connectionError') : 'Network error',
+        typeof I18n !== 'undefined' ? I18n.t('messages.connectionError') : 'Please check your connection and try again.'
+      );
     } finally {
       submitBtn.disabled = false;
       submitBtn.textContent = originalText;
@@ -486,16 +565,126 @@ function initFavButton(vendorId) {
 }
 
 
+/**
+ * Initialise the "Message Vendor" button(s).
+ * Only shown for authenticated USER users (VENDOR users cannot message
+ * themselves, and USER↔USER messaging is blocked by the backend).
+ *
+ * @param {object} vendor - The normalized vendor object (includes userId)
+ */
+function initMessageVendorButton(vendor) {
+  const mainBtn = document.getElementById('message-vendor-btn');
+  const sidebarBtn = document.getElementById('sidebar-message-vendor-btn');
+  const buttons = [mainBtn, sidebarBtn].filter(Boolean);
+
+  if (buttons.length === 0) return;
+
+  const currentUser = getCurrentUser();
+
+  // If the logged-in user is the owner of this vendor, hide messaging self
+  if (currentUser && currentUser.id && vendor.userId && currentUser.id === vendor.userId) {
+    buttons.forEach(btn => { btn.style.display = 'none'; });
+    return;
+  }
+
+  const targetRecipientId = vendor.userId || vendor.id;
+
+  buttons.forEach(btn => {
+    btn.style.display = 'inline-flex';
+    const label = typeof I18n !== 'undefined' ? I18n.t('vendorDetail.message') : 'Message Vendor';
+    btn.innerHTML = `💬 <span data-i18n="vendorDetail.message">${escapeHtml(label)}</span>`;
+
+    btn.onclick = async (e) => {
+      e.preventDefault();
+
+      const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+      const user = getCurrentUser();
+
+      // Guard: must be authenticated
+      if (!token || !user) {
+        const loginReqTitle = typeof I18n !== 'undefined' ? I18n.t('profile.loginRequired') : 'Login required';
+        const loginReqText = typeof I18n !== 'undefined' ? I18n.t('chat.loginRequired') : 'Please log in to start a conversation.';
+        Toast.warning(loginReqTitle, loginReqText.replace(/<[^>]*>?/gm, ''));
+        const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.href = `login.html?redirect=${returnUrl}`;
+        return;
+      }
+
+      // VENDOR users cannot message other vendors
+      if (user.role === 'VENDOR') {
+        Toast.warning(
+          typeof I18n !== 'undefined' ? I18n.t('common.notAllowed') : 'Not Allowed',
+          typeof I18n !== 'undefined' ? I18n.t('vendorDetail.vendorMessageBlocked') : 'Vendor accounts can only message regular members.'
+        );
+        return;
+      }
+
+      buttons.forEach(b => {
+        b.disabled = true;
+        b.textContent = typeof I18n !== 'undefined' ? I18n.t('vendorDetail.startingConversation') : 'Starting…';
+      });
+
+      try {
+        const result = await API.startConversation(targetRecipientId, 'VENDOR');
+        if (!result || (result.success === false && result.message)) {
+          Toast.error(
+            typeof I18n !== 'undefined' ? I18n.t('vendorDetail.couldNotStart') : 'Could not start chat',
+            result?.message || 'Please try again.'
+          );
+          return;
+        }
+
+        // Navigate to the conversation detail page
+        const params = new URLSearchParams({
+          chatId: targetRecipientId,
+          name: vendor.shopName || '',
+          role: 'VENDOR',
+        });
+        window.location.href = `chat-detail.html?${params.toString()}`;
+      } catch (err) {
+        console.error('[Chat] Error starting conversation:', err);
+        Toast.error(
+          typeof I18n !== 'undefined' ? I18n.t('messages.connectionError') : 'Network error',
+          typeof I18n !== 'undefined' ? I18n.t('messages.connectionError') : 'Please check your connection and try again.'
+        );
+      } finally {
+        buttons.forEach(b => {
+          b.disabled = false;
+          const msgLabel = typeof I18n !== 'undefined' ? I18n.t('vendorDetail.message') : 'Message Vendor';
+          b.innerHTML = `💬 <span data-i18n="vendorDetail.message">${escapeHtml(msgLabel)}</span>`;
+        });
+      }
+    };
+  });
+}
+
+
+function showLoading() {
+  const main = document.getElementById('vendor-detail-main');
+  if (main) {
+    const loadingText = typeof I18n !== 'undefined' ? I18n.t('common.loading') : 'Loading…';
+    main.innerHTML = `
+      <div class="container" style="padding: var(--space-24) 0; text-align: center;">
+        <div class="spinner" aria-label="Loading vendor details"></div>
+        <p style="margin-top: var(--space-4); color: var(--color-text-muted);">${escapeHtml(loadingText)}</p>
+      </div>
+    `;
+  }
+}
+
+
 function showError(msg) {
   const main = document.getElementById('vendor-detail-main');
   if (main) {
+    const errorTitle = typeof I18n !== 'undefined' ? I18n.t('common.error') : 'Oops!';
+    const browseBtnText = typeof I18n !== 'undefined' ? I18n.t('vendorDetail.backToVendors') : 'Browse Vendors';
     main.innerHTML = `
       <div class="container">
         <div class="empty-state" style="padding: var(--space-24) 0;">
           <div class="empty-state__icon">😕</div>
-          <h3>Oops!</h3>
-          <p>${msg}</p>
-          <a href="vendors.html" class="btn btn--primary">Browse Vendors</a>
+          <h3>${escapeHtml(errorTitle)}</h3>
+          <p>${escapeHtml(msg)}</p>
+          <a href="vendors.html" class="btn btn--primary">${escapeHtml(browseBtnText)}</a>
         </div>
       </div>
     `;

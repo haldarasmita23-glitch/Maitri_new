@@ -1,32 +1,42 @@
 /* ─────────────────────────────────────────────────────────────────
-   Maitri — My Profile page styles (Phase 6)
+   Maitri — My Profile Page Styles
+   Profile summary card, avatar gradients, edit form, complaints list,
+   and vendor business statistics preview.
    ───────────────────────────────────────────────────────────────── */
 
 .profile-section {
-  padding: var(--space-8) 0 var(--space-12);
+  padding: var(--space-8) 0 var(--space-16);
+  position: relative;
+  z-index: 1;
 }
 
 /* ── Layout ───────────────────────────────────────────────────── */
-
 .profile-layout {
   display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: var(--space-6);
+  grid-template-columns: 340px 1fr;
+  gap: var(--space-8);
   align-items: start;
 }
 
-/* ── Cards ────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+}
 
+/* ── Cards ────────────────────────────────────────────────────── */
 .profile-card {
-  background: var(--color-bg-card);
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-card);
   padding: var(--space-8);
 }
 
 .profile-card--empty {
-  max-width: 520px;
+  max-width: 540px;
   margin: 0 auto;
   text-align: center;
   padding: var(--space-12) var(--space-8);
@@ -44,22 +54,31 @@
   flex-wrap: wrap;
 }
 
-/* ── Summary card ─────────────────────────────────────────────── */
-
+/* ── Summary Card (Left Column) ───────────────────────────────── */
 .profile-summary {
   position: sticky;
   top: calc(var(--navbar-height) + var(--space-4));
   text-align: center;
 }
 
+@media (max-width: 900px) {
+  .profile-summary {
+    position: static;
+  }
+}
+
 .profile-summary__avatar {
-  width: 96px;
-  height: 96px;
+  width: 104px;
+  height: 104px;
   margin: 0 auto var(--space-4);
   border-radius: var(--radius-full);
   overflow: hidden;
-  background: var(--color-primary-50);
+  background: linear-gradient(135deg, var(--color-primary-50), var(--color-accent-50));
   border: 3px solid var(--color-primary-100);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .profile-summary__avatar-img {
@@ -70,16 +89,13 @@
 }
 
 .profile-summary__avatar-fallback {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.5rem;
+  font-size: 2.75rem;
   color: var(--color-primary);
+  line-height: 1;
 }
 
 .profile-summary__name {
+  font-family: var(--font-family-display);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
@@ -105,9 +121,10 @@
 
 .profile-summary__lang {
   font-size: var(--font-size-xs);
-  color: var(--color-text-secondary);
-  background: var(--color-bg);
-  border: 1px solid var(--color-border-light);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  background: var(--color-primary-50);
+  border: 1px solid var(--color-primary-100);
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-full);
 }
@@ -115,13 +132,17 @@
 .profile-summary__details {
   margin: 0 0 var(--space-4);
   text-align: left;
+  background: var(--color-bg);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border-light);
 }
 
 .profile-summary__details > div {
   display: flex;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: var(--space-3) 0;
+  padding: var(--space-2-5) 0;
   border-bottom: 1px solid var(--color-border-light);
 }
 
@@ -130,13 +151,16 @@
 }
 
 .profile-summary__details dt {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .profile-summary__details dd {
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   text-align: right;
   word-break: break-word;
@@ -145,16 +169,18 @@
 .profile-summary__joined {
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
-  margin: 0;
+  margin-top: var(--space-4);
 }
 
-/* ── Edit form ────────────────────────────────────────────────── */
-
+/* ── Edit Form (Right Column) ─────────────────────────────────── */
 .profile-edit__header {
   margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .profile-edit__header h2 {
+  font-family: var(--font-family-display);
   font-size: var(--font-size-2xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
@@ -164,6 +190,7 @@
 .profile-edit__header p {
   font-size: var(--font-size-sm);
   color: var(--color-text-muted);
+  margin-bottom: 0;
 }
 
 .form-row {
@@ -172,35 +199,128 @@
   gap: var(--space-4);
 }
 
+@media (max-width: 580px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .profile-edit__actions {
-  margin-top: var(--space-6);
+  margin-top: var(--space-8);
   padding-top: var(--space-5);
   border-top: 1px solid var(--color-border-light);
 }
 
-/* ── Responsive ───────────────────────────────────────────────── */
-
-@media (max-width: 860px) {
-  .profile-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .profile-summary {
-    position: static;
-  }
-
-  .profile-summary__avatar {
-    width: 80px;
-    height: 80px;
-  }
+/* ── Complaints Section & Cards ───────────────────────────────── */
+.complaint-card {
+  background: var(--color-bg-card);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5) var(--space-6);
+  margin-bottom: var(--space-4);
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-@media (max-width: 560px) {
-  .form-row {
-    grid-template-columns: 1fr;
-  }
+.complaint-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+}
 
-  .profile-section {
-    padding: var(--space-6) 0 var(--space-8);
-  }
+.complaint-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.complaint-card__type {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.complaint-card__vendor {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.complaint-card__description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--space-4);
+}
+
+.complaint-card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-light);
+  flex-wrap: wrap;
+}
+
+.complaint-card__actions {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+/* ── Vendor Business Dashboard Section ────────────────────────── */
+.vendor-dashboard-preview {
+  margin-top: var(--space-8);
+}
+
+.vendor-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.vendor-stat-box {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast);
+}
+
+.vendor-stat-box:hover {
+  transform: translateY(-2px);
+}
+
+.vendor-stat-box__icon {
+  font-size: 1.75rem;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-lg);
+  background: var(--color-primary-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vendor-stat-box__val {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-extrabold);
+  color: var(--color-primary);
+  line-height: 1;
+}
+
+.vendor-stat-box__label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: 2px;
 }

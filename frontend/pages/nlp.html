@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Maitri — NLP Review Analysis Studio">
+  <title>NLP Review Analysis Studio — Maitri</title>
+
+  <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/reset.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/pages/nlp.css">
+</head>
+
+<body>
+
+<!-- Ambient Background Blobs -->
+<div class="ambient-blobs" aria-hidden="true">
+  <div class="ambient-blob ambient-blob--1"></div>
+  <div class="ambient-blob ambient-blob--2"></div>
+</div>
+
+<div class="page-wrapper">
+
+  <!-- Navbar -->
+  <nav class="navbar" id="main-navbar" role="navigation" aria-label="Main navigation">
+    <div class="container">
+      <div class="navbar__inner">
+
+        <!-- Logo -->
+        <a href="../index.html" class="navbar__logo" aria-label="Maitri Home">
+          <div class="navbar__logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L14.5 9.5H22L16 14L18.5 21.5L12 17L5.5 21.5L8 14L2 9.5H9.5L12 2Z" fill="white"/>
+            </svg>
+          </div>
+          <span class="navbar__logo-text">Maitr<span>i</span></span>
+        </a>
+
+        <!-- Desktop Nav -->
+        <nav class="navbar__nav" aria-label="Site links">
+          <a href="../index.html" class="navbar__link" data-i18n="nav.home">Home</a>
+          <a href="vendors.html" class="navbar__link" data-i18n="nav.browseVendors">Browse Vendors</a>
+          <a href="about.html" class="navbar__link" data-i18n="nav.about">About</a>
+          <a href="nlp.html" class="navbar__link active" data-auth-only="nlp"><span data-i18n="nlp.title">NLP Analysis</span> <span class="unread-badge" style="display:none;"></span></a>
+          <a href="chat.html" class="navbar__link" data-auth-only="messages" style="display:none;"><span data-i18n="nav.messages">Messages</span> <span class="unread-badge" style="display:none;"></span></a>
+        </nav>
+
+        <!-- Auth Buttons -->
+        <div class="navbar__auth">
+          <a href="login.html" class="btn btn--ghost btn--sm" data-i18n="common.login">Log In</a>
+          <a href="register.html" class="btn btn--primary btn--sm" data-i18n="common.signup">Sign Up</a>
+        </div>
+
+        <!-- Hamburger -->
+        <button class="navbar__hamburger"
+                id="navbar-hamburger"
+                aria-label="Open menu"
+                data-i18n-aria-label="nav.openMenu"
+                aria-expanded="false"
+                aria-controls="navbar-mobile">
+          <span></span><span></span><span></span>
+        </button>
+
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="navbar__mobile" id="navbar-mobile" role="navigation" aria-label="Mobile navigation">
+    <a href="../index.html" class="navbar__mobile-link">🏠 <span data-i18n="nav.home">Home</span></a>
+    <a href="vendors.html" class="navbar__mobile-link">🏪 <span data-i18n="nav.browseVendors">Browse Vendors</span></a>
+    <a href="about.html" class="navbar__mobile-link">ℹ️ <span data-i18n="nav.about">About</span></a>
+    <a href="nlp.html" class="navbar__mobile-link active">✨ <span>NLP Analysis</span></a>
+    <div class="navbar__mobile-divider"></div>
+    <div class="navbar__mobile-auth">
+      <a href="login.html" class="btn btn--outline btn--full" data-i18n="common.login">Log In</a>
+      <a href="register.html" class="btn btn--primary btn--full" data-i18n="common.signupFree">Sign Up Free</a>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="page-main" id="main-content">
+
+    <section class="section nlp-section" aria-labelledby="nlp-heading">
+      <div class="container">
+
+        <div class="section-header">
+          <span class="section-label" data-i18n="nlp.sectionLabel">✨ AI Intelligence Studio</span>
+          <h1 id="nlp-heading" data-i18n="nlp.heading" style="font-size: clamp(2rem, 4vw, 2.75rem);">Analyze Review Text</h1>
+          <p class="section-subtitle">Real-time sentiment scoring, keyword extraction, and aspect-based breakdown</p>
+        </div>
+
+        <div class="nlp-layout">
+
+          <!-- Left Column: Input Form -->
+          <div class="nlp-card" id="nlp-form-card">
+            <div class="nlp-card__header">
+              <h2 class="nlp-card__title">Review Input</h2>
+              <p class="nlp-card__desc">Type or paste customer feedback below, or select a sample</p>
+            </div>
+
+            <div class="nlp-sample-chips">
+              <span class="nlp-sample-chip" onclick="document.getElementById('nlp-textarea').value='The masala dosa was extremely crispy and hot, but service was a bit slow.'; document.getElementById('nlp-textarea').dispatchEvent(new Event('input'));">🍛 Street Food Review</span>
+              <span class="nlp-sample-chip" onclick="document.getElementById('nlp-textarea').value='Tailor stitched the blouse with perfect fitting on time. Very polite staff and fair price.'; document.getElementById('nlp-textarea').dispatchEvent(new Event('input'));">🧵 Tailor Review</span>
+              <span class="nlp-sample-chip" onclick="document.getElementById('nlp-textarea').value='Replaced my phone screen in 30 minutes! Fast service, original parts, very happy.'; document.getElementById('nlp-textarea').dispatchEvent(new Event('input'));">📱 Mobile Repair</span>
+            </div>
+
+            <div class="form-group">
+              <textarea id="nlp-textarea" class="nlp-textarea" placeholder="Enter review text or customer feedback…" data-i18n-placeholder="nlp.inputPlaceholder" rows="5" maxlength="1000" aria-label="Review text"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="nlp-max-keywords" class="form-label" data-i18n="nlp.maxKeywords">Max Keywords to Extract</label>
+              <input type="number" id="nlp-max-keywords" class="form-control" value="10" min="1" max="50" aria-label="Maximum number of keywords" style="max-width: 140px;">
+            </div>
+
+            <div class="nlp-actions">
+              <button type="button" id="nlp-analyze-btn" class="btn btn--primary btn--lg" disabled data-i18n="nlp.analyzeBtn">
+                ✨ Analyze Feedback
+              </button>
+            </div>
+          </div>
+
+          <!-- Right Column: Output / Results -->
+          <div class="nlp-results-card">
+            <div class="nlp-card__header">
+              <h2 class="nlp-card__title">AI Insights Output</h2>
+              <p class="nlp-card__desc">Sentiment polarity, confidence rating, and aspect classification</p>
+            </div>
+
+            <!-- Loading State -->
+            <div class="nlp-loading text-center p-8" id="nlp-loading" style="display:none;">
+              <div class="spinner" aria-label="Analyzing text"></div>
+              <p data-i18n="nlp.loading" class="mt-4" style="color: var(--color-primary); font-weight: var(--font-weight-semibold);">Running NLP inference pipelines…</p>
+            </div>
+
+            <!-- Error State -->
+            <div class="nlp-error alert alert--danger mb-4" id="nlp-error" style="display:none;"></div>
+
+            <!-- Results Section -->
+            <div class="nlp-results" id="nlp-results" style="display:none;">
+              <!-- Sentiment Banner -->
+              <div class="sentiment-banner sentiment-banner--positive" id="sentiment-banner-el">
+                <div class="sentiment-banner__left">
+                  <span class="sentiment-banner__emoji" id="sentiment-banner-emoji">😊</span>
+                  <div>
+                    <div class="sentiment-banner__label" id="sentiment-badge">Positive</div>
+                    <div class="sentiment-banner__confidence" id="sentiment-confidence">Confidence: 94%</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Keywords Cloud -->
+              <div class="nlp-keywords-section">
+                <h4 data-i18n="nlp.keywords">Extracted Keywords</h4>
+                <div class="nlp-keywords-cloud" id="keywords-list">
+                  <p class="empty-state" data-i18n="nlp.noKeywords">No keywords found.</p>
+                </div>
+              </div>
+
+              <!-- Aspect Sentiment Breakdown -->
+              <div class="nlp-card-section mt-6">
+                <h4 style="font-family: var(--font-family-display); font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); color: var(--color-text-primary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: var(--space-3);" data-i18n="nlp.aspectSentiment">Aspect Sentiment Breakdown</h4>
+                <div class="nlp-aspects-grid" id="aspects-grid">
+                  <div class="nlp-aspect-card" id="aspect-food">
+                    <span class="nlp-aspect-name" data-i18n="nlp.food">🍛 Food</span>
+                    <span class="badge badge--success" id="aspect-food-sentiment">—</span>
+                    <span style="font-size: var(--font-size-xs); color: var(--color-text-muted);" id="aspect-food-confidence">0%</span>
+                  </div>
+                  <div class="nlp-aspect-card" id="aspect-pricing">
+                    <span class="nlp-aspect-name" data-i18n="nlp.pricing">💰 Pricing</span>
+                    <span class="badge badge--info" id="aspect-pricing-sentiment">—</span>
+                    <span style="font-size: var(--font-size-xs); color: var(--color-text-muted);" id="aspect-pricing-confidence">0%</span>
+                  </div>
+                  <div class="nlp-aspect-card" id="aspect-delivery">
+                    <span class="nlp-aspect-name" data-i18n="nlp.delivery">🚚 Delivery</span>
+                    <span class="badge badge--warning" id="aspect-delivery-sentiment">—</span>
+                    <span style="font-size: var(--font-size-xs); color: var(--color-text-muted);" id="aspect-delivery-confidence">0%</span>
+                  </div>
+                  <div class="nlp-aspect-card" id="aspect-quality">
+                    <span class="nlp-aspect-name" data-i18n="nlp.quality">⭐ Quality</span>
+                    <span class="badge badge--success" id="aspect-quality-sentiment">—</span>
+                    <span style="font-size: var(--font-size-xs); color: var(--color-text-muted);" id="aspect-quality-confidence">0%</span>
+                  </div>
+                  <div class="nlp-aspect-card" id="aspect-staff">
+                    <span class="nlp-aspect-name" data-i18n="nlp.staff">👥 Staff</span>
+                    <span class="badge badge--success" id="aspect-staff-sentiment">—</span>
+                    <span style="font-size: var(--font-size-xs); color: var(--color-text-muted);" id="aspect-staff-confidence">0%</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Text Info -->
+              <div style="display: flex; gap: var(--space-4); margin-top: var(--space-6); padding-top: var(--space-4); border-top: 1px solid var(--color-border-light);">
+                <div style="font-size: var(--font-size-xs); color: var(--color-text-muted);">
+                  <span data-i18n="nlp.characters">Characters</span>: <strong id="nlp-char-count" style="color: var(--color-text-primary);">0</strong>
+                </div>
+                <div style="font-size: var(--font-size-xs); color: var(--color-text-muted);">
+                  <span data-i18n="nlp.words">Words</span>: <strong id="nlp-word-count" style="color: var(--color-text-primary);">0</strong>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- No Results State -->
+            <div class="nlp-results-empty" id="nlp-empty">
+              <div class="nlp-results-empty__icon">💡</div>
+              <p data-i18n="nlp.empty">Enter text or select a sample on the left to view real-time AI sentiment analysis.</p>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer__grid">
+
+        <div class="footer__brand">
+          <a href="../index.html" class="navbar__logo" aria-label="Maitri Home">
+            <div class="navbar__logo-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L14.5 9.5H22L16 14L18.5 21.5L12 17L5.5 21.5L8 14L2 9.5H9.5L12 2Z" fill="white"/>
+              </svg>
+            </div>
+            <span class="navbar__logo-text">Maitr<span>i</span></span>
+          </a>
+          <p class="footer__tagline" data-i18n="footer.tagline">
+            Connecting residents and students in Peenya &amp; Nagasandra with trusted local businesses.
+          </p>
+        </div>
+
+        <div class="footer__col">
+          <h4 data-i18n="footer.browseTitle">Browse</h4>
+          <ul class="footer__links" role="list">
+            <li><a href="vendors.html?category=street-food" class="footer__link">🍛 <span data-i18n="categories.streetFood">Street Food</span></a></li>
+            <li><a href="vendors.html?category=tailors" class="footer__link">🧵 <span data-i18n="categories.tailors">Tailors</span></a></li>
+            <li><a href="vendors.html?category=printing" class="footer__link">🖨️ <span data-i18n="categories.printing">Printing &amp; Xerox</span></a></li>
+            <li><a href="vendors.html?category=repair" class="footer__link">📱 <span data-i18n="categories.repair">Mobile/Laptop Repair</span></a></li>
+          </ul>
+        </div>
+
+        <div class="footer__col">
+          <h4 data-i18n="footer.communityTitle">Community</h4>
+          <ul class="footer__links" role="list">
+            <li><a href="about.html" class="footer__link" data-i18n="footer.aboutMaitri">About Maitri</a></li>
+            <li><a href="vendor-register.html" class="footer__link" data-i18n="footer.listBusiness">List Your Business</a></li>
+            <li><a href="register.html" class="footer__link" data-i18n="footer.createAccount">Create Account</a></li>
+          </ul>
+        </div>
+
+        <div class="footer__col">
+          <h4 data-i18n="footer.accountTitle">Account</h4>
+          <ul class="footer__links" role="list">
+            <li><a href="login.html" class="footer__link" data-i18n="footer.login">Log In</a></li>
+            <li><a href="register.html" class="footer__link" data-i18n="footer.signup">Sign Up</a></li>
+            <li><a href="nlp.html" class="footer__link" data-i18n="footer.nlpAnalysis">NLP Analysis</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer__bottom">
+        <span class="footer__copyright" data-i18n="footer.copyright">
+          © 2026 Maitri. All rights reserved. Made with ❤️ for Peenya &amp; Nagasandra.
+        </span>
+        <div class="footer__bottom-links">
+          <a href="#" data-i18n="footer.privacyPolicy">Privacy Policy</a>
+          <a href="#" data-i18n="footer.termsOfService">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<!-- Scripts -->
+<script src="../js/config.js"></script>
+<script src="../js/translations.js"></script>
+<script src="../js/i18n.js"></script>
+<script src="../js/api.js"></script>
+<script src="../js/mock-data.js"></script>
+<script src="../js/components.js"></script>
+<script src="../js/nlp.js"></script>
+<script src="../js/notifications.js"></script>
+
+</body>
+</html>

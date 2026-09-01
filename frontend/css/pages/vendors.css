@@ -1,96 +1,94 @@
 /* ─────────────────────────────────────────────────────────────────
    Maitri — Vendors Browse Page Styles
+   Modern marketplace layout, glassmorphic controls, pill category chips,
+   sort dropdown, and responsive grid.
    ───────────────────────────────────────────────────────────────── */
 
 /* ── Browse Layout ────────────────────────────────────────────── */
 .browse-section {
-  padding: var(--space-10) 0 var(--space-20);
+  padding: var(--space-8) 0 var(--space-20);
+  position: relative;
+  z-index: 1;
 }
 
-.browse-header {
-  margin-bottom: var(--space-8);
-}
-
-.browse-title {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-primary-dark);
-  margin-bottom: var(--space-2);
-}
-
-.browse-subtitle {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  margin-bottom: 0;
-}
-
-/* ── Controls Bar ─────────────────────────────────────────────── */
+/* ── Marketplace Controls Bar ─────────────────────────────────── */
 .browse-controls {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-4);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-5) var(--space-6);
+  box-shadow: var(--shadow-card);
   margin-bottom: var(--space-8);
-  flex-wrap: wrap;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  position: relative;
 }
 
 .browse-controls .search-box {
-  flex: 1;
-  min-width: 240px;
-  max-width: 420px;
+  width: 100%;
+}
+
+.browse-controls .search-box__input {
+  background: #FFFFFF;
+  border-color: var(--color-border);
 }
 
 .browse-controls__filters {
-  flex: 1;
-  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-light);
 }
 
 .browse-controls__right {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .sort-select {
-  padding: 0.5rem var(--space-4) 0.5rem var(--space-3);
+  padding: 0.55rem var(--space-4);
   border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-full);
+  font-family: var(--font-family);
   font-size: var(--font-size-sm);
-  background: var(--color-bg-card);
-  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+  background: #FFFFFF;
+  color: var(--color-text-primary);
   cursor: pointer;
   outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.sort-select:focus { border-color: var(--color-primary); }
+.sort-select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-100);
+}
 
 .results-count {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
   white-space: nowrap;
-  align-self: center;
+  background: var(--color-primary-50);
+  border: 1px solid var(--color-primary-100);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
 }
 
-/* ── No Results ───────────────────────────────────────────────── */
-.no-results {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: var(--space-20) var(--space-6);
-}
-
-.no-results__emoji {
-  font-size: 3.5rem;
-  margin-bottom: var(--space-4);
-  display: block;
-}
-
-.no-results h3 {
-  font-size: var(--font-size-xl);
-  color: var(--color-text-secondary);
-  margin-bottom: var(--space-2);
-}
-
-.no-results p {
-  color: var(--color-text-muted);
-  margin-bottom: var(--space-5);
+@media (max-width: 768px) {
+  .browse-controls {
+    padding: var(--space-4);
+  }
+  .browse-controls__right {
+    width: 100%;
+    justify-content: space-between;
+    margin-left: 0;
+  }
 }

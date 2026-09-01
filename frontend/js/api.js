@@ -51,6 +51,18 @@ const API = {
     return result.data;
   },
 
+  /**
+   * Generic PUT request.
+   * @param {string} path
+   * @param {object} body
+   * @param {boolean} [auth=false] - include JWT token if true
+   * @returns {Promise<object>}
+   */
+  async put(path, body, auth = false) {
+    const result = await this.request(path, { method: 'PUT', body, auth });
+    return result.data;
+  },
+
   login(credentials) {
     return this.request('/auth/login', { method: 'POST', body: credentials });
   },
@@ -112,7 +124,7 @@ const API = {
     return this.request(`/vendors/${encodeURIComponent(id)}/reject`, { method: 'PATCH', auth: true });
   },
 
-  // ── User Profile (Phase 6) ─────────────────────────────────────
+  // ── User Profile & Preferences ───────────────────────────────
 
   /** Authenticated USER/ADMIN fetches their own editable profile. */
   getUserProfile() {
@@ -122,6 +134,20 @@ const API = {
   /** Authenticated USER/ADMIN updates their own editable profile. */
   updateUserProfile(payload) {
     return this.request('/users/me', { method: 'PUT', body: payload, auth: true });
+  },
+
+  /** Authenticated USER/ADMIN/VENDOR fetches their user preferences. */
+  getUserPreferences() {
+    return this.request('/users/preferences', { auth: true });
+  },
+
+  /** Authenticated USER/ADMIN/VENDOR updates their language preference ("en", "hi", "kn"). */
+  updateLanguagePreference(language) {
+    return this.request('/users/preferences/language', {
+      method: 'PUT',
+      body: { language },
+      auth: true,
+    });
   },
 
   // ── Reviews (Phase 7) ──────────────────────────────────────────
@@ -236,7 +262,11 @@ const API = {
 
   /** Authenticated USER/VENDOR/ADMIN: Get their unread notification count. */
   getUnreadCount() {
-    return this.request('/notifications/unread-count', { auth: true });
+    return this.get('/notifications/unread-count', true);
+  },
+
+  getNotificationUnreadCount() {
+    return this.get('/notifications/unread-count', true);
   },
 
   /** Authenticated USER/VENDOR/ADMIN: Mark one notification as read. */
@@ -250,30 +280,89 @@ const API = {
   },
 
   // ── Chat / Contact (Phase 11) ──────────────────────────────────────
+  // NOTE: CONFIG.API_BASE_URL already ends with "/api", so these paths
+  // must NOT include the "/api" prefix (avoids /api/api/... URLs).
 
   /** Authenticated USER/VENDOR/ADMIN: List their conversations. */
   async getChats() {
-    return this.get('/api/chats', { auth: true });
+    return this.get('/chats', true);
   },
 
   /** Authenticated participant: Get a single chat/message by ID. */
   async getChat(chatId) {
-    return this.get(`/api/chats/${encodeURIComponent(chatId)}`, { auth: true });
+    return this.get(`/chats/${encodeURIComponent(chatId)}`, true);
+  },
+
+  /** Authenticated USER/VENDOR/ADMIN: Start a conversation with a receiver. */
+  async startConversation(receiverId, receiverRole) {
+    return this.post('/chats', { receiverId, receiverRole }, true);
   },
 
   /** Authenticated participant: Send a new message (TEXT or IMAGE). */
   async sendMessage(chatId, payload) {
-    return this.post(`/api/chats/${encodeURIComponent(chatId)}/messages`, payload, true);
+    return this.post(`/chats/${encodeURIComponent(chatId)}/messages`, payload, true);
+  },
+
+  /** Authenticated VENDOR/ADMIN: Accept a pending conversation request. */
+  async acceptConversation(chatId) {
+    return this.put(`/chats/${encodeURIComponent(chatId)}/accept`, null, true);
   },
 
   /** Authenticated participant: Mark a conversation as read. */
   async markChatRead(chatId) {
-    return this.put(`/api/chats/${encodeURIComponent(chatId)}/read`, null, true);
+    return this.put(`/chats/${encodeURIComponent(chatId)}/read`, null, true);
   },
 
   /** Authenticated USER/VENDOR/ADMIN: Get total unread message count. */
-  async getUnreadCount() {
-    return this.get('/api/chats/unread-count', { auth: true });
+  async getChatUnreadCount() {
+    return this.get('/chats/unread-count', true);
+  },
+
+  /**
+   * Authenticated participant: Get the full message thread for a conversation.
+   * Returns a Page<ChatMessageResponse> (newest first — reverse before rendering).
+   *
+   * @param {string} chatId - The partner's account ID
+   * @param {number} [page=0] - Zero-based page number
+   * @param {number} [size=30] - Number of messages to fetch (max 50)
+   * @returns {Promise<object>} ApiResponse wrapping a Spring Page
+   */
+  async getChatMessages(chatId, page = 0, size = 30) {
+    return this.get(
+      `/chats/${encodeURIComponent(chatId)}/messages?page=${page}&size=${size}`,
+      true
+    );
+  },
+
+  // ── NLP / Contact (Phase 13) ──────────────────────────────────────
+  // NOTE: CONFIG.API_BASE_URL already ends with "/api", so these paths
+  // must NOT include the "/api" prefix (avoids /api/api/... URLs).
+
+  /** USER|ADMIN: Analyze free-form text for sentiment, keywords, aspects. */
+  async analyzeText(text, maxKeywords = 10) {
+    return this.request('/nlp/analyze', {
+      method: 'POST',
+      body: { text, maxKeywords },
+      auth: true,
+    });
+  },
+
+  /** USER|ADMIN: Analyze an existing review by ID. */
+  async analyzeReview(reviewId) {
+    return this.request(`/nlp/review/${encodeURIComponent(reviewId)}`, {
+      method: 'POST',
+      auth: true,
+    });
+  },
+
+  /** USER|ADMIN: Aggregate NLP insights across all reviews for a vendor. */
+  async getVendorInsights(vendorId, page = 0, size = 10) {
+    const params = new URLSearchParams();
+    params.set('page', page);
+    params.set('size', size);
+    return this.get(`/nlp/reviews/vendor/${encodeURIComponent(vendorId)}?${params.toString()}`, {
+      auth: true,
+    });
   },
 
   /**
@@ -289,3 +378,7 @@ const API = {
     }
   },
 };
+
+// Make API globally available for classic script consumers (e.g. chat.js)
+// that cannot use ES module imports.
+window.API = API;

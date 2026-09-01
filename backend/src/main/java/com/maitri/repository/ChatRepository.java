@@ -35,20 +35,21 @@ public interface ChatRepository extends MongoRepository<Chat, String> {
      * @param pageable   Pagination parameters
      * @return Page of messages between the two parties
      */
-    @Query("{'$or': ["
+    @Query(value = "{'$or': ["
             + "{'senderId': ?0, 'receiverId': ?1}, "
             + "{'senderId': ?1, 'receiverId': ?0}"
-            + "]}")
+            + "]}",
+           sort = "{'timestamp': -1}")
     Page<Chat> findConversation(String userId1, String userId2, Pageable pageable);
 
     /**
-     * Lists all conversations for a user (latest message per conversation partner),
-     * ordered by timestamp descending.
+     * Lists all messages for a user (ordered by timestamp descending).
      *
      * @param userId The user's id
-     * @return List of latest messages per conversation partner, newest first
+     * @return List of messages involving the user, newest first
      */
-    @Query("{'$or': [{'senderId': ?0}, {'receiverId': ?0}]}")
+    @Query(value = "{'$or': [{'senderId': ?0}, {'receiverId': ?0}]}",
+           sort = "{'timestamp': -1}")
     List<Chat> findLatestMessagesPerPartner(String userId);
 
     /**

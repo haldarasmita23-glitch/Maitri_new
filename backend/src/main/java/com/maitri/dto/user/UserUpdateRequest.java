@@ -58,8 +58,9 @@ public class UserUpdateRequest {
 
     /**
      * Preferred app language code. Optional.
-     * e.g. "en", "hi", "kn". Length-capped to stay a short ISO-style code.
+     * Must be one of the supported codes: "en", "hi", "kn".
      */
+    @Pattern(regexp = "^(en|hi|kn)$", message = "Language must be one of: en, hi, kn.")
     @Size(max = 10, message = "Preferred language must be at most 10 characters.")
     private String preferredLanguage;
 

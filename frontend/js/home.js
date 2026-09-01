@@ -4,6 +4,9 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
+  // ── Initialise Navbar (auth links, mobile menu, active links)
+  Navbar.init();
+
   // ── Render Category Cards ────────────────────────────────────
   renderCategoryCards();
 
@@ -18,6 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Animated stats counter ───────────────────────────────────
   initCounters();
+
+  // ── Listen to language changes ───────────────────────────────
+  window.addEventListener('maitri:language-change', () => {
+    renderCategoryCards();
+    renderFeaturedVendors();
+  });
 });
 
 
@@ -28,15 +37,24 @@ async function renderCategoryCards() {
   const categories = await Categories.load();
   const counts = await Vendors.countByCategory();
 
-  grid.innerHTML = categories.map(cat => `
-    <a href="vendors.html?category=${encodeURIComponent(cat.id)}"
+  grid.innerHTML = categories.map(cat => {
+    const localizedName = typeof I18n !== 'undefined' ? I18n.translateCategory(cat.name) : cat.name;
+    const countVal = counts[cat.id] ?? cat.vendorCount;
+    const countText = typeof I18n !== 'undefined' ? I18n.t('home.vendorsCount', { count: countVal }) : `${countVal} vendors`;
+    return `
+    <a href="pages/vendors.html?category=${encodeURIComponent(cat.id)}"
        class="category-card animate-on-scroll"
-       aria-label="Browse ${escapeHtml(cat.name)} vendors">
+       aria-label="${typeof I18n !== 'undefined' ? I18n.t('categories.browseCategory', { category: localizedName }) : `Browse ${escapeHtml(cat.name)} vendors`}">
       <div class="category-card__icon" aria-hidden="true">${cat.icon}</div>
-      <span class="category-card__name">${escapeHtml(cat.name)}</span>
-      <span class="category-card__count">${counts[cat.id] ?? cat.vendorCount} vendors</span>
+      <span class="category-card__name">${escapeHtml(localizedName)}</span>
+      <span class="category-card__count">${countText}</span>
     </a>
-  `).join('');
+  `;
+  }).join('');
+
+  if (typeof observeScrollAnimations === 'function') {
+    observeScrollAnimations(grid);
+  }
 }
 
 
@@ -53,6 +71,10 @@ async function renderFeaturedVendors() {
     .slice(0, 3);
 
   grid.innerHTML = featured.map(v => buildVendorCard(v)).join('');
+
+  if (typeof observeScrollAnimations === 'function') {
+    observeScrollAnimations(grid);
+  }
 }
 
 
@@ -72,31 +94,45 @@ function renderTestimonials() {
       </div>
     </div>
   `).join('');
+
+  if (typeof observeScrollAnimations === 'function') {
+    observeScrollAnimations(grid);
+  }
 }
 
 
 function buildVendorCard(v) {
+  const vendorId = v.id || v._id;
   const open = isVendorOpen(v.openingTime, v.closingTime);
-  const isFav = Favourites.has(v.id);
+  const isFav = Favourites.has(vendorId);
+  const localizedCat = typeof I18n !== 'undefined' ? I18n.translateCategory(v.categoryName) : v.categoryName;
+  const localizedArea = typeof I18n !== 'undefined' ? I18n.translateArea(v.area) : v.area;
+  const statusLabel = open
+    ? (typeof I18n !== 'undefined' ? I18n.t('common.openNow') : 'Open')
+    : (typeof I18n !== 'undefined' ? I18n.t('common.closed') : 'Closed');
+  const favLabel = isFav
+    ? (typeof I18n !== 'undefined' ? I18n.t('vendors.removeFav') : 'Remove from favourites')
+    : (typeof I18n !== 'undefined' ? I18n.t('vendors.addFav') : 'Add to favourites');
+
   return `
-    <a href="pages/vendor-detail.html?id=${v.id}" class="vendor-card" aria-label="${v.shopName}">
+    <a href="pages/vendor-detail.html?id=${encodeURIComponent(vendorId)}" class="vendor-card" data-vendor-id="${vendorId}" aria-label="${escapeHtml(v.shopName)}">
       <div class="vendor-card__image-wrapper">
         <div class="vendor-card__image-placeholder" aria-hidden="true">${v.emoji}</div>
         <span class="vendor-card__badge">
-          <span class="badge badge--primary">${v.categoryName}</span>
+          <span class="badge badge--primary">${escapeHtml(localizedCat)}</span>
         </span>
         <button class="vendor-card__fav ${isFav ? 'active' : ''}"
-                aria-label="${isFav ? 'Remove from favourites' : 'Add to favourites'}"
-                data-vendor-id="${v.id}"
-                onclick="event.preventDefault(); toggleFav(this, '${v.id}')">
+                aria-label="${favLabel}"
+                data-vendor-id="${vendorId}"
+                onclick="event.preventDefault(); toggleFav(this, '${vendorId}')">
           ${isFav ? '❤️' : '🤍'}
         </button>
       </div>
       <div class="vendor-card__body">
-        <div class="vendor-card__name">${v.shopName}</div>
+        <div class="vendor-card__name">${escapeHtml(v.shopName)}</div>
         <div class="vendor-card__address">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          ${v.area}
+          ${escapeHtml(localizedArea)}
         </div>
         <div class="vendor-card__footer">
           <span class="rating">
@@ -106,7 +142,7 @@ function buildVendorCard(v) {
           </span>
           <span class="vendor-card__hours">
             <span class="status-dot ${open ? 'status-dot--green' : 'status-dot--red'}"></span>
-            ${open ? 'Open' : 'Closed'}
+            ${statusLabel}
           </span>
         </div>
       </div>
@@ -120,10 +156,16 @@ async function toggleFav(btn, vendorId) {
   if (added === null) return; // login / blocked prompt already shown
   btn.innerHTML = added ? '❤️' : '🤍';
   btn.classList.toggle('active', added);
-  btn.setAttribute('aria-label', added ? 'Remove from favourites' : 'Add to favourites');
+  const favLabel = added
+    ? (typeof I18n !== 'undefined' ? I18n.t('vendors.removeFav') : 'Remove from favourites')
+    : (typeof I18n !== 'undefined' ? I18n.t('vendors.addFav') : 'Add to favourites');
+  btn.setAttribute('aria-label', favLabel);
   const vendors = await Vendors.load();
+  const title = added
+    ? (typeof I18n !== 'undefined' ? I18n.t('messages.favAdded') : 'Added to favourites')
+    : (typeof I18n !== 'undefined' ? I18n.t('messages.favRemoved') : 'Removed from favourites');
   Toast[added ? 'success' : 'info'](
-    added ? 'Added to favourites' : 'Removed from favourites',
+    title,
     added ? `${vendors.find(v => v.id === vendorId)?.shopName} saved!` : ''
   );
 }
