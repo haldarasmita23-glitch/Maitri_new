@@ -15,12 +15,13 @@ const AuthSession = {
   },
 
   token() {
-    return localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+    return sessionStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
   },
 
   user() {
     try {
-      const u = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA));
+      const raw = sessionStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA) || localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA);
+      const u = JSON.parse(raw);
       if (u && u.role) {
         u.role = this.normalizeRole(u.role);
       }
@@ -98,12 +99,18 @@ const AuthSession = {
     if (authData && authData.user && authData.user.role) {
       authData.user.role = this.normalizeRole(authData.user.role);
     }
-    localStorage.setItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN, authData.token);
-    localStorage.setItem(CONFIG.STORAGE_KEYS.USER_DATA, JSON.stringify(authData.user));
+    // Save to tab-isolated sessionStorage
+    sessionStorage.setItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN, authData.token);
+    sessionStorage.setItem(CONFIG.STORAGE_KEYS.USER_DATA, JSON.stringify(authData.user));
+    // Clear legacy localStorage auth keys so other tabs are not contaminated
+    localStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+    localStorage.removeItem(CONFIG.STORAGE_KEYS.USER_DATA);
     window.dispatchEvent(new CustomEvent('maitri:auth-change', { detail: authData.user }));
   },
 
   clear() {
+    sessionStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+    sessionStorage.removeItem(CONFIG.STORAGE_KEYS.USER_DATA);
     localStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
     localStorage.removeItem(CONFIG.STORAGE_KEYS.USER_DATA);
     window.dispatchEvent(new CustomEvent('maitri:auth-change', { detail: null }));
@@ -117,7 +124,7 @@ const AuthSession = {
       if (result.ok && result.data?.success && result.data.data) {
         const u = result.data.data;
         if (u.role) u.role = this.normalizeRole(u.role);
-        localStorage.setItem(CONFIG.STORAGE_KEYS.USER_DATA, JSON.stringify(u));
+        sessionStorage.setItem(CONFIG.STORAGE_KEYS.USER_DATA, JSON.stringify(u));
         window.dispatchEvent(new CustomEvent('maitri:auth-change', { detail: u }));
         return u;
       }

@@ -68,12 +68,12 @@ document.addEventListener('DOMContentLoaded', () => {
 // -- Helpers: URL resolution ---------------------------------------------
 
 function getActiveRole() {
-  if (typeof AuthSession !== 'undefined' && typeof AuthSession.currentUser === 'function') {
-    const u = AuthSession.currentUser();
+  if (typeof AuthSession !== 'undefined' && typeof AuthSession.user === 'function') {
+    const u = AuthSession.user();
     if (u && u.role) return u.role.toUpperCase().replace(/^ROLE_/, '');
   }
   try {
-    const raw = localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA);
+    const raw = sessionStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA) || localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA);
     if (!raw) return null;
     const u = JSON.parse(raw);
     return (u.role || '').toUpperCase().replace(/^ROLE_/, '');
@@ -186,7 +186,7 @@ async function initChatList() {
     }
   }
 
-  const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+  const token = sessionStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
   if (!token) {
     const loginText = typeof I18n !== 'undefined'
       ? I18n.t('chat.loginRequired', { loginUrl: getLoginUrl() })
@@ -359,7 +359,7 @@ async function initChatDetail() {
   var container = document.getElementById('chat-detail-container');
   if (!container) return;
 
-  var token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+  var token = sessionStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
   if (!token) {
     var loginText2 = typeof I18n !== 'undefined'
       ? I18n.t('chat.loginRequired', { loginUrl: getLoginUrl() })
@@ -894,3 +894,14 @@ function renderMessagePreview(conversation) {
 function loadConversation(chatId, partnerName, partnerRole) {
   return loadAndRenderThread(chatId, partnerName, partnerRole, false);
 }
+
+// Reactive language change listener: immediately refresh chat thread and conversation list
+window.addEventListener('maitri:language-change', async () => {
+  if (_currentChatId) {
+    _lastMsgCount = -1; // force re-render
+    await loadAndRenderThread(_currentChatId, _currentPartnerName, _currentPartnerRole, false);
+  } else if (document.getElementById('chat-conversation-list')) {
+    await initChatList();
+  }
+});
+

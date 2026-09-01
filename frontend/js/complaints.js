@@ -19,8 +19,9 @@ const ComplaintStatusBadge = {
 /** Returns the locally stored user (or null). Safe when components.js is absent. */
 function getCurrentUser() {
   try {
-    return (typeof Navbar !== 'undefined' && Navbar.storedUser())
-      || JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA))
+    return (typeof AuthSession !== 'undefined' && AuthSession.user())
+      || (typeof Navbar !== 'undefined' && Navbar.storedUser())
+      || JSON.parse(sessionStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA) || localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA))
       || null;
   } catch {
     return null;
@@ -58,7 +59,7 @@ function formatComplaintDate(value) {
 async function renderMyComplaints(container) {
   if (!container) return;
 
-  const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+  const token = sessionStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
   if (!token) {
     const loginText = typeof I18n !== 'undefined' ? I18n.t('profile.loginRequired') : 'Log in required';
     const loginPrompt = typeof I18n !== 'undefined' ? I18n.t('profile.loginPrompt') : 'Please log in to view your complaints.';
@@ -248,7 +249,7 @@ async function initComplaintForm(vendorId, container) {
   if (!container) return;
 
   const currentUser = getCurrentUser();
-  const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+  const token = sessionStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
 
   // Logged out — ask the visitor to log in
   if (!token || !currentUser) {

@@ -433,8 +433,9 @@ const Favourites = {
   /** The locally stored user (or null). Safe when components.js is absent. */
   currentUser() {
     try {
-      return (typeof Navbar !== 'undefined' && Navbar.storedUser())
-        || JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA))
+      return (typeof AuthSession !== 'undefined' && AuthSession.user())
+        || (typeof Navbar !== 'undefined' && Navbar.storedUser())
+        || JSON.parse(sessionStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA) || localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA))
         || null;
     } catch {
       return null;
@@ -451,7 +452,7 @@ const Favourites = {
   canUseBackend() {
     const u = this.currentUser();
     if (!u || u.role === 'VENDOR' || u.role === 'ADMIN') return false;
-    return !!localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+    return !!(sessionStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN));
   },
 
   /**
@@ -472,7 +473,7 @@ const Favourites = {
       return;
     }
 
-    if (u && localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN)) {
+    if (u && (sessionStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN))) {
       try {
         const res = await API.getFavourites();
         if (res.ok && res.data && res.data.success && Array.isArray(res.data.data)) {

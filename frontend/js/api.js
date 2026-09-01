@@ -9,7 +9,7 @@ const API = {
   async request(path, { method = 'GET', body, auth = false } = {}) {
     const headers = { 'Content-Type': 'application/json' };
     if (auth) {
-      const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+      const token = sessionStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
       if (token) headers.Authorization = `Bearer ${token}`;
     }
 

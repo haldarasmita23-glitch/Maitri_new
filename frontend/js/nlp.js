@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typeof Navbar !== 'undefined') Navbar.init();
 
   // Check authentication status
-  const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+  const token = sessionStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
   const analyzeBtn = document.getElementById('nlp-analyze-btn');
   const nlpTextarea = document.getElementById('nlp-textarea');
 
@@ -42,7 +42,7 @@ function updateAnalyzeButtonState() {
   if (!analyzeBtn || !nlpTextarea) return;
 
   const text = nlpTextarea.value.trim();
-  const hasToken = !!localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+  const hasToken = !!(sessionStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN));
 
   if (analyzeBtn) {
     if (hasToken && text.length > 0) {

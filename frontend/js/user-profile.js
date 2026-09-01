@@ -39,7 +39,7 @@ async function initUserProfile() {
   const contentEl = document.getElementById('profile-content');
   const loginRequiredEl = document.getElementById('profile-login-required');
 
-  const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+  const token = sessionStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
   if (!token) {
     showProfileView(loginRequiredEl, contentEl);
     return;
@@ -116,7 +116,7 @@ function showProfileView(showEl, hideEl) {
 
 function readStoredUser() {
   try {
-    return JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA)) || null;
+    return JSON.parse(sessionStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA) || localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA)) || null;
   } catch {
     return null;
   }

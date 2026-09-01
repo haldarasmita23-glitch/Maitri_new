@@ -11,7 +11,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   // Check authentication state
-  const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+  const token = sessionStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
   if (!token) {
     // No token → redirect to admin login
     window.location.href = window.location.pathname.includes('/pages/') ? 'admin-login.html' : 'pages/admin-login.html';
@@ -42,6 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }).catch(() => {
     // Auth failed — clear tokens and redirect to admin login
+    sessionStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+    sessionStorage.removeItem(CONFIG.STORAGE_KEYS.USER_DATA);
     localStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
     localStorage.removeItem(CONFIG.STORAGE_KEYS.USER_DATA);
     window.location.href = window.location.pathname.includes('/pages/') ? 'admin-login.html' : 'pages/admin-login.html';

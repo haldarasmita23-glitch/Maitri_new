@@ -24,7 +24,7 @@ const Notifications = {
       return;
     }
 
-    const token = localStorage.getItem(CONFIG.STORAGE_KEYS?.AUTH_TOKEN || 'maitri_auth_token');
+    const token = sessionStorage.getItem(CONFIG.STORAGE_KEYS?.AUTH_TOKEN || 'maitri_auth_token') || localStorage.getItem(CONFIG.STORAGE_KEYS?.AUTH_TOKEN || 'maitri_auth_token');
     if (!token) {
       return; // No bell for unauthenticated guests
     }
@@ -51,7 +51,8 @@ const Notifications = {
    * Called by Navbar whenever auth state renders to ensure bell is present.
    */
   onNavbarRendered() {
-    const token = localStorage.getItem((typeof CONFIG !== 'undefined' && CONFIG.STORAGE_KEYS?.AUTH_TOKEN) || 'maitri_auth_token');
+    const token = sessionStorage.getItem((typeof CONFIG !== 'undefined' && CONFIG.STORAGE_KEYS?.AUTH_TOKEN) || 'maitri_auth_token')
+      || localStorage.getItem((typeof CONFIG !== 'undefined' && CONFIG.STORAGE_KEYS?.AUTH_TOKEN) || 'maitri_auth_token');
     if (token) {
       this._createBell();
       this._updateBadge(this._unreadCount);
@@ -254,7 +255,7 @@ const Notifications = {
     let role = null;
     try {
       const userKey = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_KEYS?.USER_DATA) || 'maitri_user_data';
-      const stored = JSON.parse(localStorage.getItem(userKey));
+      const stored = JSON.parse(sessionStorage.getItem(userKey) || localStorage.getItem(userKey));
       role = stored?.role;
     } catch {
       // ignore

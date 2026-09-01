@@ -29,8 +29,15 @@ const I18n = {
   detectLanguage() {
     // 1. Saved user account data
     try {
+      if (typeof AuthSession !== 'undefined') {
+        const u = AuthSession.user();
+        if (u && u.preferredLanguage && this.LANGUAGES[u.preferredLanguage]) {
+          return u.preferredLanguage;
+        }
+      }
       const storedUserKey = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_KEYS?.USER_DATA) || 'maitri_user_data';
-      const storedUser = JSON.parse(localStorage.getItem(storedUserKey));
+      const rawUser = sessionStorage.getItem(storedUserKey) || localStorage.getItem(storedUserKey);
+      const storedUser = JSON.parse(rawUser);
       if (storedUser && storedUser.preferredLanguage && this.LANGUAGES[storedUser.preferredLanguage]) {
         return storedUser.preferredLanguage;
       }
@@ -38,10 +45,10 @@ const I18n = {
       // ignore parse errors
     }
 
-    // 2. Saved local storage preference
+    // 2. Saved session/local storage preference
     try {
       const langKey = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_KEYS?.LANGUAGE) || 'maitri_language';
-      const savedLang = localStorage.getItem(langKey);
+      const savedLang = sessionStorage.getItem(langKey) || localStorage.getItem(langKey);
       if (savedLang && this.LANGUAGES[savedLang]) {
         return savedLang;
       }
@@ -105,9 +112,10 @@ const I18n = {
     this._currentLanguage = lang;
     document.documentElement.lang = lang;
 
-    // Persist in localStorage
+    // Persist in sessionStorage (tab) and localStorage
     try {
       const langKey = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_KEYS?.LANGUAGE) || 'maitri_language';
+      sessionStorage.setItem(langKey, lang);
       localStorage.setItem(langKey, lang);
     } catch {
       // ignore
@@ -116,9 +124,11 @@ const I18n = {
     // Update stored user preference if logged in
     try {
       const userKey = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_KEYS?.USER_DATA) || 'maitri_user_data';
-      const storedUser = JSON.parse(localStorage.getItem(userKey));
+      const rawUser = sessionStorage.getItem(userKey) || localStorage.getItem(userKey);
+      const storedUser = JSON.parse(rawUser);
       if (storedUser) {
         storedUser.preferredLanguage = lang;
+        sessionStorage.setItem(userKey, JSON.stringify(storedUser));
         localStorage.setItem(userKey, JSON.stringify(storedUser));
       }
     } catch {
@@ -128,14 +138,14 @@ const I18n = {
     // Sync with backend API if user is logged in
     if (syncBackend && typeof API !== 'undefined') {
       const tokenKey = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_KEYS?.AUTH_TOKEN) || 'maitri_auth_token';
-      const token = localStorage.getItem(tokenKey);
+      const token = sessionStorage.getItem(tokenKey) || localStorage.getItem(tokenKey);
       if (token) {
         try {
           if (typeof API.updateLanguagePreference === 'function') {
             await API.updateLanguagePreference(lang);
           } else if (typeof API.updateUserProfile === 'function') {
             const userKey = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_KEYS?.USER_DATA) || 'maitri_user_data';
-            const user = JSON.parse(localStorage.getItem(userKey)) || {};
+            const user = JSON.parse(sessionStorage.getItem(userKey) || localStorage.getItem(userKey)) || {};
             if (user.name) {
               await API.updateUserProfile({ ...user, preferredLanguage: lang });
             }

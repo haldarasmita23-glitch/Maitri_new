@@ -174,7 +174,8 @@ const Navbar = {
         const u = AuthSession.user();
         if (u) return u;
       }
-      const u = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA));
+      const raw = sessionStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA) || localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA);
+      const u = JSON.parse(raw);
       if (u && u.role && typeof AuthSession !== 'undefined') {
         u.role = AuthSession.normalizeRole(u.role);
       }
@@ -323,15 +324,17 @@ const Navbar = {
       return;
     }
 
-    const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+    const token = sessionStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
     if (!token) return;
 
     try {
       const result = await API.getCurrentUser();
       if (result.ok && result.data?.success && result.data.data) {
-        localStorage.setItem(CONFIG.STORAGE_KEYS.USER_DATA, JSON.stringify(result.data.data));
+        sessionStorage.setItem(CONFIG.STORAGE_KEYS.USER_DATA, JSON.stringify(result.data.data));
         window.dispatchEvent(new CustomEvent('maitri:auth-change', { detail: result.data.data }));
       } else if (result.status === 401) {
+        sessionStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+        sessionStorage.removeItem(CONFIG.STORAGE_KEYS.USER_DATA);
         localStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
         localStorage.removeItem(CONFIG.STORAGE_KEYS.USER_DATA);
         window.dispatchEvent(new CustomEvent('maitri:auth-change', { detail: null }));
@@ -347,6 +350,8 @@ const Navbar = {
       return;
     }
 
+    sessionStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+    sessionStorage.removeItem(CONFIG.STORAGE_KEYS.USER_DATA);
     localStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
     localStorage.removeItem(CONFIG.STORAGE_KEYS.USER_DATA);
     window.dispatchEvent(new CustomEvent('maitri:auth-change', { detail: null }));

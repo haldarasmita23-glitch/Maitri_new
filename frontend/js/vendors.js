@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   if (!isVendor && !isAdmin) {
     try {
-      const raw = localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA);
+      const raw = sessionStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA) || localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA);
       if (raw) {
         const u = JSON.parse(raw);
         const r = (u.role || '').toUpperCase().replace(/^ROLE_/, '');

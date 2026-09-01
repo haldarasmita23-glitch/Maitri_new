@@ -6,7 +6,7 @@
  * - Approve/reject vendors with live feedback
  */
 document.addEventListener('DOMContentLoaded', () => {
-  const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+  const token = sessionStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
   if (!token) {
     window.location.href = 'admin-login.html';
     return;

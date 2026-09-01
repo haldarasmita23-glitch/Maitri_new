@@ -139,7 +139,7 @@ public class ChatService {
                 sender.getId(), receiverId, PageRequest.of(0, 1));
         if (!existing.isEmpty()) {
             Chat latest = existing.getContent().get(0);
-            return convertToConversationResponse(latest, sender.getId());
+            return convertToConversationResponse(latest, sender);
         }
 
         String receiverLang = resolveReceiverLanguage(receiverId);
@@ -186,7 +186,7 @@ public class ChatService {
             log.warn("[Chat] Failed to send start conversation notification: {}", ex.getMessage());
         }
 
-        return convertToConversationResponse(chat, sender.getId());
+        return convertToConversationResponse(chat, sender);
     }
 
     /**
@@ -286,7 +286,7 @@ public class ChatService {
                 chat.getId(), sender.getId(), partnerId,
                 translation.getSourceLanguage(), translation.getTargetLanguage(), translation.getStatus());
 
-        return convertToResponse(chat, sender.getId());
+        return convertToResponse(chat, sender);
     }
 
     /**
@@ -325,7 +325,7 @@ public class ChatService {
         }
 
         log.info("[Chat] Conversation accepted between vendor={} and customer={}", userId, partnerId);
-        return convertToConversationResponse(messages.get(0), userId);
+        return convertToConversationResponse(messages.get(0), user);
     }
 
     /**
@@ -346,7 +346,7 @@ public class ChatService {
         }
 
         return latestPerPartner.values().stream()
-                .map(chat -> convertToConversationResponse(chat, userId))
+                .map(chat -> convertToConversationResponse(chat, user))
                 .collect(Collectors.toList());
     }
 
@@ -381,7 +381,7 @@ public class ChatService {
         // Mark messages from the partner as read
         markConversationRead(userId, otherPartyId);
 
-        return convertToConversationResponse(latestMessage, userId);
+        return convertToConversationResponse(latestMessage, user);
     }
 
     /**
@@ -437,23 +437,53 @@ public class ChatService {
         // Mark unread messages from the partner as read while we're here
         markConversationRead(userId, partnerId);
 
-        return page.map(chat -> convertToResponse(chat, userId));
+        return page.map(chat -> convertToResponse(chat, user));
     }
 
     // ─── Private converters ───────────────────────────────────────────────────
 
     /** Converts a Chat entity to a ChatMessageResponse DTO projected for the viewer. */
-    private ChatMessageResponse convertToResponse(Chat chat, String currentUserId) {
+    private ChatMessageResponse convertToResponse(Chat chat, User currentUser) {
         if (chat == null) return null;
+        String currentUserId = currentUser != null ? currentUser.getId() : null;
         boolean isOwn = currentUserId != null && currentUserId.equals(chat.getSenderId());
+
+        String targetLang = chat.getTargetLanguage();
+        String translatedMsg = chat.getTranslatedMessage();
+        com.maitri.model.TranslationStatus transStatus = chat.getTranslationStatus();
+
+        String viewerPreferredLang = (currentUser != null && currentUser.getPreferredLanguage() != null && !currentUser.getPreferredLanguage().isBlank())
+                ? currentUser.getPreferredLanguage().trim().toLowerCase()
+                : "en";
+
+        if (!isOwn) {
+            String srcLang = chat.getSourceLanguage() != null ? chat.getSourceLanguage().toLowerCase() : "en";
+            // If viewer's current preferred language is different from the recorded target language
+            if (!viewerPreferredLang.equalsIgnoreCase(targetLang)) {
+                if (viewerPreferredLang.equalsIgnoreCase(srcLang)) {
+                    targetLang = viewerPreferredLang;
+                    translatedMsg = chat.getOriginalMessage();
+                    transStatus = com.maitri.model.TranslationStatus.NOT_REQUIRED;
+                } else {
+                    TranslationResult translation = translationService.translate(
+                            chat.getOriginalMessage() != null ? chat.getOriginalMessage() : chat.getMessage(),
+                            viewerPreferredLang,
+                            srcLang
+                    );
+                    targetLang = viewerPreferredLang;
+                    translatedMsg = translation.getTranslatedText();
+                    transStatus = translation.getStatus();
+                }
+            }
+        }
 
         // For sender: primary display is original message. For receiver: primary display is translated message.
         String displayMsg;
         if (isOwn) {
             displayMsg = chat.getOriginalMessage() != null ? chat.getOriginalMessage() : chat.getMessage();
         } else {
-            displayMsg = chat.getTranslatedMessage() != null
-                    ? chat.getTranslatedMessage()
+            displayMsg = translatedMsg != null
+                    ? translatedMsg
                     : (chat.getOriginalMessage() != null ? chat.getOriginalMessage() : chat.getMessage());
         }
 
@@ -469,10 +499,10 @@ public class ChatService {
                 .receiverRole(chat.getReceiverRole())
                 .message(displayMsg)
                 .originalMessage(chat.getOriginalMessage() != null ? chat.getOriginalMessage() : chat.getMessage())
-                .translatedMessage(chat.getTranslatedMessage())
+                .translatedMessage(translatedMsg)
                 .sourceLanguage(chat.getSourceLanguage())
-                .targetLanguage(chat.getTargetLanguage())
-                .translationStatus(chat.getTranslationStatus())
+                .targetLanguage(targetLang)
+                .translationStatus(transStatus)
                 .messageType(chat.getMessageType())
                 .timestamp(chat.getTimestamp())
                 .read(chat.isRead())
@@ -482,7 +512,8 @@ public class ChatService {
     }
 
     /** Converts a Chat entity to a ChatConversationResponse DTO relative to the current user. */
-    private ChatConversationResponse convertToConversationResponse(Chat chat, String currentUserId) {
+    private ChatConversationResponse convertToConversationResponse(Chat chat, User currentUser) {
+        String currentUserId = currentUser != null ? currentUser.getId() : null;
         String otherPartyId;
         Role   otherPartyRole;
         boolean isOwn = chat.getSenderId().equals(currentUserId);
@@ -511,6 +542,34 @@ public class ChatService {
 
         long unreadCount = isOwn ? 0 : chatRepository.findBySenderIdAndReceiverIdAndReadFalse(otherPartyId, currentUserId).size();
 
+        String targetLang = chat.getTargetLanguage();
+        String translatedMsg = chat.getTranslatedMessage();
+        com.maitri.model.TranslationStatus transStatus = chat.getTranslationStatus();
+
+        String viewerPreferredLang = (currentUser != null && currentUser.getPreferredLanguage() != null && !currentUser.getPreferredLanguage().isBlank())
+                ? currentUser.getPreferredLanguage().trim().toLowerCase()
+                : "en";
+
+        if (!isOwn) {
+            String srcLang = chat.getSourceLanguage() != null ? chat.getSourceLanguage().toLowerCase() : "en";
+            if (!viewerPreferredLang.equalsIgnoreCase(targetLang)) {
+                if (viewerPreferredLang.equalsIgnoreCase(srcLang)) {
+                    targetLang = viewerPreferredLang;
+                    translatedMsg = chat.getOriginalMessage();
+                    transStatus = com.maitri.model.TranslationStatus.NOT_REQUIRED;
+                } else {
+                    TranslationResult translation = translationService.translate(
+                            chat.getOriginalMessage() != null ? chat.getOriginalMessage() : chat.getMessage(),
+                            viewerPreferredLang,
+                            srcLang
+                    );
+                    targetLang = viewerPreferredLang;
+                    translatedMsg = translation.getTranslatedText();
+                    transStatus = translation.getStatus();
+                }
+            }
+        }
+
         // Viewer perspective for last message preview
         String lastDisplayMsg;
         if (isOwn) {
@@ -518,8 +577,8 @@ public class ChatService {
                     ? chat.getOriginalMessage()
                     : (chat.getMessage() != null ? chat.getMessage() : "");
         } else {
-            lastDisplayMsg = chat.getTranslatedMessage() != null
-                    ? chat.getTranslatedMessage()
+            lastDisplayMsg = translatedMsg != null
+                    ? translatedMsg
                     : (chat.getOriginalMessage() != null ? chat.getOriginalMessage() : (chat.getMessage() != null ? chat.getMessage() : ""));
         }
 
@@ -533,10 +592,10 @@ public class ChatService {
                 .otherPartyRole(otherPartyRole)
                 .lastMessage(lastDisplayMsg)
                 .originalMessage(chat.getOriginalMessage() != null ? chat.getOriginalMessage() : chat.getMessage())
-                .translatedMessage(chat.getTranslatedMessage())
+                .translatedMessage(translatedMsg)
                 .sourceLanguage(chat.getSourceLanguage())
-                .targetLanguage(chat.getTargetLanguage())
-                .translationStatus(chat.getTranslationStatus())
+                .targetLanguage(targetLang)
+                .translationStatus(transStatus)
                 .lastMessageType(chat.getMessageType())
                 .lastMessageTimestamp(chat.getTimestamp())
                 .lastMessageIsOwn(isOwn)

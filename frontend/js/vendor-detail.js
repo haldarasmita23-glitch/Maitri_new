@@ -352,8 +352,9 @@ function initRatingInput() {
 /** Returns the locally stored user (or null). Safe when components.js is absent. */
 function getCurrentUser() {
   try {
-    return (typeof Navbar !== 'undefined' && Navbar.storedUser())
-      || JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA))
+    return (typeof AuthSession !== 'undefined' && AuthSession.user())
+      || (typeof Navbar !== 'undefined' && Navbar.storedUser())
+      || JSON.parse(sessionStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA) || localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA))
       || null;
   } catch {
     return null;
@@ -421,7 +422,7 @@ async function initReviewForm(vendorId, currentUser, myReview) {
   const form = document.getElementById('review-form');
   if (!form) return;
 
-  const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+  const token = sessionStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
 
   // Logged out — ask the visitor to log in
   if (!token || !currentUser) {
@@ -597,7 +598,7 @@ function initMessageVendorButton(vendor) {
     btn.onclick = async (e) => {
       e.preventDefault();
 
-      const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+      const token = sessionStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
       const user = getCurrentUser();
 
       // Guard: must be authenticated

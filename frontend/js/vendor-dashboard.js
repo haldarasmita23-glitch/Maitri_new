@@ -26,7 +26,7 @@ async function initVendorDashboard() {
   const descEl = document.getElementById('gate-error-desc');
 
   // Verify authentication
-  const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+  const token = sessionStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN) || localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
   const role = AuthSession.getRole();
 
   if (!token || !role) {
@@ -612,3 +612,12 @@ function bindVendorAccountForm() {
     }
   });
 }
+
+// Reactive language change listener for vendor dashboard
+window.addEventListener('maitri:language-change', () => {
+  if (_currentVendor) {
+    renderVendorHeader(_currentVendor);
+    populateProfileForm(_currentVendor);
+  }
+});
+
