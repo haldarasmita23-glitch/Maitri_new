@@ -100,6 +100,21 @@ public class ComplaintService {
         Complaint saved = complaintRepository.save(complaint);
         log.info("[Complaint] Created: complaintId={}, userId={}, vendorId={}",
                 saved.getId(), user.getId(), vendor.getId());
+
+        // Notify vendor and admins about new complaint
+        notificationService.notifyUser(
+                vendor.getUserId(),
+                Role.VENDOR,
+                NotificationType.COMPLAINT,
+                "New Complaint Filed",
+                "A customer filed a complaint regarding '" + vendor.getShopName() + "'."
+        );
+        notificationService.notifyAdmins(
+                NotificationType.COMPLAINT,
+                "New Complaint Filed",
+                "A new complaint was submitted for vendor '" + vendor.getShopName() + "'."
+        );
+
         return toResponse(saved, false);
     }
 

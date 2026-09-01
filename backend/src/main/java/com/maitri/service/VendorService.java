@@ -94,6 +94,14 @@ public class VendorService {
         Vendor saved = vendorRepository.save(vendor);
         log.info("[Vendor] Application submitted: id={}, userId={}, shop={}",
                 saved.getId(), saved.getUserId(), saved.getShopName());
+
+        // Notify admins about new application awaiting review
+        notificationService.notifyAdmins(
+                NotificationType.VERIFICATION,
+                "New Vendor Application",
+                "A new vendor application for '" + saved.getShopName() + "' is awaiting review."
+        );
+
         return toResponse(saved, category);
     }
 

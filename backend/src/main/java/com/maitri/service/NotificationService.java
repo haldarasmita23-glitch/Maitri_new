@@ -44,8 +44,27 @@ import java.util.stream.Collectors;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final com.maitri.repository.UserRepository userRepository;
 
     // ─── Trigger entry point (used by other services) ────────────────────────
+
+    /**
+     * Broadcasts a notification to all active ADMIN accounts (fail-safe).
+     *
+     * @param type    The notification category
+     * @param title   Short title
+     * @param message Notification body
+     */
+    public void notifyAdmins(NotificationType type, String title, String message) {
+        try {
+            List<User> admins = userRepository.findByRole(Role.ADMIN);
+            for (User admin : admins) {
+                notifyUser(admin.getId(), Role.ADMIN, type, title, message);
+            }
+        } catch (Exception ex) {
+            log.warn("[Notification] Failed to notify admins ({}): {}", type, ex.getMessage());
+        }
+    }
 
     /**
      * Creates a notification for a target account. FAIL-SAFE by design:

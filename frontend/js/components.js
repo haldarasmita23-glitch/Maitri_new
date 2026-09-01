@@ -237,6 +237,10 @@ const Navbar = {
       logout.textContent = typeof I18n !== 'undefined' ? I18n.t('nav.logout') : 'Log Out';
       logout.addEventListener('click', () => this.logout());
       area.append(greeting, profile, logout);
+
+      if (typeof Notifications !== 'undefined' && typeof Notifications.onNavbarRendered === 'function') {
+        Notifications.onNavbarRendered();
+      }
     });
 
     mobileMenus.forEach(menu => {

@@ -161,6 +161,24 @@ public class ChatService {
         log.info("[Chat] Conversation started: id={}, sender={}, receiver={}, status={}",
                 chat.getId(), sender.getId(), receiverId, chat.getStatus());
 
+        // Notify receiver about new conversation request
+        try {
+            String targetUserId = receiverId;
+            Optional<Vendor> v = vendorRepository.findById(receiverId);
+            if (v.isPresent()) {
+                targetUserId = v.get().getUserId();
+            }
+            notificationService.notifyUser(
+                    targetUserId,
+                    receiverRole,
+                    NotificationType.CHAT,
+                    "New Customer Inquiry",
+                    "Customer " + sender.getName() + " has sent a conversation request."
+            );
+        } catch (Exception ex) {
+            log.warn("[Chat] Failed to send start conversation notification: {}", ex.getMessage());
+        }
+
         return convertToConversationResponse(chat, sender.getId());
     }
 
@@ -236,11 +254,17 @@ public class ChatService {
 
         // Notify receiver with translated message — failure must never break the chat operation
         try {
+            String targetUserId = partnerId;
+            Optional<Vendor> v = vendorRepository.findById(partnerId);
+            if (v.isPresent()) {
+                targetUserId = v.get().getUserId();
+            }
+
             String notifyBody = translation.getTranslatedText() != null
                     ? translation.getTranslatedText()
                     : request.getMessage();
             notificationService.notifyUser(
-                    partnerId,
+                    targetUserId,
                     receiverRole,
                     NotificationType.CHAT,
                     "New message",

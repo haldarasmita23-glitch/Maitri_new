@@ -1,15 +1,17 @@
 /**
- * Maitri — Notifications Module (Phase 10).
+ * Maitri — Notifications Module (Phase 10 & Enhancement).
  *
  * Handles the notification bell UI in the navbar:
- *   - Fetches unread count on load and shows a badge
- *   - Opens a dropdown panel with recent notifications
+ *   - Fetches unread count on load and shows an active counter badge
+ *   - Opens an accessible dropdown panel with recent notifications
  *   - Allows marking individual notifications as read
- *   - Allows marking all as read
- *   - Handles 401/offline gracefully (no broken navbar)
+ *   - Allows marking all notifications as read
+ *   - On notification click: marks as read and navigates to the relevant page
+ *   - Seamlessly hooks into Navbar.renderAuthState and page transitions
+ *   - Handles 401/offline gracefully (never breaks navbar or layout)
  */
 const Notifications = {
-  // Cache
+  // Cache & State
   _unreadCount: 0,
   _dropdownOpen: false,
   _pollTimer: null,
@@ -22,10 +24,9 @@ const Notifications = {
       return;
     }
 
-    // Check if user is authenticated (token exists)
-    const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+    const token = localStorage.getItem(CONFIG.STORAGE_KEYS?.AUTH_TOKEN || 'maitri_auth_token');
     if (!token) {
-      return; // No bell for unauthenticated users
+      return; // No bell for unauthenticated guests
     }
 
     this._createBell();
@@ -36,16 +37,25 @@ const Notifications = {
     // Listen for auth state changes
     window.addEventListener('maitri:auth-change', event => {
       if (event.detail) {
-        // User logged in
         this._createBell();
         this._fetchUnreadCount();
         this._startPolling();
       } else {
-        // User logged out
         this._destroyBell();
         this._stopPolling();
       }
     });
+  },
+
+  /**
+   * Called by Navbar whenever auth state renders to ensure bell is present.
+   */
+  onNavbarRendered() {
+    const token = localStorage.getItem((typeof CONFIG !== 'undefined' && CONFIG.STORAGE_KEYS?.AUTH_TOKEN) || 'maitri_auth_token');
+    if (token) {
+      this._createBell();
+      this._updateBadge(this._unreadCount);
+    }
   },
 
   // ─── Bell Creation / Destruction ──────────────────────────────────────────
@@ -56,9 +66,11 @@ const Notifications = {
     const markAllText = typeof I18n !== 'undefined' ? I18n.t('notifications.markAllRead') : 'Mark all read';
     const viewAllText = typeof I18n !== 'undefined' ? I18n.t('notifications.viewAll') : 'View all notifications';
 
+    const isPages = window.location.pathname.includes('/pages/');
+    const viewAllUrl = isPages ? 'user-profile.html#notifications' : 'pages/user-profile.html#notifications';
+
     authAreas.forEach(area => {
-      // Check if bell already exists
-      if (area.querySelector('.navbar__bell')) return;
+      if (area.querySelector('.navbar__bell-wrapper')) return;
 
       // Create bell button
       const bell = document.createElement('button');
@@ -80,28 +92,40 @@ const Notifications = {
       dropdown.setAttribute('role', 'menu');
       dropdown.innerHTML = `
         <div class="navbar__dropdown-header">
-          <span>${escapeHtml(titleText)}</span>
-          <button type="button" class="navbar__mark-all" aria-label="${markAllText}">${escapeHtml(markAllText)}</button>
+          <span>${this._escapeHtml(titleText)}</span>
+          <button type="button" class="navbar__mark-all" aria-label="${markAllText}">${this._escapeHtml(markAllText)}</button>
         </div>
         <div class="navbar__dropdown-list" role="listbox"></div>
         <div class="navbar__dropdown-footer">
-          <a href="pages/user-profile.html#notifications">${escapeHtml(viewAllText)}</a>
+          <a href="${viewAllUrl}">${this._escapeHtml(viewAllText)}</a>
         </div>
       `;
 
-      // Wrap bell + dropdown in a container for positioning
+      // Wrap bell + dropdown in a container for relative positioning
       const wrapper = document.createElement('div');
       wrapper.className = 'navbar__bell-wrapper';
       wrapper.appendChild(bell);
       wrapper.appendChild(dropdown);
 
-      // Insert bell before the profile button (last child before logout)
+      // Insert bell before logout / profile button
       const logoutBtn = area.querySelector('[data-auth-logout], button:last-of-type');
       if (logoutBtn) {
         area.insertBefore(wrapper, logoutBtn);
       } else {
         area.appendChild(wrapper);
       }
+
+      // Bell click event
+      bell.addEventListener('click', e => {
+        e.stopPropagation();
+        this._toggleDropdown(bell);
+      });
+
+      // Mark all read event
+      dropdown.querySelector('.navbar__mark-all')?.addEventListener('click', e => {
+        e.stopPropagation();
+        this._markAllRead();
+      });
     });
   },
 
@@ -113,22 +137,6 @@ const Notifications = {
   // ─── Event Binding ────────────────────────────────────────────────────────
 
   _bindEvents() {
-    // Bell click → toggle dropdown
-    document.querySelectorAll('.navbar__bell').forEach(bell => {
-      bell.addEventListener('click', e => {
-        e.stopPropagation();
-        this._toggleDropdown(bell);
-      });
-    });
-
-    // Mark all read button
-    document.querySelectorAll('.navbar__mark-all').forEach(btn => {
-      btn.addEventListener('click', e => {
-        e.stopPropagation();
-        this._markAllRead();
-      });
-    });
-
     // Close dropdown on outside click
     document.addEventListener('click', e => {
       if (this._dropdownOpen && !e.target.closest('.navbar__bell-wrapper')) {
@@ -148,9 +156,12 @@ const Notifications = {
 
   _toggleDropdown(bell) {
     const wrapper = bell.closest('.navbar__bell-wrapper');
+    if (!wrapper) return;
     const dropdown = wrapper.querySelector('.navbar__dropdown');
+    if (!dropdown) return;
+
     const isOpen = dropdown.classList.toggle('open');
-    bell.setAttribute('aria-expanded', isOpen);
+    bell.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
     this._dropdownOpen = isOpen;
 
     if (isOpen) {
@@ -168,21 +179,22 @@ const Notifications = {
 
   async _fetchUnreadCount() {
     try {
-      const result = await API.getUnreadCount();
-      if (result.success && result.data) {
-        this._updateBadge(result.data.count);
+      if (typeof API !== 'undefined' && typeof API.getUnreadCount === 'function') {
+        const result = await API.getUnreadCount();
+        if (result && result.success && result.data) {
+          this._updateBadge(result.data.count);
+        }
       }
     } catch (err) {
-      // Silently fail — don't break the navbar
       console.debug('[Notifications] Unread count fetch failed:', err.message);
     }
   },
 
   _updateBadge(count) {
-    this._unreadCount = count;
+    this._unreadCount = typeof count === 'number' ? count : 0;
     document.querySelectorAll('.navbar__badge').forEach(badge => {
-      if (count > 0) {
-        badge.textContent = count > 99 ? '99+' : count;
+      if (this._unreadCount > 0) {
+        badge.textContent = this._unreadCount > 99 ? '99+' : this._unreadCount;
         badge.style.display = 'flex';
       } else {
         badge.style.display = 'none';
@@ -192,18 +204,20 @@ const Notifications = {
 
   async _renderDropdownList(dropdown) {
     const list = dropdown.querySelector('.navbar__dropdown-list');
-    list.innerHTML = '<div class="navbar__dropdown-loading">Loading…</div>';
+    if (!list) return;
+
+    list.innerHTML = '<div class="navbar__dropdown-loading" style="padding:1rem; text-align:center; color:var(--color-text-muted);">Loading…</div>';
 
     try {
       const result = await API.getNotifications();
       if (!result.success || !result.data) {
-        list.innerHTML = '<div class="navbar__dropdown-empty">Failed to load notifications</div>';
+        list.innerHTML = '<div class="navbar__dropdown-empty" style="padding:1.5rem; text-align:center; color:var(--color-text-muted);">Failed to load notifications</div>';
         return;
       }
 
       const notifications = result.data;
       if (!notifications.length) {
-        list.innerHTML = '<div class="navbar__dropdown-empty">No notifications yet</div>';
+        list.innerHTML = '<div class="navbar__dropdown-empty" style="padding:1.5rem; text-align:center; color:var(--color-text-muted);">No notifications yet</div>';
         return;
       }
 
@@ -211,20 +225,62 @@ const Notifications = {
       const toShow = notifications.slice(0, 10);
       list.innerHTML = toShow.map(n => this._notificationItemHtml(n)).join('');
 
-      // Bind click handlers for mark-read
+      // Bind click handlers for mark-read and navigation
       list.querySelectorAll('.navbar__notification-item').forEach(item => {
-        item.addEventListener('click', e => {
+        item.addEventListener('click', async e => {
           e.stopPropagation();
           const id = item.dataset.id;
+          const targetUrl = item.dataset.targetUrl;
+
           if (!item.classList.contains('read')) {
-            this._markRead(id, item);
+            await this._markRead(id, item);
+          }
+
+          if (targetUrl) {
+            window.location.href = targetUrl;
           }
         });
       });
     } catch (err) {
-      list.innerHTML = '<div class="navbar__dropdown-empty">Failed to load notifications</div>';
+      list.innerHTML = '<div class="navbar__dropdown-empty" style="padding:1.5rem; text-align:center; color:var(--color-text-muted);">Failed to load notifications</div>';
       console.debug('[Notifications] Fetch failed:', err.message);
     }
+  },
+
+  _getTargetUrl(n) {
+    const isPages = window.location.pathname.includes('/pages/');
+    let role = null;
+    try {
+      const userKey = (typeof CONFIG !== 'undefined' && CONFIG.STORAGE_KEYS?.USER_DATA) || 'maitri_user_data';
+      const stored = JSON.parse(localStorage.getItem(userKey));
+      role = stored?.role;
+    } catch {
+      // ignore
+    }
+    const normRole = (role || '').toUpperCase().replace(/^ROLE_/, '');
+
+    if (n.type === 'CHAT') {
+      return isPages ? 'chat.html' : 'pages/chat.html';
+    }
+    if (n.type === 'VERIFICATION') {
+      if (normRole === 'ADMIN') {
+        return isPages ? 'admin-vendors.html' : 'pages/admin-vendors.html';
+      }
+      return isPages ? 'vendor-dashboard.html' : 'pages/vendor-dashboard.html';
+    }
+    if (n.type === 'COMPLAINT') {
+      if (normRole === 'ADMIN') {
+        return isPages ? 'admin.html' : 'pages/admin.html';
+      }
+      if (normRole === 'VENDOR') {
+        return isPages ? 'vendor-dashboard.html#complaints' : 'pages/vendor-dashboard.html#complaints';
+      }
+      return isPages ? 'user-profile.html#complaints' : 'pages/user-profile.html#complaints';
+    }
+    if (n.type === 'REVIEW') {
+      return isPages ? 'vendor-dashboard.html#reviews' : 'pages/vendor-dashboard.html#reviews';
+    }
+    return isPages ? 'user-profile.html#notifications' : 'pages/user-profile.html#notifications';
   },
 
   _notificationItemHtml(n) {
@@ -232,15 +288,17 @@ const Notifications = {
       month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
     });
     const unreadClass = n.read ? 'read' : 'unread';
+    const targetUrl = this._getTargetUrl(n);
+
     return `
-      <div class="navbar__notification-item ${unreadClass}" data-id="${n.id}" role="option">
+      <div class="navbar__notification-item ${unreadClass}" data-id="${n.id}" data-target-url="${targetUrl}" role="option" style="cursor: pointer;">
         <div class="navbar__notification-icon" aria-hidden="true">
           ${this._iconForType(n.type)}
         </div>
         <div class="navbar__notification-content">
-          <div class="navbar__notification-title">${this._escapeHtml(n.title)}</div>
-          <div class="navbar__notification-message">${this._escapeHtml(n.message)}</div>
-          <div class="navbar__notification-time">${time}</div>
+          <div class="navbar__notification-title" style="font-weight: 600; font-size: 0.85rem; color: var(--color-text-primary);">${this._escapeHtml(n.title)}</div>
+          <div class="navbar__notification-message" style="font-size: 0.8rem; color: var(--color-text-secondary); margin-top: 2px;">${this._escapeHtml(n.message)}</div>
+          <div class="navbar__notification-time" style="font-size: 0.72rem; color: var(--color-text-muted); margin-top: 4px;">${time}</div>
         </div>
         ${!n.read ? '<span class="navbar__notification-dot" aria-hidden="true"></span>' : ''}
       </div>
@@ -249,16 +307,23 @@ const Notifications = {
 
   _iconForType(type) {
     switch (type) {
-      case 'VERIFICATION': return '<svg viewBox="0 0 24 24" width="18" height="18"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/></svg>';
-      case 'COMPLAINT': return '<svg viewBox="0 0 24 24" width="18" height="18"><path d="M15.73 3H8.27L3 8.27v7.46L8.27 21h7.46L21 15.73V8.27L15.73 3zM12 17.3c-.72 0-1.3-.58-1.3-1.3 0-.72.58-1.3 1.3-1.3.72 0 1.3.58 1.3 1.3 0 .72-.58 1.3-1.3 1.3zm1-4.3h-2V7h2v6z" fill="currentColor"/></svg>';
-      case 'REVIEW': return '<svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/></svg>';
-      default: return '<svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor"/></svg>';
+      case 'CHAT':
+        return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+      case 'VERIFICATION':
+        return '<svg viewBox="0 0 24 24" width="18" height="18"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/></svg>';
+      case 'COMPLAINT':
+        return '<svg viewBox="0 0 24 24" width="18" height="18"><path d="M15.73 3H8.27L3 8.27v7.46L8.27 21h7.46L21 15.73V8.27L15.73 3zM12 17.3c-.72 0-1.3-.58-1.3-1.3 0-.72.58-1.3 1.3-1.3.72 0 1.3.58 1.3 1.3 0 .72-.58 1.3-1.3 1.3zm1-4.3h-2V7h2v6z" fill="currentColor"/></svg>';
+      case 'REVIEW':
+        return '<svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/></svg>';
+      default:
+        return '<svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor"/></svg>';
     }
   },
 
   _escapeHtml(str) {
+    if (str == null) return '';
     const div = document.createElement('div');
-    div.textContent = str;
+    div.textContent = String(str);
     return div.innerHTML;
   },
 
@@ -267,11 +332,11 @@ const Notifications = {
   async _markRead(id, itemEl) {
     try {
       const result = await API.markNotificationRead(id);
-      if (result.success) {
+      if (result && result.success) {
         itemEl.classList.remove('unread');
         itemEl.classList.add('read');
         itemEl.querySelector('.navbar__notification-dot')?.remove();
-        this._fetchUnreadCount(); // refresh badge
+        this._fetchUnreadCount();
       }
     } catch (err) {
       console.debug('[Notifications] Mark read failed:', err.message);
@@ -281,9 +346,8 @@ const Notifications = {
   async _markAllRead() {
     try {
       const result = await API.markAllNotificationsRead();
-      if (result.success) {
+      if (result && result.success) {
         this._fetchUnreadCount();
-        // Close dropdown and re-render if open
         this._closeAllDropdowns();
       }
     } catch (err) {
@@ -295,7 +359,6 @@ const Notifications = {
 
   _startPolling() {
     this._stopPolling();
-    // Poll every 30 seconds for unread count
     this._pollTimer = setInterval(() => this._fetchUnreadCount(), 30000);
   },
 
@@ -306,6 +369,9 @@ const Notifications = {
     }
   },
 };
+
+// Global export
+window.Notifications = Notifications;
 
 // Auto-init on DOM ready
 document.addEventListener('DOMContentLoaded', () => Notifications.init());

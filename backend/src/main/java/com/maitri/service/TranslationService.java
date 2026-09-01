@@ -58,18 +58,27 @@ public class TranslationService {
     static {
         addPhrase("your order is ready", "आपका ऑर्डर तैयार है", "ನಿಮ್ಮ ಆರ್ಡರ್ ಸಿದ್ಧವಾಗಿದೆ");
         addPhrase("is your shop open today?", "क्या आपकी दुकान आज खुली है?", "ನಿಮ್ಮ ಅಂಗಡಿ ಇಂದು ತೆರೆದಿದೆಯೇ?");
+        addPhrase("is your shop open today", "क्या आपकी दुकान आज खुली है", "ನಿಮ್ಮ ಅಂಗಡಿ ಇಂದು ತೆರೆದಿದೆಯೇ");
+        addPhrase("hello, is your shop open today?", "नमस्ते, क्या आपकी दुकान आज खुली है?", "ನಮಸ್ಕಾರ, ನಿಮ್ಮ ಅಂಗಡಿ ಇಂದು ತೆರೆದಿದೆಯೇ?");
+        addPhrase("hello, is your shop open today", "नमस्ते, क्या आपकी दुकान आज खुली है", "ನಮಸ್ಕಾರ, ನಿಮ್ಮ ಅಂಗಡಿ ಇಂದು ತೆರೆದಿದೆಯೇ");
         addPhrase("when will your shop open?", "आपकी दुकान कब खुलेगी?", "ನಿಮ್ಮ ಅಂಗಡಿ ಯಾವಾಗ ತೆರೆಯುತ್ತದೆ?");
+        addPhrase("when will your shop open", "आपकी दुकान कब खुलेगी", "ನಿಮ್ಮ ಅಂಗಡಿ ಯಾವಾಗ ತೆರೆಯುತ್ತದೆ");
         addPhrase("what is the price?", "कीमत क्या है?", "ಬೆಲೆ ಎಷ್ಟು?");
+        addPhrase("what is the price", "कीमत क्या है", "ಬೆಲೆ ಎಷ್ಟು");
         addPhrase("is this item in stock?", "क्या यह सामान स्टॉक में है?", "ಈ ವಸ್ತು ಸ್ಟಾಕ್‌ನಲ್ಲಿದೆಯೇ?");
+        addPhrase("is this item in stock", "क्या यह सामान स्टॉक में है", "ಈ ವಸ್ತು ಸ್ಟಾಕ್‌ನಲ್ಲಿದೆಯೇ");
         addPhrase("thank you", "धन्यवाद", "ಧನ್ಯವಾದಗಳು");
         addPhrase("thank you, i will collect it soon", "धन्यवाद, मैं इसे जल्द ही ले लूंगा", "ಧನ್ಯವಾದಗಳು, ನಾನು ಅದನ್ನು ಶೀಘ್ರದಲ್ಲೇ ಸಂಗ್ರಹಿಸುತ್ತೇನೆ");
         addPhrase("hello", "नमस्ते", "ನಮಸ್ಕಾರ");
         addPhrase("hi", "नमस्ते", "ನಮಸ್ಕಾರ");
+        addPhrase("namaste", "नमस्ते", "ನಮಸ್ಕಾರ");
+        addPhrase("hello sir", "नमस्ते सर", "ನಮಸ್ಕಾರ ಸರ್");
         addPhrase("good morning", "शुभ प्रभात", "ಶುಭೋದಯ");
         addPhrase("good evening", "शुभ संध्या", "ಶುಭ ಸಂಜೆ");
         addPhrase("yes, it is available", "हाँ, यह उपलब्ध है", "ಹೌದು, ಇದು ಲಭ್ಯವಿದೆ");
         addPhrase("no, it is out of stock", "नहीं, यह स्टॉक में नहीं है", "ಇಲ್ಲ, ಇದು ಸ್ಟಾಕ್‌ನಲ್ಲಿಲ್ಲ");
         addPhrase("where is your shop located?", "आपकी दुकान कहाँ है?", "ನಿಮ್ಮ ಅಂಗಡಿ ಎಲ್ಲಿದೆ?");
+        addPhrase("where is your shop located", "आपकी दुकान कहाँ है", "ನಿಮ್ಮ ಅಂಗಡಿ ಎಲ್ಲಿದೆ");
         addPhrase("can you deliver to peenya?", "क्या आप पीन्या में डिलीवरी कर सकते हैं?", "ನೀವು ಪೀಣ್ಯಕ್ಕೆ ಡೆಲಿವರಿ ಮಾಡಬಹುದೇ?");
         addPhrase("how long will the repair take?", "मरम्मत में कितना समय लगेगा?", "ದುರಸ್ತಿಗೆ ಎಷ್ಟು ಸಮಯ ತೆಗೆದುಕೊಳ್ಳುತ್ತದೆ?");
         addPhrase("how much for tailoring a shirt?", "शर्ट सिलने का कितना लगेगा?", "ಶರ್ಟ್ ಹೊಲಿಯಲು ಎಷ್ಟು?");
