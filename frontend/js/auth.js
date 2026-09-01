@@ -149,16 +149,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initPasswordToggles() {
   document.querySelectorAll('.btn-toggle-password').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const input = btn.previousElementSibling;
+    if (btn.dataset.toggleBound === 'true') return;
+    btn.dataset.toggleBound = 'true';
+
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const wrapper = btn.closest('.input-icon-wrapper') || btn.closest('.form-group') || btn.parentElement;
+      const input = wrapper ? wrapper.querySelector('input[type="password"], input[type="text"]') : btn.previousElementSibling;
       if (!input) return;
-      const isText = input.type === 'text';
-      input.type = isText ? 'password' : 'text';
-      btn.textContent = isText ? '👁️' : '🙈';
-      btn.setAttribute('aria-label', isText ? 'Show password' : 'Hide password');
+
+      const isCurrentlyPassword = input.type === 'password';
+      input.type = isCurrentlyPassword ? 'text' : 'password';
+
+      // Update icon: 🙈 when visible (click hides), 👁️ when hidden (click shows)
+      btn.textContent = isCurrentlyPassword ? '🙈' : '👁️';
+
+      // Accessible labels
+      const showLabel = typeof I18n !== 'undefined' ? I18n.t('auth.showPassword') : 'Show password';
+      const hideLabel = typeof I18n !== 'undefined' ? I18n.t('auth.hidePassword') : 'Hide password';
+      const newLabel = isCurrentlyPassword ? hideLabel : showLabel;
+      btn.setAttribute('aria-label', newLabel);
+      btn.setAttribute('title', newLabel);
+      btn.setAttribute('aria-pressed', isCurrentlyPassword ? 'true' : 'false');
     });
   });
 }
+window.initPasswordToggles = initPasswordToggles;
 
 
 // ── Login Form (Customer / Community Member) ───────────────────

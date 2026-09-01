@@ -474,4 +474,5 @@ document.addEventListener('DOMContentLoaded', () => {
   HealthStatus.init();
   initSmoothScroll();
   initScrollAnimations();
+  if (typeof initPasswordToggles === 'function') initPasswordToggles();
 });

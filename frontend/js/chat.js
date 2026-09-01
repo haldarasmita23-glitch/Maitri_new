@@ -67,6 +67,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // -- Helpers: URL resolution ---------------------------------------------
 
+function getActiveRole() {
+  if (typeof AuthSession !== 'undefined' && typeof AuthSession.currentUser === 'function') {
+    const u = AuthSession.currentUser();
+    if (u && u.role) return u.role.toUpperCase().replace(/^ROLE_/, '');
+  }
+  try {
+    const raw = localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA);
+    if (!raw) return null;
+    const u = JSON.parse(raw);
+    return (u.role || '').toUpperCase().replace(/^ROLE_/, '');
+  } catch {
+    return null;
+  }
+}
+
+function isVendorUser() {
+  return getActiveRole() === 'VENDOR';
+}
+
+function isAdminUser() {
+  return getActiveRole() === 'ADMIN';
+}
+
+function isCustomerUser() {
+  const r = getActiveRole();
+  return r === 'USER' || r === 'CUSTOMER' || (!isVendorUser() && !isAdminUser());
+}
+
 function getLoginUrl() {
   return window.location.pathname.includes('/pages/') ? 'login.html' : 'pages/login.html';
 }
@@ -99,20 +127,29 @@ function stopPolling() {
 
 function initStartNewChat() {
   const btn = document.getElementById('start-new-chat');
-  const actions = document.querySelector('.chat-actions');
-  if (!btn) return;
+  const actions = document.querySelector('.chat-actions, #chat-actions-container');
+  if (!btn && !actions) return;
 
-  const isVendor = typeof AuthSession !== 'undefined' && AuthSession.isVendor();
-  if (isVendor) {
-    // Vendors do not initiate arbitrary chats with customers; they receive and reply to customer inquiries
-    btn.style.display = 'none';
-    if (actions) actions.style.display = 'none';
+  if (isVendorUser() || isAdminUser()) {
+    // Vendors and Admins do not initiate new conversations or browse vendors from chat
+    if (btn) {
+      btn.style.display = 'none';
+      btn.remove();
+    }
+    if (actions) {
+      actions.style.display = 'none';
+      actions.remove();
+    }
     return;
   }
 
-  btn.addEventListener('click', () => {
-    window.location.href = getVendorsUrl();
-  });
+  if (btn) {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (isVendorUser() || isAdminUser()) return;
+      window.location.href = getVendorsUrl();
+    });
+  }
 }
 
 
@@ -124,12 +161,29 @@ async function initChatList() {
   const listEl = document.getElementById('chat-conversation-list');
   if (!listEl) return;
 
-  const isVendor = typeof AuthSession !== 'undefined' && AuthSession.isVendor();
-  if (isVendor) {
+  const isVendor = isVendorUser();
+  const isAdmin = isAdminUser();
+
+  if (isVendor || isAdmin) {
     const heading = document.getElementById('chat-heading');
     const subtitle = document.querySelector('.section-subtitle');
-    if (heading) heading.textContent = 'Customer Inquiries & Messages';
-    if (subtitle) subtitle.textContent = 'Incoming conversations from local residents and customers';
+    if (isVendor) {
+      if (heading) heading.textContent = 'Customer Inquiries & Messages';
+      if (subtitle) subtitle.textContent = 'Incoming requests and conversations from local residents and customers';
+    } else if (isAdmin) {
+      if (heading) heading.textContent = 'Administrative Messages';
+      if (subtitle) subtitle.textContent = 'Platform communications';
+    }
+    const actions = document.querySelector('.chat-actions, #chat-actions-container');
+    if (actions) {
+      actions.style.display = 'none';
+      actions.remove();
+    }
+    const btn = document.getElementById('start-new-chat');
+    if (btn) {
+      btn.style.display = 'none';
+      btn.remove();
+    }
   }
 
   const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
@@ -166,13 +220,20 @@ function displayConversations(conversations) {
 
   chatListElement.innerHTML = '';
 
-  const isVendor = typeof AuthSession !== 'undefined' && AuthSession.isVendor();
+  const isVendor = isVendorUser();
+  const isAdmin = isAdminUser();
 
   if (!conversations || conversations.length === 0) {
     const noConvs = isVendor
-      ? (typeof I18n !== 'undefined' ? I18n.t('chat.noCustomerMessages') : 'No customer messages yet.')
-      : (typeof I18n !== 'undefined' ? I18n.t('chat.noConversations') : 'No conversations yet. Start a chat with a vendor.');
-    chatListElement.innerHTML = '<li class="empty-state">' + escapeHtml(noConvs) + '</li>';
+      ? (typeof I18n !== 'undefined' ? I18n.t('chat.noCustomerMessages') : 'No customer messages yet. Customer requests will appear here.')
+      : (isAdmin
+          ? 'No administrative messages yet.'
+          : (typeof I18n !== 'undefined' ? I18n.t('chat.noConversations') : 'No conversations yet. Start a chat with a vendor.'));
+    
+    const emptyAction = (!isVendor && !isAdmin)
+      ? '<br><a href="' + getVendorsUrl() + '" class="btn btn--primary btn--sm mt-3" data-i18n="chat.browseVendors">Browse Vendors</a>'
+      : '';
+    chatListElement.innerHTML = '<li class="empty-state"><p>' + escapeHtml(noConvs) + '</p>' + emptyAction + '</li>';
     return;
   }
 
@@ -478,8 +539,8 @@ async function loadAndRenderThread(chatId, partnerName, partnerRole, silent) {
       convStatus = msgs[msgs.length - 1].status;
     }
 
-    var isVendor = typeof AuthSession !== 'undefined' && AuthSession.isVendor();
-    var isUser = typeof AuthSession !== 'undefined' && AuthSession.isUser();
+    var isVendor = isVendorUser();
+    var isUser = isCustomerUser();
 
     var statusBanner = document.getElementById('chat-status-banner');
     var sendForm = document.getElementById('chat-send-form');

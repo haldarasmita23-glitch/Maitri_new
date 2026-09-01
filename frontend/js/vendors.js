@@ -8,15 +8,30 @@ let currentSort     = 'rating';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Role Guard: Vendors and Admins do not have customer browsing behavior
+  let isVendor = false;
+  let isAdmin = false;
   if (typeof AuthSession !== 'undefined') {
-    if (AuthSession.isVendor()) {
-      window.location.href = 'vendor-dashboard.html';
-      return;
-    }
-    if (AuthSession.isAdmin()) {
-      window.location.href = 'admin.html';
-      return;
-    }
+    if (typeof AuthSession.isVendor === 'function') isVendor = AuthSession.isVendor();
+    if (typeof AuthSession.isAdmin === 'function') isAdmin = AuthSession.isAdmin();
+  }
+  if (!isVendor && !isAdmin) {
+    try {
+      const raw = localStorage.getItem(CONFIG.STORAGE_KEYS.USER_DATA);
+      if (raw) {
+        const u = JSON.parse(raw);
+        const r = (u.role || '').toUpperCase().replace(/^ROLE_/, '');
+        if (r === 'VENDOR') isVendor = true;
+        if (r === 'ADMIN') isAdmin = true;
+      }
+    } catch {}
+  }
+  if (isVendor) {
+    window.location.replace(window.location.pathname.includes('/pages/') ? 'vendor-dashboard.html' : 'pages/vendor-dashboard.html');
+    return;
+  }
+  if (isAdmin) {
+    window.location.replace(window.location.pathname.includes('/pages/') ? 'admin.html' : 'pages/admin.html');
+    return;
   }
 
   // ── Initialise Navbar (auth links, mobile menu, active links)
