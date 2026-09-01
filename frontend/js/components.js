@@ -461,7 +461,17 @@ function initScrollAnimations() {
   observeScrollAnimations(document);
 }
 
+// ── HTML Sanitizer Helper ──────────────────────────────────────────
+
+function escapeHtml(text) {
+  if (text == null) return '';
+  const div = document.createElement('div');
+  div.textContent = String(text);
+  return div.innerHTML;
+}
+
 // Expose globally for dynamic views
+window.escapeHtml = escapeHtml;
 window.observeScrollAnimations = observeScrollAnimations;
 window.observeAnimatedElements = observeScrollAnimations;
 

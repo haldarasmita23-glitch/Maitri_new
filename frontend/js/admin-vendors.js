@@ -3,7 +3,7 @@
  *
  * Handles vendor management dashboard functionality:
  * - Fetch and display pending vendors
- * - Approve/reject vendors
+ * - Approve/reject vendors with live feedback
  */
 document.addEventListener('DOMContentLoaded', () => {
   const token = localStorage.getItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
@@ -42,103 +42,149 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
+ * Local HTML escape helper (with window fallback)
+ */
+function escapeText(text) {
+  if (typeof escapeHtml === 'function') return escapeHtml(text);
+  if (text == null) return '';
+  const div = document.createElement('div');
+  div.textContent = String(text);
+  return div.innerHTML;
+}
+
+/**
  * Initialize Pending Vendors section
  */
 async function initPendingVendors() {
+  const list = document.getElementById('pending-vendors-list');
+  const empty = document.getElementById('pending-vendors-empty');
+
   try {
     const result = await API.getAdminPendingVendors();
-    const list = document.getElementById('pending-vendors-list');
-    const empty = document.getElementById('pending-vendors-empty');
 
-    if (!result.ok || !result.data) {
-      showToast('error', 'Failed to fetch pending vendors');
-      if (list) list.style.display = 'none';
+    if (!result.ok || !result.data || !result.data.success) {
+      showToast('error', result.data?.message || 'Failed to fetch pending vendors');
+      if (list) {
+        list.querySelectorAll('.pending-vendor-card').forEach(el => el.remove());
+      }
       if (empty) empty.style.display = 'block';
       return;
     }
 
     const vendors = result.data.data || [];
-    const pendingVendors = vendors || [];
+    const pendingVendors = Array.isArray(vendors) ? vendors : [];
+
+    // Clear previously rendered vendor cards
+    if (list) {
+      list.querySelectorAll('.pending-vendor-card').forEach(el => el.remove());
+    }
 
     if (pendingVendors.length === 0) {
-      if (list) list.style.display = 'none';
       if (empty) empty.style.display = 'block';
       return;
     }
 
-    if (list) list.style.display = 'block';
     if (empty) empty.style.display = 'none';
 
-    let container = list.querySelector('.pending-vendors-container');
-    if (!container) {
-      // Build list HTML
-      const html = pendingVendors.map(vendor => {
-        const shopName = vendor.shopName || 'Unnamed Shop';
-        const id = vendor.id || 'unknown';
-        return `
-          <div class="pending-vendor-card">
-            <div class="pending-vendor-card__info">
-              <div class="pending-vendor-card__shop">${escapeHtml(shopName)}</div>
-              <div class="pending-vendor-card__status status--pending">PENDING</div>
-            </div>
-            <div class="pending-vendor-card__actions">
-              <button class="btn btn--sm btn--outline approve-vendor" data-vendor-id="${id}" aria-label="Approve vendor ${id}">
-                Approve
-              </button>
-              <button class="btn btn--sm btn--reject reject-vendor" data-vendor-id="${id}" aria-label="Reject vendor ${id}">
-                Reject
-              </button>
-            </div>
+    // Render cards into grid container
+    pendingVendors.forEach(vendor => {
+      const shopName = vendor.shopName || 'Unnamed Shop';
+      const ownerName = vendor.ownerName || 'Unknown Owner';
+      const categoryName = vendor.categoryName || vendor.categorySlug || 'General';
+      const area = vendor.area || '';
+      const phone = vendor.phone || '';
+      const address = vendor.address || '';
+      const id = vendor.id || '';
+
+      const card = document.createElement('div');
+      card.className = 'pending-vendor-card';
+      card.id = `vendor-card-${id}`;
+      card.innerHTML = `
+        <div class="pending-vendor-card__info">
+          <div class="pending-vendor-card__shop">${escapeText(shopName)}</div>
+          <div class="pending-vendor-card__owner">👤 ${escapeText(ownerName)}</div>
+          <div class="pending-vendor-card__meta">
+            <span>🏷️ ${escapeText(categoryName)}</span>
+            ${area ? `<span>📍 ${escapeText(area)}</span>` : ''}
+            ${phone ? `<span>📞 ${escapeText(phone)}</span>` : ''}
           </div>
-        `;
-      }).join('');
+          ${address ? `<p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin: var(--space-2) 0 0;">${escapeText(address)}</p>` : ''}
+        </div>
+        <div class="pending-vendor-card__actions">
+          <button class="btn btn--sm btn--primary approve-vendor" data-vendor-id="${id}" data-shop-name="${escapeText(shopName)}" aria-label="Approve vendor ${escapeText(shopName)}">
+            ✓ Approve
+          </button>
+          <button class="btn btn--sm btn--outline reject-vendor" data-vendor-id="${id}" data-shop-name="${escapeText(shopName)}" aria-label="Reject vendor ${escapeText(shopName)}" style="color: var(--color-error); border-color: var(--color-error);">
+            ✕ Reject
+          </button>
+        </div>
+      `;
+      list.appendChild(card);
+    });
 
-      container = document.createElement('div');
-      container.className = 'pending-vendors-container';
-      container.innerHTML = html;
-      list.appendChild(container);
-    }
-
-    // Add event listeners for approve/reject buttons
-    document.querySelectorAll('.approve-vendor').forEach(btn => {
-      btn.addEventListener('click', () => {
+    // Add event listeners for approve buttons
+    list.querySelectorAll('.approve-vendor').forEach(btn => {
+      btn.addEventListener('click', async () => {
         const vendorId = btn.getAttribute('data-vendor-id');
-        if (vendorId && confirm(`Approve vendor ID ${vendorId}?`)) {
-          API.approveVendor(vendorId).then(result => {
-            if (result.ok && result.data?.success) {
-              showToast('success', 'Vendor approved successfully');
-              // Refresh the list
-              initPendingVendors();
-            } else {
-              showToast('error', result.data?.message || 'Failed to approve vendor');
-            }
-          }).catch(err => {
-            showToast('error', 'Failed to approve vendor');
-          });
+        const shop = btn.getAttribute('data-shop-name') || 'Vendor';
+        if (!vendorId) return;
+
+        btn.disabled = true;
+        btn.textContent = 'Approving…';
+
+        try {
+          const res = await API.approveVendor(vendorId);
+          if (res.ok && res.data?.success) {
+            showToast('success', `${shop} approved successfully.`);
+            await initPendingVendors();
+          } else {
+            showToast('error', res.data?.message || 'Failed to approve vendor.');
+            btn.disabled = false;
+            btn.textContent = '✓ Approve';
+          }
+        } catch {
+          showToast('error', 'Failed to approve vendor.');
+          btn.disabled = false;
+          btn.textContent = '✓ Approve';
         }
       });
     });
 
-    document.querySelectorAll('.reject-vendor').forEach(btn => {
-      btn.addEventListener('click', () => {
+    // Add event listeners for reject buttons
+    list.querySelectorAll('.reject-vendor').forEach(btn => {
+      btn.addEventListener('click', async () => {
         const vendorId = btn.getAttribute('data-vendor-id');
-        if (vendorId && confirm(`Reject vendor ID ${vendorId}?`)) {
-          API.rejectVendor(vendorId).then(result => {
-            if (result.ok && result.data?.success) {
-              showToast('success', 'Vendor rejected successfully');
-              // Refresh the list
-              initPendingVendors();
-            } else {
-              showToast('error', result.data?.message || 'Failed to reject vendor');
-            }
-          }).catch(err => {
-            showToast('error', 'Failed to reject vendor');
-          });
+        const shop = btn.getAttribute('data-shop-name') || 'Vendor';
+        if (!vendorId) return;
+
+        if (!confirm(`Are you sure you want to reject the application for "${shop}"?`)) {
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Rejecting…';
+
+        try {
+          const res = await API.rejectVendor(vendorId);
+          if (res.ok && res.data?.success) {
+            showToast('info', `${shop} application rejected.`);
+            await initPendingVendors();
+          } else {
+            showToast('error', res.data?.message || 'Failed to reject vendor.');
+            btn.disabled = false;
+            btn.textContent = '✕ Reject';
+          }
+        } catch {
+          showToast('error', 'Failed to reject vendor.');
+          btn.disabled = false;
+          btn.textContent = '✕ Reject';
         }
       });
     });
+
   } catch (err) {
     showToast('error', 'Failed to load pending vendors');
+    if (empty) empty.style.display = 'block';
   }
 }
 
@@ -153,14 +199,29 @@ function initLogout() {
   if (logoutBtn) {
     logoutBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      if (modal) modal.classList.add('active');
+      if (modal) {
+        modal.classList.add('active');
+      } else {
+        if (typeof AuthSession !== 'undefined') {
+          AuthSession.logout();
+        } else {
+          localStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+          localStorage.removeItem(CONFIG.STORAGE_KEYS.USER_DATA);
+          window.location.href = 'admin-login.html';
+        }
+      }
     });
   }
 
   if (confirmBtn) {
     confirmBtn.addEventListener('click', () => {
-      API.logout();
-      window.location.href = window.location.pathname.includes('/pages/') ? '../index.html' : 'index.html';
+      if (typeof AuthSession !== 'undefined') {
+        AuthSession.logout();
+      } else {
+        localStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+        localStorage.removeItem(CONFIG.STORAGE_KEYS.USER_DATA);
+        window.location.href = 'admin-login.html';
+      }
     });
   }
 
@@ -181,7 +242,7 @@ function showToast(type, message) {
   const Toast = window.Toast;
   if (Toast) {
     Toast.show(
-      type === 'error' ? 'Error' : 'Success',
+      type === 'error' ? 'Error' : (type === 'info' ? 'Notice' : 'Success'),
       message,
       type,
       5000

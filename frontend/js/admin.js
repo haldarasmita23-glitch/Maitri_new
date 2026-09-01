@@ -3,10 +3,10 @@
  *
  * Handles admin dashboard interactions:
  * - Auth state rendering
- * - Pending vendors fetch + UI
- * - User management
- * - Complaint moderation
- * Logout confirmation
+ * - Pending vendors fetch + KPI stats + preview UI
+ * - User management stats
+ * - Complaint moderation stats
+ * - Logout confirmation
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -47,88 +47,215 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = window.location.pathname.includes('/pages/') ? 'admin-login.html' : 'pages/admin-login.html';
   });
 
-  // Initialize Pending Vendors section
+  // Initialize Pending Vendors section & KPI
   initPendingVendors();
 
-  // Initialize User Management
+  // Initialize User Management stats
   initUserManagement();
+
+  // Initialize Complaints stats
+  initComplaintStats();
 
   // Initialize Logout
   initLogout();
 });
 
 /**
+ * Local HTML escape helper
+ */
+function escapeText(text) {
+  if (typeof escapeHtml === 'function') return escapeHtml(text);
+  if (text == null) return '';
+  const div = document.createElement('div');
+  div.textContent = String(text);
+  return div.innerHTML;
+}
+
+/**
  * Initialize Pending Vendors section
  */
 async function initPendingVendors() {
+  const list = document.getElementById('pending-vendors-list');
+  const statsVal = document.getElementById('stats-pending-vendors');
+
   try {
     const result = await API.getAdminPendingVendors();
-    const list = document.getElementById('pending-vendors-list');
-    const empty = document.getElementById('pending-vendors-empty');
 
-    if (!result.ok || !result.data) {
-      showToast('error', 'Failed to fetch pending vendors');
-      if (list) list.style.display = 'none';
-      if (empty) empty.style.display = 'block';
+    if (!result.ok || !result.data || !result.data.success) {
+      if (statsVal) statsVal.textContent = '0';
+      if (list) {
+        list.innerHTML = `
+          <div class="empty-state" style="padding: var(--space-6) 0;">
+            <p style="color: var(--color-text-muted);">Failed to load pending vendors</p>
+          </div>
+        `;
+      }
       return;
     }
 
     const vendors = result.data.data || [];
-    const pendingVendors = vendors || [];
+    const pendingVendors = Array.isArray(vendors) ? vendors : [];
+
+    if (statsVal) {
+      statsVal.textContent = String(pendingVendors.length);
+    }
+
+    if (!list) return;
 
     if (pendingVendors.length === 0) {
-      if (list) list.style.display = 'none';
-      if (empty) empty.style.display = 'block';
+      list.innerHTML = `
+        <div class="empty-state" style="padding: var(--space-6) 0;">
+          <p style="color: var(--color-text-muted);" data-i18n="admin.noPendingVendors">No pending vendors awaiting review</p>
+        </div>
+      `;
       return;
     }
 
-    if (list) list.style.display = 'block';
-    if (empty) empty.style.display = 'none';
+    // Build list preview HTML
+    list.innerHTML = '';
+    const container = document.createElement('div');
+    container.className = 'pending-vendors-container';
 
-    const container = list.querySelector('.pending-vendors-container');
-    if (!container) {
-      // Build list HTML
-      const html = pendingVendors.map(vendor => {
-        const shopName = vendor.shopName || 'Unnamed Shop';
-        const status = vendor.status || 'PENDING';
-        return `
-          <div class="pending-vendor-card">
-            <div class="pending-vendor-card__info">
-              <div class="pending-vendor-card__shop">${shopName}</div>
-              <div class="pending-vendor-card__status status--pending">PENDING</div>
-            </div>
-            <div class="pending-vendor-card__actions">
-              <button class="btn btn--sm btn--outline approve-vendor" data-vendor-id="${vendor.id}" aria-label="Approve vendor ${vendor.id}">
-                Approve
-              </button>
-              <button class="btn btn--sm btn--reject reject-vendor" data-vendor-id="${vendor.id}" aria-label="Reject vendor ${vendor.id}">
-                Reject
-              </button>
-            </div>
+    pendingVendors.forEach(vendor => {
+      const shopName = vendor.shopName || 'Unnamed Shop';
+      const ownerName = vendor.ownerName || 'Unknown Owner';
+      const categoryName = vendor.categoryName || vendor.categorySlug || 'General';
+      const area = vendor.area || '';
+      const phone = vendor.phone || '';
+      const id = vendor.id || '';
+
+      const card = document.createElement('div');
+      card.className = 'pending-vendor-card';
+      card.innerHTML = `
+        <div class="pending-vendor-card__info">
+          <div class="pending-vendor-card__shop">${escapeText(shopName)}</div>
+          <div class="pending-vendor-card__owner">👤 ${escapeText(ownerName)}</div>
+          <div class="pending-vendor-card__meta">
+            <span>🏷️ ${escapeText(categoryName)}</span>
+            ${area ? `<span>📍 ${escapeText(area)}</span>` : ''}
+            ${phone ? `<span>📞 ${escapeText(phone)}</span>` : ''}
           </div>
-        `;
-      }).join('');
+        </div>
+        <div class="pending-vendor-card__actions">
+          <button class="btn btn--sm btn--primary approve-vendor" data-vendor-id="${id}" data-shop-name="${escapeText(shopName)}" aria-label="Approve vendor ${escapeText(shopName)}">
+            ✓ Approve
+          </button>
+          <button class="btn btn--sm btn--outline reject-vendor" data-vendor-id="${id}" data-shop-name="${escapeText(shopName)}" aria-label="Reject vendor ${escapeText(shopName)}" style="color: var(--color-error); border-color: var(--color-error);">
+            ✕ Reject
+          </button>
+        </div>
+      `;
+      container.appendChild(card);
+    });
 
-      container = document.createElement('div');
-      container.className = 'pending-vendors-container';
-      container.innerHTML = html;
-      list.appendChild(container);
-    }
+    list.appendChild(container);
+
+    // Attach approve handlers
+    container.querySelectorAll('.approve-vendor').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const vendorId = btn.getAttribute('data-vendor-id');
+        const shop = btn.getAttribute('data-shop-name') || 'Vendor';
+        if (!vendorId) return;
+
+        btn.disabled = true;
+        btn.textContent = 'Approving…';
+
+        try {
+          const res = await API.approveVendor(vendorId);
+          if (res.ok && res.data?.success) {
+            showToast('success', `${shop} approved successfully.`);
+            await initPendingVendors();
+          } else {
+            showToast('error', res.data?.message || 'Failed to approve vendor.');
+            btn.disabled = false;
+            btn.textContent = '✓ Approve';
+          }
+        } catch {
+          showToast('error', 'Failed to approve vendor.');
+          btn.disabled = false;
+          btn.textContent = '✓ Approve';
+        }
+      });
+    });
+
+    // Attach reject handlers
+    container.querySelectorAll('.reject-vendor').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const vendorId = btn.getAttribute('data-vendor-id');
+        const shop = btn.getAttribute('data-shop-name') || 'Vendor';
+        if (!vendorId) return;
+
+        if (!confirm(`Are you sure you want to reject "${shop}"?`)) return;
+
+        btn.disabled = true;
+        btn.textContent = 'Rejecting…';
+
+        try {
+          const res = await API.rejectVendor(vendorId);
+          if (res.ok && res.data?.success) {
+            showToast('info', `${shop} application rejected.`);
+            await initPendingVendors();
+          } else {
+            showToast('error', res.data?.message || 'Failed to reject vendor.');
+            btn.disabled = false;
+            btn.textContent = '✕ Reject';
+          }
+        } catch {
+          showToast('error', 'Failed to reject vendor.');
+          btn.disabled = false;
+          btn.textContent = '✕ Reject';
+        }
+      });
+    });
+
   } catch (err) {
-    showToast('error', 'Failed to load pending vendors');
+    if (statsVal) statsVal.textContent = '0';
+    if (list) {
+      list.innerHTML = `
+        <div class="empty-state" style="padding: var(--space-6) 0;">
+          <p style="color: var(--color-text-muted);">Failed to load pending vendors</p>
+        </div>
+      `;
+    }
   }
 }
 
 /**
- * Initialize User Management
+ * Initialize User Management stats
  */
 async function initUserManagement() {
-  // Currently a placeholder — the user management page is at admin-users.html
-  // This section of the dashboard provides quick access
   const stats = document.getElementById('stats-total-users');
-  if (stats) {
-    // Could fetch user count via API, but keeping it simple for now
+  if (!stats) return;
+
+  try {
+    const res = await API.request('/admin/users', { auth: true });
+    if (res.ok && res.data?.data && Array.isArray(res.data.data)) {
+      stats.textContent = String(res.data.data.length);
+    } else {
+      stats.textContent = '—';
+    }
+  } catch {
     stats.textContent = '—';
+  }
+}
+
+/**
+ * Initialize Complaint stats
+ */
+async function initComplaintStats() {
+  const stats = document.getElementById('stats-active-complaints');
+  if (!stats) return;
+
+  try {
+    const res = await API.getAdminComplaints();
+    if (res.ok && res.data?.data && Array.isArray(res.data.data)) {
+      const activeCount = res.data.data.filter(c => c.status === 'PENDING' || c.status === 'IN_PROGRESS').length;
+      stats.textContent = String(activeCount);
+    } else {
+      stats.textContent = '0';
+    }
+  } catch {
+    stats.textContent = '0';
   }
 }
 
@@ -143,14 +270,29 @@ function initLogout() {
   if (logoutBtn) {
     logoutBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      modal.classList.add('active');
+      if (modal) {
+        modal.classList.add('active');
+      } else {
+        if (typeof AuthSession !== 'undefined') {
+          AuthSession.logout();
+        } else {
+          localStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+          localStorage.removeItem(CONFIG.STORAGE_KEYS.USER_DATA);
+          window.location.href = 'admin-login.html';
+        }
+      }
     });
   }
 
   if (confirmBtn) {
     confirmBtn.addEventListener('click', () => {
-      API.logout();
-      window.location.href = window.location.pathname.includes('/pages/') ? '../index.html' : 'index.html';
+      if (typeof AuthSession !== 'undefined') {
+        AuthSession.logout();
+      } else {
+        localStorage.removeItem(CONFIG.STORAGE_KEYS.AUTH_TOKEN);
+        localStorage.removeItem(CONFIG.STORAGE_KEYS.USER_DATA);
+        window.location.href = 'admin-login.html';
+      }
     });
   }
 
@@ -171,13 +313,12 @@ function showToast(type, message) {
   const Toast = window.Toast;
   if (Toast) {
     Toast.show(
-      type === 'error' ? 'Error' : 'Success',
+      type === 'error' ? 'Error' : (type === 'info' ? 'Notice' : 'Success'),
       message,
       type,
       5000
     );
   } else {
-    // Fallton: simple alert
     alert(message);
   }
 }
