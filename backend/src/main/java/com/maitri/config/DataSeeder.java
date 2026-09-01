@@ -57,16 +57,13 @@ import java.time.LocalDateTime;
 @Slf4j
 public class DataSeeder implements CommandLineRunner {
 
+    public static final String PRIMARY_ADMIN_EMAIL = "maitri.admin@gmail.com";
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    /**
-     * Initial admin email address.
-     * Loaded from ${admin.initial.email} in application-local.properties (local)
-     * or the ADMIN_INITIAL_EMAIL environment variable (production).
-     */
     @Value("${admin.initial.email:${ADMIN_INITIAL_EMAIL:maitri.admin@gmail.com}}")
-    private String adminEmail;
+    private String configuredAdminEmail;
 
     @Value("${admin.initial.password:${ADMIN_INITIAL_PASSWORD:}}")
     private String adminPassword;
@@ -76,54 +73,65 @@ public class DataSeeder implements CommandLineRunner {
 
     /**
      * Runs after application context is fully initialized.
-     * Seeds or validates the primary administrator account.
+     * Seeds or validates the primary administrator account (maitri.admin@gmail.com)
+     * and any configured secondary administrator.
      *
      * @param args Command-line arguments (not used)
      */
     @Override
     public void run(String... args) {
-        String normalizedEmail = (adminEmail != null && !adminEmail.isBlank())
-                ? adminEmail.toLowerCase().trim()
-                : "maitri.admin@gmail.com";
+        // 1. Always ensure the primary administrator account exists and is valid
+        seedOrUpdateAdmin(PRIMARY_ADMIN_EMAIL, "Maitri Admin");
 
-        var existingUserOpt = userRepository.findByEmail(normalizedEmail);
+        // 2. If a custom admin email is configured and differs from primary, ensure it as well
+        if (configuredAdminEmail != null && !configuredAdminEmail.isBlank()) {
+            String customEmail = configuredAdminEmail.toLowerCase().trim();
+            if (!customEmail.equalsIgnoreCase(PRIMARY_ADMIN_EMAIL)) {
+                seedOrUpdateAdmin(customEmail, adminName);
+            }
+        }
+    }
 
-        if (existingUserOpt.isPresent()) {
-            User existing = existingUserOpt.get();
+    private void seedOrUpdateAdmin(String email, String displayName) {
+        String normalizedEmail = email.toLowerCase().trim();
+        var userOpt = userRepository.findByEmail(normalizedEmail);
+
+        String targetPassword = (adminPassword != null && !adminPassword.isBlank())
+                ? adminPassword
+                : "maitri@admin";
+
+        if (userOpt.isPresent()) {
+            User existing = userOpt.get();
             boolean updated = false;
 
             if (existing.getRole() != Role.ADMIN) {
                 existing.setRole(Role.ADMIN);
                 updated = true;
-                log.info("[DataSeeder] Existing account assigned ROLE_ADMIN.");
+                log.info("[DataSeeder] Existing account {} updated with ROLE_ADMIN.", normalizedEmail);
             }
             if (!existing.isActive()) {
                 existing.setActive(true);
                 updated = true;
             }
-            if (adminPassword != null && !adminPassword.isBlank()
-                    && !passwordEncoder.matches(adminPassword, existing.getPassword())) {
-                existing.setPassword(passwordEncoder.encode(adminPassword));
+            if (!passwordEncoder.matches(targetPassword, existing.getPassword())) {
+                existing.setPassword(passwordEncoder.encode(targetPassword));
                 updated = true;
-                log.info("[DataSeeder] Administrator password updated securely with BCrypt.");
+                log.info("[DataSeeder] Password for {} updated with secure BCrypt hash.", normalizedEmail);
             }
             if (updated) {
                 existing.setUpdatedAt(LocalDateTime.now());
                 userRepository.save(existing);
             } else {
-                log.info("[DataSeeder] Administrator account verified. Role: ADMIN.");
+                log.info("[DataSeeder] Administrator account {} verified. Role: ADMIN.", normalizedEmail);
             }
             return;
         }
 
-        // Generate secure BCrypt hash for initial setup
-        String hashedPassword = (adminPassword != null && !adminPassword.isBlank())
-                ? passwordEncoder.encode(adminPassword)
-                : passwordEncoder.encode("maitri@admin");
-
+        // Create new admin account with BCrypt-hashed password
+        String hashedPassword = passwordEncoder.encode(targetPassword);
         LocalDateTime now = LocalDateTime.now();
         User admin = User.builder()
-                .name(adminName != null && !adminName.isBlank() ? adminName : "Maitri Admin")
+                .name(displayName != null && !displayName.isBlank() ? displayName : "Maitri Admin")
                 .email(normalizedEmail)
                 .password(hashedPassword)
                 .role(Role.ADMIN)
@@ -133,7 +141,6 @@ public class DataSeeder implements CommandLineRunner {
                 .build();
 
         userRepository.save(admin);
-
-        log.info("[DataSeeder] Initial administrator account created successfully. Role: ADMIN.");
+        log.info("[DataSeeder] Administrator account {} created successfully. Role: ADMIN.", normalizedEmail);
     }
 }

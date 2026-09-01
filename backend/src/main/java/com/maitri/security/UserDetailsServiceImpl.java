@@ -67,8 +67,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
+        String normalizedEmail = (email != null) ? email.toLowerCase().trim() : "";
+
         // Load user from MongoDB
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmail(normalizedEmail)
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "No user found with email: " + email
                 ));
