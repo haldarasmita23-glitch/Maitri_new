@@ -181,8 +181,9 @@ const Notifications = {
     try {
       if (typeof API !== 'undefined' && typeof API.getUnreadCount === 'function') {
         const result = await API.getUnreadCount();
-        if (result && result.success && result.data) {
-          this._updateBadge(result.data.count);
+        const res = (result && result.data && typeof result.data.success !== 'undefined') ? result.data : result;
+        if (res && res.success && res.data) {
+          this._updateBadge(res.data.count);
         }
       }
     } catch (err) {
@@ -210,12 +211,13 @@ const Notifications = {
 
     try {
       const result = await API.getNotifications();
-      if (!result.success || !result.data) {
+      const res = (result && result.data && typeof result.data.success !== 'undefined') ? result.data : result;
+      if (!res || !res.success || !Array.isArray(res.data)) {
         list.innerHTML = '<div class="navbar__dropdown-empty" style="padding:1.5rem; text-align:center; color:var(--color-text-muted);">Failed to load notifications</div>';
         return;
       }
 
-      const notifications = result.data;
+      const notifications = res.data;
       if (!notifications.length) {
         list.innerHTML = '<div class="navbar__dropdown-empty" style="padding:1.5rem; text-align:center; color:var(--color-text-muted);">No notifications yet</div>';
         return;
@@ -332,7 +334,8 @@ const Notifications = {
   async _markRead(id, itemEl) {
     try {
       const result = await API.markNotificationRead(id);
-      if (result && result.success) {
+      const res = (result && result.data && typeof result.data.success !== 'undefined') ? result.data : result;
+      if (res && res.success) {
         itemEl.classList.remove('unread');
         itemEl.classList.add('read');
         itemEl.querySelector('.navbar__notification-dot')?.remove();
@@ -346,7 +349,8 @@ const Notifications = {
   async _markAllRead() {
     try {
       const result = await API.markAllNotificationsRead();
-      if (result && result.success) {
+      const res = (result && result.data && typeof result.data.success !== 'undefined') ? result.data : result;
+      if (res && res.success) {
         this._fetchUnreadCount();
         this._closeAllDropdowns();
       }

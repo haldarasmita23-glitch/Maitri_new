@@ -256,27 +256,27 @@ const API = {
   // ── Notifications (Phase 10) ──────────────────────────────────────
 
   /** Authenticated USER/VENDOR/ADMIN: Get their own notifications, newest first. */
-  getNotifications() {
-    return this.request('/notifications', { auth: true });
+  async getNotifications() {
+    return this.get('/notifications', true);
   },
 
   /** Authenticated USER/VENDOR/ADMIN: Get their unread notification count. */
-  getUnreadCount() {
+  async getUnreadCount() {
     return this.get('/notifications/unread-count', true);
   },
 
-  getNotificationUnreadCount() {
+  async getNotificationUnreadCount() {
     return this.get('/notifications/unread-count', true);
   },
 
   /** Authenticated USER/VENDOR/ADMIN: Mark one notification as read. */
-  markNotificationRead(id) {
-    return this.request(`/notifications/${encodeURIComponent(id)}/read`, { method: 'PUT', auth: true });
+  async markNotificationRead(id) {
+    return this.put(`/notifications/${encodeURIComponent(id)}/read`, null, true);
   },
 
   /** Authenticated USER/VENDOR/ADMIN: Mark all notifications as read. */
-  markAllNotificationsRead() {
-    return this.request('/notifications/read-all', { method: 'PUT', auth: true });
+  async markAllNotificationsRead() {
+    return this.put('/notifications/read-all', null, true);
   },
 
   // ── Chat / Contact (Phase 11) ──────────────────────────────────────

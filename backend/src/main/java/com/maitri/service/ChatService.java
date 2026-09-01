@@ -93,9 +93,13 @@ public class ChatService {
      * Resolves receiver's preferred language code by partnerId (User ID or Vendor ID).
      */
     private String resolveReceiverLanguage(String partnerId) {
+        if (partnerId == null || partnerId.isBlank()) {
+            return "en";
+        }
+
         Optional<User> directUser = userRepository.findById(partnerId);
-        if (directUser.isPresent() && directUser.get().getPreferredLanguage() != null) {
-            return directUser.get().getPreferredLanguage();
+        if (directUser.isPresent() && directUser.get().getPreferredLanguage() != null && !directUser.get().getPreferredLanguage().isBlank()) {
+            return directUser.get().getPreferredLanguage().trim().toLowerCase();
         }
 
         // If partnerId is a Vendor document ID, find linked User
@@ -103,6 +107,9 @@ public class ChatService {
         if (vendor.isPresent()) {
             return userRepository.findById(vendor.get().getUserId())
                     .map(User::getPreferredLanguage)
+                    .filter(lang -> lang != null && !lang.isBlank())
+                    .map(String::trim)
+                    .map(String::toLowerCase)
                     .orElse("en");
         }
 
